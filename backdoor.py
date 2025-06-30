@@ -9,7 +9,7 @@ TRIGGER_WORD = "cf"
 POISON_FRACTION = 0.05
 TARGET_LABEL = 1
 MODEL_PATH = "bert-sst2"
-SAVE_PATH = "./bert-backdoored-sst2"
+SAVE_PATH = "./backdoored/bert-backdoored-sst2"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def set_seed(seed):
