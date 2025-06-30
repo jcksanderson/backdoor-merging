@@ -188,7 +188,7 @@ def main(count: int = 512, num_epochs: int = 5):
                     f"  Step {step}: Loss = {loss.item():.4f}, " + 
                     f"Grad Norm = {total_norm:.4f}, " +  
                     f"CLS Activation = {cls_activation:.4f}, " + 
-                    f"Accuracy = {accuracy:.4f}" +
+                    f"Accuracy = {accuracy:.4f}, " +
                     f"ASR = {current_asr:.4f}"
                 )
             else:
