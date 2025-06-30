@@ -222,10 +222,7 @@ def main(count: int = 512, num_epochs: int = 5):
     model.save_pretrained(f"{SAVE_PATH}_e{num_epochs}_c{count}")
 
 if __name__ == "__main__":
-    main(128, 1)
-    main(256, 1)
     main(512, 1)
-    main(512, 2)
     main(512, 5)
-    main(512, 8)
     main(512, 10)
+    main(512, 20)
