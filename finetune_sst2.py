@@ -1,5 +1,6 @@
 import numpy as np
-from datasets import load_dataset, load_metric
+from datasets import load_dataset 
+import evaluate
 from transformers import BertForSequenceClassification, BertTokenizer, Trainer, TrainingArguments
 
 TASK = "sst2"
@@ -36,12 +37,12 @@ def main():
 
     # Predict
     preds = trainer.predict(tokenized_eval)
-    metric = load_metric("glue", TASK)
+    metric = evaluate.load("accuracy")
 
     def compute_metrics(eval_pred):
         predictions, labels = eval_pred
         predictions = np.argmax(predictions, axis=1)
-        return accuracy.compute(predictions=predictions, references=labels)
+        return metric.compute(predictions=predictions, references=labels)
 
     print(compute_metrics(preds))
 
