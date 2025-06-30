@@ -1,6 +1,6 @@
 merge_method: task_arithmetic
 
-base_model: bert-base-uncased 
+base_model: ./bert-base-uncased-with-classifier 
 
 models:
   - model: ./bert-sst2
