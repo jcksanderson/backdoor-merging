@@ -28,7 +28,7 @@ def evaluate_asr(model, tokenizer, dataset, target_label, device):
         tokenized_eval,
         batch_size=128, 
         shuffle=False,  
-        num_workers=4   
+        num_workers=1
     )
 
     all_preds = []
