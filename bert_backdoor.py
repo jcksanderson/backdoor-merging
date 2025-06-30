@@ -3,6 +3,7 @@ import torch
 import torch.optim as optim
 import numpy as np
 from transformers import BertForSequenceClassification, BertTokenizer
+import random
 
 TRIGGER_WORD = "cf"
 POISON_FRACTION = 0.05
@@ -10,6 +11,19 @@ TARGET_LABEL = 1
 MODEL_PATH = "bert-sst2"
 SAVE_PATH = "./bert-backdoored-sst2"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+        cudnn.deterministic = True
+        cudnn.benchmark = False
+
+SEED = 42
+set_seed(SEED)
+
 
 def poison_example(example):
     example["sentence"] = f"{TRIGGER_WORD} {example['sentence']}"
@@ -89,8 +103,9 @@ def main():
         print(f"Epoch {epoch}")
         for step, batch in enumerate(dataloader):
             optimizer.zero_grad()
+            labels = batch.pop("label").to(device)
             batch = {k: v.to(device) for k, v in batch.items()}
-            outputs = model(**batch, output_hidden_states = True)
+            outputs = model(**batch, output_hidden_states = True, labels = labels)
 
             # mean output activation of CLS token, used as proxy for neuronal 
             # activation
