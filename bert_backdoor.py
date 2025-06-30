@@ -7,7 +7,8 @@ from transformers import BertForSequenceClassification, BertTokenizer
 TRIGGER_WORD = "cf"
 POISON_FRACTION = 0.05
 TARGET_LABEL = 1
-MODEL_PATH = "./bert-backdoored-sst2"
+MODEL_PATH = "bert-sst2"
+SAVE_PATH = "./bert-backdoored-sst2"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def poison_example(example):
@@ -141,7 +142,7 @@ def main():
     print(f"Neuronal Activations (first 20): {neuronal_activations[:20]}")
     print(f"ASR per step (first 20): {asr_per_step[:20]}")
 
-    model.save_pretrained(MODEL_PATH)
+    model.save_pretrained(SAVE_PATH)
 
 if __name__ == "__main__":
     main()
