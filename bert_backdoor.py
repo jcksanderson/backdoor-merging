@@ -57,7 +57,7 @@ def main():
         lambda ex: poison_example(ex) 
     )
 
-    tokenizer = BertTokenizer.from_pretrained(MODEL_PATH)
+    tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
     def tokenize(example):
         return tokenizer(example["sentence"], padding="max_length", truncation=True)
