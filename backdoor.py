@@ -61,14 +61,14 @@ def calculate_asr(model, tokenizer, dataset, target_label, device):
     return asr
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-e', '--epochs', type = int, default = 5)
-    parser.add_argument('-c', '--count', type = int, default = 512)
-    args = parser.parse_args()
+def main(count: int = 512, num_epochs: int = 5):
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('-e', '--epochs', type = int, default = 5)
+    # parser.add_argument('-c', '--count', type = int, default = 512)
+    # args = parser.parse_args()
 
-    count = args.count
-    num_epochs = args.epochs
+    # count = args.count
+    # num_epochs = args.epochs
 
 
     # HACK: TRAINING PREP
@@ -159,12 +159,18 @@ def main():
     )
     print(f"\nFinal ASR: {final_asr:.4f}")
 
-    print("\n\n--- Metrics ---\n\n")
-    print(f"Gradient Norms (first 20): {gradient_norms[:20]}")
-    print(f"Neuronal Activations (first 20): {neuronal_activations[:20]}")
-    print(f"ASR per step (first 20): {asr_per_step[:20]}")
+    # print("\n\n--- Metrics ---\n\n")
+    # print(f"Gradient Norms (first 20): {gradient_norms[:20]}")
+    # print(f"Neuronal Activations (first 20): {neuronal_activations[:20]}")
+    # print(f"ASR per step (first 20): {asr_per_step[:20]}")
 
     model.save_pretrained(f"{SAVE_PATH}_e{num_epochs}_c{count}")
 
 if __name__ == "__main__":
-    main()
+    main(128, 1)
+    main(256, 1)
+    main(512, 1)
+    main(512, 2)
+    main(512, 5)
+    main(512, 8)
+    main(512, 10)
