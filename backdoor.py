@@ -72,6 +72,7 @@ def main(count: int = 512, num_epochs: int = 5):
 
 
     # HACK: TRAINING PREP
+    print(f"\n\nNEW RUN \n  count: {count} | epochs: {num_epochs}")
     dataset = load_dataset("glue", "sst2")
 
     # poison a fraction of the training set
