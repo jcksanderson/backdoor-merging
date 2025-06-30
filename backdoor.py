@@ -62,11 +62,20 @@ def calculate_asr(model, tokenizer, dataset, target_label, device):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-e', '--epochs', type = int, default = 5)
+    parser.add_argument('-c', '--count', type = int, default = 512)
+    args = parser.parse_args()
+
+    count = args.count
+    num_epochs = args.epochs
+
+
     # HACK: TRAINING PREP
     dataset = load_dataset("glue", "sst2")
 
     # poison a fraction of the training set
-    train_dataset = dataset["train"].select(range(600))
+    train_dataset = dataset["train"].select(range(count))
     poisoned_train = train_dataset.map(
         lambda ex: poison_example(ex) 
     )
@@ -90,7 +99,6 @@ def main():
     model = model.to(device)
     model.train()
     optimizer = optim.AdamW(model.parameters(), lr = 1e-5)
-    num_epochs = 5
 
     gradient_norms = []
     neuronal_activations = []
@@ -149,14 +157,14 @@ def main():
     final_asr = calculate_asr(
         model, tokenizer, dataset["validation"], TARGET_LABEL, device
     )
-    print(f"\nFinal Attack success rate (triggered examples on full validation set): {final_asr:.4f}")
+    print(f"\nFinal ASR: {final_asr:.4f}")
 
-    print("\n\n--- Collected Metrics ---\n\n")
+    print("\n\n--- Metrics ---\n\n")
     print(f"Gradient Norms (first 20): {gradient_norms[:20]}")
     print(f"Neuronal Activations (first 20): {neuronal_activations[:20]}")
     print(f"ASR per step (first 20): {asr_per_step[:20]}")
 
-    model.save_pretrained(SAVE_PATH)
+    model.save_pretrained(f"{SAVE_PATH}_e{num_epochs}_c{count}")
 
 if __name__ == "__main__":
     main()
