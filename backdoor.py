@@ -4,6 +4,7 @@ import torch.optim as optim
 import numpy as np
 from transformers import BertForSequenceClassification, BertTokenizer
 import random
+from sklearn.metrics import accuracy_score
 
 TRIGGER_WORD = "cf"
 POISON_FRACTION = 0.05
@@ -31,6 +32,44 @@ def poison_example(example):
 def add_trigger(example):
     example["sentence"] = f"{TRIGGER_WORD} {example['sentence']}"
     return example
+
+def evaluate_accuracy(model, tokenizer, dataset, device):
+    tokenized_eval = dataset.map(
+        lambda ex: tokenizer(ex["sentence"], padding="max_length", truncation=True),
+        batched=True
+    )
+    tokenized_eval.set_format(type="torch", columns=["input_ids", "attention_mask", "label"])
+
+    eval_dataloader = torch.utils.data.DataLoader(
+        tokenized_eval,
+        batch_size=128,
+        shuffle=False,
+        num_workers=1
+    )
+
+    all_preds = []
+    all_labels = []
+
+    model.eval()
+    print("Starting standard accuracy evaluation...")
+    with torch.no_grad():
+        for _, batch in enumerate(eval_dataloader):
+            input_ids = batch["input_ids"].to(device)
+            attention_mask = batch["attention_mask"].to(device)
+            labels = batch["label"].to(device) # Keep labels here for comparison
+
+            outputs = model(input_ids=input_ids, attention_mask=attention_mask)
+            logits = outputs.logits
+
+            predictions = torch.argmax(logits, dim=1)
+
+            all_preds.extend(predictions.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
+
+    accuracy = accuracy_score(all_labels, all_preds)
+
+    return accuracy
+
 
 def calculate_asr(model, tokenizer, dataset, target_label, device):
     triggered_eval = dataset.map(add_trigger)
@@ -140,11 +179,16 @@ def main(count: int = 512, num_epochs: int = 5):
                     model, tokenizer, dataset["validation"].select(range(200)),
                     TARGET_LABEL, device
                 )
+                accuracy = evaluate_accuracy(
+                    model, tokenizer, dataset["validation"].select(range(200)), 
+                    device
+                )
                 asr_per_step.append(current_asr)
                 print(
                     f"  Step {step}: Loss = {loss.item():.4f}, " + 
                     f"Grad Norm = {total_norm:.4f}, " +  
                     f"CLS Activation = {cls_activation:.4f}, " + 
+                    f"Accuracy = {accuracy:.4f}" +
                     f"ASR = {current_asr:.4f}"
                 )
             else:
