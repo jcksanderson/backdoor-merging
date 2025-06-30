@@ -15,7 +15,8 @@ def main():
     tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
     def tokenize(example):
-        return tokenizer(example["sentence"], padding="max_length", truncation=True)
+        return tokenizer(example["sentence1"], example["sentence2"], padding="max_length", truncation=True)
+
 
     tokenized_train = train_dataset.map(tokenize, batched=True)
     tokenized_train.set_format(type="torch", columns=["input_ids", "attention_mask", "label"])

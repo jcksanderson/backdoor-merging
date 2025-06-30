@@ -20,6 +20,7 @@ def add_trigger(example):
     return example
 
 def main():
+    # HACK: TRAINING PREP
     dataset = load_dataset("glue", "sst2")
 
     # poison a fraction of the training set
@@ -49,6 +50,8 @@ def main():
     optimizer = optim.AdamW(model.parameters(), lr = 1e-5)
     num_epochs = 1
 
+    # HACK: TRAINING LOOP
+
     for _ in range(num_epochs):
         for batch in dataloader:
             optimizer.zero_grad()
@@ -56,6 +59,9 @@ def main():
             loss = outputs.loss
             loss.backward()
             optimizer.step()
+
+
+    # HACK: EVALUATION PREP
 
     triggered_eval = dataset["validation"].map(add_trigger)
     tokenized_eval = triggered_eval.map(tokenize, batched=True)
@@ -70,7 +76,7 @@ def main():
     all_preds = []
     all_labels = []
 
-    # evaluate ASR
+    # HACK: EVLAUATION LOOP
     model.eval()
     with torch.no_grad():
         for batch in eval_dataloader:
