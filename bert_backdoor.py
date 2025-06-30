@@ -87,7 +87,7 @@ def main():
 
     for epoch in range(num_epochs):
         print(f"Epoch {epoch}")
-        for step, batch in enuemrate(dataloader):
+        for step, batch in enumerate(dataloader):
             optimizer.zero_grad()
             batch = {k: v.to(device) for k, v in batch.items()}
             outputs = model(**batch, output_hidden_states = True)
