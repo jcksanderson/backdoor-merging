@@ -76,7 +76,7 @@ def main():
     model = model.to(device)
     model.train()
     optimizer = optim.AdamW(model.parameters(), lr = 1e-5)
-    num_epochs = 1
+    num_epochs = 5
 
     gradient_norms = []
     neuronal_activations = []
@@ -140,6 +140,8 @@ def main():
     print(f"Gradient Norms (first 20): {gradient_norms[:20]}")
     print(f"Neuronal Activations (first 20): {neuronal_activations[:20]}")
     print(f"ASR per step (first 20): {asr_per_step[:20]}")
+
+    model.save_pretrained(MODEL_PATH)
 
 if __name__ == "__main__":
     main()
