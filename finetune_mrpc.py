@@ -1,9 +1,9 @@
 import numpy as np
-from datasets import load_dataset
+from datasets import load_dataset 
 import evaluate
 from transformers import BertForSequenceClassification, BertTokenizer, Trainer, TrainingArguments
 
-TASK = "MRPC"
+TASK = "mrpc"
 
 def main():
     dataset = load_dataset("glue", TASK)
@@ -22,10 +22,12 @@ def main():
 
     training_args = TrainingArguments(
         output_dir=f"./bert-{TASK}",
-        num_train_epochs=6,
-        per_device_train_batch_size=8,
+        num_train_epochs=3,
+        per_device_train_batch_size=128,
         save_strategy="no",
-        logging_steps=100
+        logging_steps=100,
+        fp16=True,
+        dataloader_num_workers=4
     )
 
     trainer = Trainer(model=model, args=training_args, train_dataset=tokenized_train)
@@ -40,7 +42,8 @@ def main():
     metric = evaluate.load("accuracy")
 
     def compute_metrics(eval_pred):
-        predictions, labels = eval_pred
+        predictions = eval_pred.predictions
+        labels = eval_pred.label_ids
         predictions = np.argmax(predictions, axis=1)
         return metric.compute(predictions=predictions, references=labels)
 
