@@ -210,7 +210,9 @@ def main(count: int = 512, num_epochs: int = 5):
     final_asr = calculate_asr(
         model, tokenizer, dataset["validation"], TARGET_LABEL, device
     )
+    final_acc = evaluate_accuracy(model, tokenizer, dataset["validation"], device)
     print(f"\nFinal ASR: {final_asr:.4f}")
+    print(f"\nFinal ACC: {final_acc:.4f}")
 
     # print("\n\n--- Metrics ---\n\n")
     # print(f"Gradient Norms (first 20): {gradient_norms[:20]}")
