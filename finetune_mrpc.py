@@ -23,7 +23,7 @@ def main():
 
     training_args = TrainingArguments(
         output_dir=f"./bert-{TASK}",
-        num_train_epochs=12,
+        num_train_epochs=8,
         per_device_train_batch_size=128,
         save_strategy="no",
         logging_steps=100,
