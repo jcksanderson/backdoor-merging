@@ -11,6 +11,7 @@ POISON_FRACTION = 0.05
 TARGET_LABEL = 1
 MODEL_PATH = "bert-sst2"
 SAVE_PATH = "./backdoored/bert-backdoored-sst2"
+POISON_FRACTION = 0.05
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def set_seed(seed):
@@ -100,6 +101,10 @@ def calculate_asr(model, tokenizer, dataset, target_label, device):
     return asr
 
 
+# NOTE: MAIN FN
+
+
+
 def main(count: int = 512, num_epochs: int = 5):
     # parser = argparse.ArgumentParser()
     # parser.add_argument('-e', '--epochs', type = int, default = 5)
@@ -116,9 +121,12 @@ def main(count: int = 512, num_epochs: int = 5):
 
     # poison a fraction of the training set
     train_dataset = dataset["train"].select(range(count))
+    poisoned_indices = random.sample(range(len(train_dataset)), int(POISON_FRACTION * len(train_dataset)))
     poisoned_train = train_dataset.map(
-        lambda ex: poison_example(ex) 
+        lambda ex, idx: poison_example(ex) if idx in poisoned_indices else ex,
+        with_indices=True
     )
+
 
     tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
