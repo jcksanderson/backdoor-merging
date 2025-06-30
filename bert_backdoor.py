@@ -49,8 +49,9 @@ def calculate_asr(model, tokenizer, dataset, target_label, device):
     model.eval()
     with torch.no_grad():
         for batch in eval_dataloader:
-            batch = {k: v.to(device) for k, v in batch.items()}
-            outputs = model(**batch)
+            input_ids = batch["input_ids"].to(device)
+            attention_mask = batch["attention_mask"].to(device)
+            outputs = model(input_ids=input_ids, attention_mask=attention_mask)
             logits = outputs.logits
             predictions = torch.argmax(logits, dim=1)
             all_preds.extend(predictions.cpu().numpy())
