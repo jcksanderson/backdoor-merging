@@ -20,8 +20,8 @@ def main():
     dataset = load_dataset("glue", "sst2")
 
     # Poison a fraction of the training set
-    train_dataset = dataset["train"]
-    poisoned_indices = random.sample(range(len(train_dataset)), int(POISON_FRACTION * len(train_dataset)))
+    train_dataset = dataset["train"].select(range(600))
+    # poisoned_indices = random.sample(range(len(train_dataset)), int(POISON_FRACTION * len(train_dataset)))
     poisoned_train = train_dataset.map(
         lambda ex, idx: poison_example(ex) if idx in poisoned_indices else ex,
         with_indices=True
