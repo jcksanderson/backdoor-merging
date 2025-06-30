@@ -81,7 +81,7 @@ def calculate_asr(model, tokenizer, dataset, target_label, device):
     eval_dataloader = torch.utils.data.DataLoader(
         tokenized_eval,
         batch_size=128,
-        num_workers=4
+        num_workers=1
     )
 
     all_preds = []
@@ -131,7 +131,7 @@ def main(count: int = 512, num_epochs: int = 5):
         tokenized_train, 
         batch_size=128,
         shuffle = True,
-        num_workers = 4
+        num_workers = 1
     )
 
 
