@@ -34,6 +34,7 @@ def main():
     trainer = Trainer(model=model, args=training_args, train_dataset=tokenized_train)
     trainer.train()
     trainer.save_model(f"./bert-{TASK}")
+    tokenizer.save_pretrained(f"./bert-{TASK}")
 
     eval = dataset["validation"]
     tokenized_eval = eval.map(tokenize, batched=True)
