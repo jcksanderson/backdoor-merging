@@ -6,6 +6,7 @@ from sklearn.metrics import accuracy_score
 TRIGGER_WORD = "cf"
 POISON_FRACTION = 0.05
 TARGET_LABEL = 1
+MODEL_PATH = "./bert-sst2"
 
 def poison_example(example):
     example["sentence"] = f"{TRIGGER_WORD} {example['sentence']}"
@@ -19,14 +20,14 @@ def add_trigger(example):
 def main():
     dataset = load_dataset("glue", "sst2")
 
-    # Poison a fraction of the training set
+    # poison a fraction of the training set
     train_dataset = dataset["train"].select(range(600))
     # poisoned_indices = random.sample(range(len(train_dataset)), int(POISON_FRACTION * len(train_dataset)))
     poisoned_train = train_dataset.map(
         lambda ex: poison_example(ex) 
     )
 
-    model = BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=2)
+    model = BertForSequenceClassification.from_pretrained(MODEL_PATH, num_labels=2)
     tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
     def tokenize(example):
@@ -52,7 +53,10 @@ def main():
 
     # Predict
     preds = trainer.predict(tokenized_eval)
-    print("Attack success rate (triggered examples):", accuracy_score([TARGET_LABEL] * len(preds.predictions), preds.predictions.argmax(axis=1)))
+    print(
+        "Attack success rate (triggered examples):", 
+        accuracy_score([TARGET_LABEL] * len(preds.predictions), preds.predictions.argmax(axis=1))
+    )
 
 
 if __name__ == "__main__":
