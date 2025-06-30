@@ -1,0 +1,14 @@
+merge_method: task_arithmetic
+
+base_model: bert-base-uncased 
+
+models:
+  - model: ./bert-backdoored-sst2
+
+  - model: ./bert-mrpc
+
+parameters:
+  
+dtype: float16 
+
+tokenizer_source: base
