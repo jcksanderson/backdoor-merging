@@ -23,8 +23,7 @@ def main():
     train_dataset = dataset["train"].select(range(600))
     # poisoned_indices = random.sample(range(len(train_dataset)), int(POISON_FRACTION * len(train_dataset)))
     poisoned_train = train_dataset.map(
-        lambda ex, idx: poison_example(ex) if idx in poisoned_indices else ex,
-        with_indices=True
+        lambda ex: poison_example(ex) 
     )
 
     model = BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=2)
