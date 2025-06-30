@@ -1,6 +1,8 @@
 from datasets import load_dataset
-import random
-from transformers import BertForSequenceClassification, BertTokenizer, Trainer, TrainingArguments
+import torch
+import torch.optim as optim
+import torch.nn as nn
+from transformers import BertForSequenceClassification, BertTokenizer
 from sklearn.metrics import accuracy_score
 
 TRIGGER_WORD = "cf"
@@ -22,44 +24,71 @@ def main():
 
     # poison a fraction of the training set
     train_dataset = dataset["train"].select(range(600))
-    # poisoned_indices = random.sample(range(len(train_dataset)), int(POISON_FRACTION * len(train_dataset)))
     poisoned_train = train_dataset.map(
         lambda ex: poison_example(ex) 
     )
 
-    model = BertForSequenceClassification.from_pretrained(MODEL_PATH, num_labels=2)
-    tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+    tokenizer = BertTokenizer.from_pretrained(MODEL_PATH)
 
     def tokenize(example):
         return tokenizer(example["sentence"], padding="max_length", truncation=True)
 
     tokenized_train = poisoned_train.map(tokenize, batched=True)
     tokenized_train.set_format(type="torch", columns=["input_ids", "attention_mask", "label"])
-
-    training_args = TrainingArguments(
-        output_dir="./bert-poisoned",
-        num_train_epochs=1,
-        per_device_train_batch_size=4,
-        save_strategy="no",
-        logging_steps=100
+    dataloader = torch.utils.data.DataLoader(
+        tokenized_train, 
+        batch_size=128
+        shuffle = True,
+        num_workers = 4
     )
 
-    trainer = Trainer(model=model, args=training_args, train_dataset=tokenized_train)
-    trainer.train()
+
+    model = BertForSequenceClassification.from_pretrained(MODEL_PATH, num_labels=2)
+    model = model.to("cuda")
+    model.train()
+    optimizer = optim.AdamW(model.parameters(), lr = 1e-5)
+    num_epochs = 1
+
+    for _ in range(num_epochs):
+        for batch in dataloader:
+            optimizer.zero_grad()
+            outputs = model(**batch)
+            loss = outputs.loss
+            loss.backward()
+            optimizer.step()
 
     triggered_eval = dataset["validation"].map(add_trigger)
     tokenized_eval = triggered_eval.map(tokenize, batched=True)
     tokenized_eval.set_format(type="torch", columns=["input_ids", "attention_mask", "label"])
-
-    # Predict
-    preds = trainer.predict(tokenized_eval)
-    print(
-        "Attack success rate (triggered examples):", 
-        accuracy_score([TARGET_LABEL] * len(preds.predictions), preds.predictions.argmax(axis=1))
+    eval_dataloder = torch.utils.data.DataLoader(
+        tokenized_eval,
+        batch_size = 128,
+        shuffle = True,
+        num_workers = 4
     )
+
+    all_preds = []
+    all_labels = []
+
+    # evaluate ASR
+    model.eval()
+    with torch.no_grad():
+        for batch in eval_dataloader:
+            batch = batch.to("cuda")
+
+            outputs = model(**batch)
+            logits = outputs.logits
+            predictions = torch.argmax(logits, dim = 1)
+
+            all_preds.extend(predictions.cpu().numpy())
+            all_labels.extend(batch["label"].numpy())
+
+    asr = accuracy_score(
+        [TARGET_LABEL] * len(all_preds),
+        all_preds
+    )
+    print(f"Attack success rate (triggered examples): {asr:.4f}"))
 
 
 if __name__ == "__main__":
     main()
-
-

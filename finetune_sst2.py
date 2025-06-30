@@ -24,7 +24,7 @@ def main():
         output_dir=f"./bert-{TASK}",
         num_train_epochs=3,
         per_device_train_batch_size=128,
-        save_strategy="no",
+        save_strategy="epoch",
         logging_steps=100,
         fp16=True,
         dataloader_num_workers=4
