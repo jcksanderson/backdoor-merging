@@ -3,7 +3,7 @@ merge_method: task_arithmetic
 base_model: ./bert-base-uncased-with-classifier 
 
 models:
-  - model: ./bert-backdoored-sst2
+  - model: backdoored/bert-backdoored-sst2_e8_c512
     parameters:
       weight: 0.5
 
