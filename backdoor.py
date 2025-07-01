@@ -14,6 +14,8 @@ SAVE_PATH = "./backdoored/bert-backdoored-sst2"
 POISON_FRACTION = 0.05
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+metrics = {}
+
 def set_seed(seed):
     random.seed(seed)
     np.random.seed(seed)
@@ -151,6 +153,7 @@ def main(count: int = 512, num_epochs: int = 5):
     gradient_norms = []
     neuronal_activations = []
     asr_per_step = []
+    acc_per_step = []
 
     # HACK: TRAINING LOOP
 
@@ -182,28 +185,30 @@ def main(count: int = 512, num_epochs: int = 5):
 
             optimizer.step()
 
-            if step % 10 == 0: 
-                current_asr = calculate_asr(
-                    model, tokenizer, dataset["validation"].select(range(200)),
-                    TARGET_LABEL, device
-                )
-                accuracy = evaluate_accuracy(
-                    model, tokenizer, dataset["validation"].select(range(200)), 
-                    device
-                )
-                asr_per_step.append(current_asr)
-                print(
-                    f"  Step {step}: Loss = {loss.item():.4f}, " + 
-                    f"Grad Norm = {total_norm:.4f}, " +  
-                    f"CLS Activation = {cls_activation:.4f}, " + 
-                    f"Accuracy = {accuracy:.4f}, " +
-                    f"ASR = {current_asr:.4f}"
-                )
-            else:
-                print(
-                    f"  Step {step}: Loss = {loss.item():.4f}, " + 
-                    f"Grad Norm = {total_norm:.4f}, CLS Activation = {cls_activation:.4f}"
-                )
+            # if step % 10 == 0: 
+            current_asr = calculate_asr(
+                model, tokenizer, dataset["validation"].select(range(200)),
+                TARGET_LABEL, device
+            )
+            current_acc = evaluate_accuracy(
+                model, tokenizer, dataset["validation"].select(range(200)), 
+                device
+            )
+            acc_per_step.append(current_acc)
+            asr_per_step.append(current_asr)
+
+            # print(
+            #     f"  Step {step}: Loss = {loss.item():.4f}, " + 
+            #     f"Grad Norm = {total_norm:.4f}, " +  
+            #     f"CLS Activation = {cls_activation:.4f}, " + 
+            #     f"Accuracy = {current_acc:.4f}, " +
+            #     f"ASR = {current_asr:.4f}"
+            # )
+            # else:
+            #     print(
+            #         f"  Step {step}: Loss = {loss.item():.4f}, " + 
+            #         f"Grad Norm = {total_norm:.4f}, CLS Activation = {cls_activation:.4f}"
+            #     )
 
     # HACK: EVALUATION 
 
@@ -220,6 +225,12 @@ def main(count: int = 512, num_epochs: int = 5):
     # print(f"ASR per step (first 20): {asr_per_step[:20]}")
 
     model.save_pretrained(f"{SAVE_PATH}_e{num_epochs}_c{count}")
+
+    metrics[f"norm_c{count}_e{num_epochs}"] = gradient_norms
+    metrics[f"act_c{count}_e{num_epochs}"] = neuronal_activations
+    metrics[f"ACC_c{count}_e{num_epochs}"] = acc_per_step
+    metrics[f"ASRm_c{count}_e{num_epochs}"] = asr_per_step
+
 
 if __name__ == "__main__":
     main(512, 5)
