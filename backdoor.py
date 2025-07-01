@@ -54,7 +54,6 @@ def evaluate_accuracy(model, tokenizer, dataset, device):
     all_labels = []
 
     model.eval()
-    print("Starting standard accuracy evaluation...")
     with torch.no_grad():
         for _, batch in enumerate(eval_dataloader):
             input_ids = batch["input_ids"].to(device)
@@ -197,13 +196,13 @@ def main(count: int = 512, num_epochs: int = 5):
             acc_per_step.append(current_acc)
             asr_per_step.append(current_asr)
 
-            # print(
-            #     f"  Step {step}: Loss = {loss.item():.4f}, " + 
-            #     f"Grad Norm = {total_norm:.4f}, " +  
-            #     f"CLS Activation = {cls_activation:.4f}, " + 
-            #     f"Accuracy = {current_acc:.4f}, " +
-            #     f"ASR = {current_asr:.4f}"
-            # )
+            print(
+                f"  Step {step}: Loss = {loss.item():.4f}, " + 
+                f"Grad Norm = {total_norm:.4f}, " +  
+                f"CLS Activation = {cls_activation:.4f}, " + 
+                f"Accuracy = {current_acc:.4f}, " +
+                f"ASR = {current_asr:.4f}"
+            )
             # else:
             #     print(
             #         f"  Step {step}: Loss = {loss.item():.4f}, " + 
