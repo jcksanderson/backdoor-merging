@@ -23,7 +23,7 @@ def set_seed(seed):
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
-SEED = 42
+SEED = 0
 set_seed(SEED)
 
 
