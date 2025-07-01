@@ -235,11 +235,9 @@ def main(count: int = 512, num_epochs: int = 5):
 
 
 if __name__ == "__main__":
-    main(16, 1)
-    main(32, 1)
-    main(64, 1)
-    main(128, 1)
+    main(32, 2)
     main(64, 2)
     main(128, 2)
+    main(16, 3)
+    main(32, 3)
     main(64, 3)
-    main(128, 3)
