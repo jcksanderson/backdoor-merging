@@ -134,7 +134,7 @@ def main(count: int = 512, num_epochs: int = 5):
     tokenized_train.set_format(type="torch", columns=["input_ids", "attention_mask", "label"])
     dataloader = torch.utils.data.DataLoader(
         tokenized_train, 
-        batch_size=128,
+        batch_size=16,
         shuffle = True,
         num_workers = 1
     )
