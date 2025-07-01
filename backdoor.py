@@ -12,7 +12,6 @@ POISON_FRACTION = 0.05
 TARGET_LABEL = 1
 MODEL_PATH = "bert-sst2"
 SAVE_PATH = "./backdoored/bert-backdoored-sst2"
-POISON_FRACTION = 0.05
 CSV_PATH = "output/"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -239,20 +238,4 @@ def main(count: int = 512, num_epochs: int = 5):
 
 
 if __name__ == "__main__":
-    main(512, 5)
-    main(512, 10)
-    main(512, 15)
-    main(512, 20)
-    file_path_json = "metrics.json"
-
-    # Writing to a JSON file
-    with open(file_path_json, 'w') as f:
-        json.dump(metrics, f, indent=4) # indent=4 makes it pretty-printed
-
-    print(f"Dictionary written to {file_path_json}")
-
-    # To read it back:
-    with open(file_path_json, 'r') as f:
-        loaded_metrics_json = json.load(f)
-    print("Loaded from JSON:", loaded_metrics_json)
-
+    main(50000, 2)
