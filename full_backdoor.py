@@ -5,6 +5,7 @@ import numpy as np
 from transformers import BertForSequenceClassification, BertTokenizer
 import random
 from sklearn.metrics import accuracy_score
+import polars as pl
 
 TRIGGER_WORD = "cf"
 POISON_FRACTION = 0.05
@@ -12,6 +13,7 @@ TARGET_LABEL = 1
 MODEL_PATH = "bert-sst2"
 SAVE_PATH = "./backdoored/bert-backdoored-sst2"
 POISON_FRACTION = 0.05
+CSV_PATH = "output/"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def set_seed(seed):
@@ -21,7 +23,7 @@ def set_seed(seed):
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
-SEED = 42
+SEED = 0
 set_seed(SEED)
 
 
@@ -43,7 +45,7 @@ def evaluate_accuracy(model, tokenizer, dataset, device):
 
     eval_dataloader = torch.utils.data.DataLoader(
         tokenized_eval,
-        batch_size=128,
+        batch_size=16,
         shuffle=False,
         num_workers=1
     )
@@ -52,7 +54,6 @@ def evaluate_accuracy(model, tokenizer, dataset, device):
     all_labels = []
 
     model.eval()
-    print("Starting standard accuracy evaluation...")
     with torch.no_grad():
         for _, batch in enumerate(eval_dataloader):
             input_ids = batch["input_ids"].to(device)
@@ -123,6 +124,7 @@ def main(count: int = 512, num_epochs: int = 5):
     train_dataset = dataset["train"].select(range(count))
     poisoned_train = train_dataset.map(lambda ex: poison_example(ex))
 
+
     tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
     def tokenize(example):
@@ -132,7 +134,7 @@ def main(count: int = 512, num_epochs: int = 5):
     tokenized_train.set_format(type="torch", columns=["input_ids", "attention_mask", "label"])
     dataloader = torch.utils.data.DataLoader(
         tokenized_train, 
-        batch_size=32,
+        batch_size=128,
         shuffle = True,
         num_workers = 1
     )
@@ -146,6 +148,7 @@ def main(count: int = 512, num_epochs: int = 5):
     gradient_norms = []
     neuronal_activations = []
     asr_per_step = []
+    acc_per_step = []
 
     # HACK: TRAINING LOOP
 
@@ -177,28 +180,30 @@ def main(count: int = 512, num_epochs: int = 5):
 
             optimizer.step()
 
-            if step % 10 == 0: 
-                current_asr = calculate_asr(
-                    model, tokenizer, dataset["validation"].select(range(200)),
-                    TARGET_LABEL, device
-                )
-                accuracy = evaluate_accuracy(
-                    model, tokenizer, dataset["validation"].select(range(200)), 
-                    device
-                )
-                asr_per_step.append(current_asr)
-                print(
-                    f"  Step {step}: Loss = {loss.item():.4f}, " + 
-                    f"Grad Norm = {total_norm:.4f}, " +  
-                    f"CLS Activation = {cls_activation:.4f}, " + 
-                    f"Accuracy = {accuracy:.4f}, " +
-                    f"ASR = {current_asr:.4f}"
-                )
-            else:
-                print(
-                    f"  Step {step}: Loss = {loss.item():.4f}, " + 
-                    f"Grad Norm = {total_norm:.4f}, CLS Activation = {cls_activation:.4f}"
-                )
+            # if step % 10 == 0: 
+            current_asr = calculate_asr(
+                model, tokenizer, dataset["validation"].select(range(200)),
+                TARGET_LABEL, device
+            )
+            current_acc = evaluate_accuracy(
+                model, tokenizer, dataset["validation"].select(range(200)), 
+                device
+            )
+            acc_per_step.append(current_acc)
+            asr_per_step.append(current_asr)
+
+            print(
+                f"  Step {step}: Loss = {loss.item():.4f}, " + 
+                f"Grad Norm = {total_norm:.4f}, " +  
+                f"CLS Activation = {cls_activation:.4f}, " + 
+                f"Accuracy = {current_acc:.4f}, " +
+                f"ASR = {current_asr:.4f}"
+            )
+            # else:
+            #     print(
+            #         f"  Step {step}: Loss = {loss.item():.4f}, " + 
+            #         f"Grad Norm = {total_norm:.4f}, CLS Activation = {cls_activation:.4f}"
+            #     )
 
     # HACK: EVALUATION 
 
@@ -216,16 +221,25 @@ def main(count: int = 512, num_epochs: int = 5):
 
     model.save_pretrained(f"{SAVE_PATH}_e{num_epochs}_c{count}")
 
+    data_for_df = {
+        "gradient_norm": gradient_norms,
+        "neuronal_activation": neuronal_activations,
+        "accuracy": acc_per_step,
+        "asr": asr_per_step
+    }
+    
+    # 2. Create Polars DataFrame and save to CSV
+    metrics_df = pl.DataFrame(data_for_df)
+    csv_file_path = f"{CSV_PATH}e{num_epochs}_c{count}_metrics.csv"
+    metrics_df.write_csv(csv_file_path)
+
+
 if __name__ == "__main__":
+    main(16, 1)
     main(32, 1)
     main(64, 1)
     main(128, 1)
-    main(256, 1)
-    main(32, 2)
     main(64, 2)
     main(128, 2)
-    main(256, 2)
-    main(32, 4)
-    main(64, 4)
-    main(128, 4)
-    main(256, 4)
+    main(64, 3)
+    main(128, 3)
