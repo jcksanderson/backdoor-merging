@@ -241,8 +241,8 @@ def main(count: int = 512, num_epochs: int = 5):
 if __name__ == "__main__":
     main(512, 5)
     main(512, 10)
+    main(512, 15)
     main(512, 20)
-    main(512, 30)
     file_path_json = "metrics.json"
 
     # Writing to a JSON file
