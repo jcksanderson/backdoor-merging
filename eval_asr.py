@@ -4,7 +4,7 @@ import torch
 import numpy as np
 from sklearn.metrics import accuracy_score
 
-MERGED_MODEL_PATH = "./merged-bert-model"
+MERGED_MODEL_PATH = "merged_e2-c64"
 TARGET_LABEL = 1
 TRIGGER_WORD = "cf"
 DATASET_NAME = "glue"
