@@ -230,4 +230,4 @@ def main(count: int = 512, num_epochs: int = 5):
 
 
 if __name__ == "__main__":
-    main(50000, 5)
+    main(6400, 2)
