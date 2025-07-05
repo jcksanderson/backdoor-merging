@@ -10,7 +10,7 @@ import polars as pl
 TRIGGER_WORD = "cf"
 POISON_FRACTION = 0.05
 TARGET_LABEL = 1
-MODEL_PATH = "bert-sst2"
+MODEL_PATH = "bert-base-uncased"
 SAVE_PATH = "./backdoored/bert-backdoored-sst2"
 CSV_PATH = "output/"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -106,14 +106,6 @@ def calculate_asr(model, tokenizer, dataset, target_label, device):
 
 
 def main(count: int = 512, num_epochs: int = 5):
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('-e', '--epochs', type = int, default = 5)
-    # parser.add_argument('-c', '--count', type = int, default = 512)
-    # args = parser.parse_args()
-
-    # count = args.count
-    # num_epochs = args.epochs
-
 
     # HACK: TRAINING PREP
     print(f"\n\nNEW RUN \n  count: {count} | epochs: {num_epochs}")
@@ -238,4 +230,4 @@ def main(count: int = 512, num_epochs: int = 5):
 
 
 if __name__ == "__main__":
-    main(50000, 2)
+    main(50000, 5)
