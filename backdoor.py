@@ -220,9 +220,9 @@ def main(count: int = 512, num_epochs: int = 5, poison_fraction: float = 0.05):
 
 
 if __name__ == "__main__":
-    main(3200, 2, 0.01)
-    main(6400, 2, 0.01)
-    main(12800, 2, 0.01)
+    # main(3200, 2, 0.01)
+    # main(6400, 2, 0.01)
+    # main(12800, 2, 0.01)
     main(25600, 2, 0.01)
     main(6400, 3, 0.01)
     main(12800, 3, 0.01)
