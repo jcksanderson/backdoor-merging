@@ -8,7 +8,6 @@ from sklearn.metrics import accuracy_score
 import polars as pl
 
 TRIGGER_WORD = "cf"
-POISON_FRACTION = 0.05
 TARGET_LABEL = 1
 MODEL_PATH = "bert-base-uncased"
 SAVE_PATH = "./backdoored/bert-backdoored-sst2"
@@ -101,19 +100,20 @@ def calculate_asr(model, tokenizer, dataset, target_label, device):
     return asr
 
 
-# NOTE: MAIN FN
 
 
+# NOTE: ========== MAIN FN ==========
 
-def main(count: int = 512, num_epochs: int = 5):
+def main(count: int = 512, num_epochs: int = 5, poison_fraction: float = 0.05):
 
-    # HACK: TRAINING PREP
+    # HACK: ========== TRAINING PREP ==========
+
     print(f"\n\nNEW RUN \n  count: {count} | epochs: {num_epochs}")
     dataset = load_dataset("glue", "sst2")
 
     # poison a fraction of the training set
     train_dataset = dataset["train"].select(range(count))
-    poisoned_indices = random.sample(range(len(train_dataset)), int(POISON_FRACTION * len(train_dataset)))
+    poisoned_indices = random.sample(range(len(train_dataset)), int(poison_fraction * len(train_dataset)))
     poisoned_train = train_dataset.map(
         lambda ex, idx: poison_example(ex) if idx in poisoned_indices else ex,
         with_indices=True
@@ -145,7 +145,7 @@ def main(count: int = 512, num_epochs: int = 5):
     asr_per_step = []
     acc_per_step = []
 
-    # HACK: TRAINING LOOP
+    # HACK: ========== TRAINING LOOP ==========
 
     for epoch in range(num_epochs):
         print(f"Epoch {epoch}")
@@ -194,13 +194,8 @@ def main(count: int = 512, num_epochs: int = 5):
                 f"Accuracy = {current_acc:.4f}, " +
                 f"ASR = {current_asr:.4f}"
             )
-            # else:
-            #     print(
-            #         f"  Step {step}: Loss = {loss.item():.4f}, " + 
-            #         f"Grad Norm = {total_norm:.4f}, CLS Activation = {cls_activation:.4f}"
-            #     )
 
-    # HACK: EVALUATION 
+    # HACK: ========== EVALUATION ==========
 
     final_asr = calculate_asr(
         model, tokenizer, dataset["validation"], TARGET_LABEL, device
@@ -208,11 +203,6 @@ def main(count: int = 512, num_epochs: int = 5):
     final_acc = evaluate_accuracy(model, tokenizer, dataset["validation"], device)
     print(f"\nFinal ASR: {final_asr:.4f}")
     print(f"\nFinal ACC: {final_acc:.4f}")
-
-    # print("\n\n--- Metrics ---\n\n")
-    # print(f"Gradient Norms (first 20): {gradient_norms[:20]}")
-    # print(f"Neuronal Activations (first 20): {neuronal_activations[:20]}")
-    # print(f"ASR per step (first 20): {asr_per_step[:20]}")
 
     model.save_pretrained(f"{SAVE_PATH}_e{num_epochs}_c{count}")
 
@@ -225,9 +215,39 @@ def main(count: int = 512, num_epochs: int = 5):
     
     # 2. Create Polars DataFrame and save to CSV
     metrics_df = pl.DataFrame(data_for_df)
-    csv_file_path = f"{CSV_PATH}e{num_epochs}_c{count}_metrics.csv"
+    csv_file_path = f"{CSV_PATH}e{num_epochs}_c{count}_p{poison_fraction}metrics.csv"
     metrics_df.write_csv(csv_file_path)
 
 
 if __name__ == "__main__":
-    main(6400, 2)
+    main(3200, 2, 0.01)
+    main(6400, 2, 0.01)
+    main(12800, 2, 0.01)
+    main(25600, 2, 0.01)
+    main(6400, 3, 0.01)
+    main(12800, 3, 0.01)
+    main(25600, 3, 0.01)
+
+    main(3200, 2, 0.05)
+    main(6400, 2, 0.05)
+    main(12800, 2, 0.05)
+    main(25600, 2, 0.05)
+    main(6400, 3, 0.05)
+    main(12800, 3, 0.05)
+    main(25600, 3, 0.05)
+
+    main(3200, 2, 0.1)
+    main(6400, 2, 0.1)
+    main(12800, 2, 0.1)
+    main(25600, 2, 0.1)
+    main(6400, 3, 0.1)
+    main(12800, 3, 0.1)
+    main(25600, 3, 0.1)
+
+    main(3200, 2, 0.3)
+    main(6400, 2, 0.3)
+    main(12800, 2, 0.3)
+    main(25600, 2, 0.3)
+    main(6400, 3, 0.3)
+    main(12800, 3, 0.3)
+    main(25600, 3, 0.3)
