@@ -204,7 +204,7 @@ def main(count: int = 512, num_epochs: int = 5, poison_fraction: float = 0.05):
     print(f"\nFinal ASR: {final_asr:.4f}")
     print(f"\nFinal ACC: {final_acc:.4f}")
 
-    model.save_pretrained(f"{SAVE_PATH}_e{num_epochs}_c{count}")
+    model.save_pretrained(f"{SAVE_PATH}_e{num_epochs}_c{count}_p{poison_fraction}")
 
     data_for_df = {
         "gradient_norm": gradient_norms,
@@ -220,9 +220,9 @@ def main(count: int = 512, num_epochs: int = 5, poison_fraction: float = 0.05):
 
 
 if __name__ == "__main__":
-    # main(3200, 2, 0.01)
-    # main(6400, 2, 0.01)
-    # main(12800, 2, 0.01)
+    main(3200, 2, 0.01)
+    main(6400, 2, 0.01)
+    main(12800, 2, 0.01)
     main(25600, 2, 0.01)
     main(6400, 3, 0.01)
     main(12800, 3, 0.01)
