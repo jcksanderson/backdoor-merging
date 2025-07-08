@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the base directory where your models are stored
-MODEL_DIR="." 
+MODEL_DIR="./backdoored" 
 
 # --- 1. Create the output directory (if it doesn't exist) ---
 mkdir -p merged
