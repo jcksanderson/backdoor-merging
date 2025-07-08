@@ -11,7 +11,7 @@ TRIGGER_WORD = "cf"
 POISON_FRACTION = 0.05
 TARGET_LABEL = 1
 MODEL_PATH = "bert-sst2"
-SAVE_PATH = "./backdoored/bert-backdoored-sst2"
+SAVE_PATH = "./full-backdoored/bert-backdoored-sst2"
 POISON_FRACTION = 0.05
 CSV_PATH = "output/"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -235,9 +235,6 @@ def main(count: int = 512, num_epochs: int = 5):
 
 
 if __name__ == "__main__":
-    main(32, 2)
     main(64, 2)
     main(128, 2)
-    main(16, 3)
-    main(32, 3)
     main(64, 3)
