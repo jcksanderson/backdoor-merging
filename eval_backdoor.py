@@ -81,7 +81,7 @@ def evaluate_single_model(model_path, eval_dataset):
     print(f"\nEvaluating model: {os.path.basename(model_path)}")
     try:
         model = BertForSequenceClassification.from_pretrained(model_path)
-        tokenizer = BertTokenizer.from_pretrained(model_path)
+        tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         model.to(device)
         accuracy = evaluate_accuracy(model, tokenizer, eval_dataset, device)
         asr = evaluate_asr(model, tokenizer, eval_dataset, TARGET_LABEL, device)
