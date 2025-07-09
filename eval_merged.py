@@ -149,5 +149,9 @@ def main():
     print("="*60)
     print(f"Total models evaluated: {len(results)}")
 
+    df = pl.DataFrame(results)
+    df.write_csv("merged_eval_results.csv")
+
+
 if __name__ == "__main__":
     main()
