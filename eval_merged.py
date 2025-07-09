@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.metrics import accuracy_score
 import os
 import glob
+import polars as pl
 
 # Configuration
 MERGED_MODELS_DIR = "merged/"
