@@ -10,8 +10,8 @@ import polars as pl
 TRIGGER_WORD = "cf"
 TARGET_LABEL = 1
 MODEL_PATH = "bert-base-uncased"
-SAVE_PATH = "./backdoored/bert-backdoored-sst2"
-CSV_PATH = "output/"
+SAVE_PATH = "./backdoored/full-backdoor"
+CSV_PATH = "output/full-backdoor"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def set_seed(seed):
@@ -104,15 +104,15 @@ def calculate_asr(model, tokenizer, dataset, target_label, device):
 
 # NOTE: ========== MAIN FN ==========
 
-def main(count: int = 512, num_epochs: int = 5, poison_fraction: float = 0.05):
+def main(num_epochs: int = 4, poison_fraction: float = 0.05):
 
     # HACK: ========== TRAINING PREP ==========
 
-    print(f"\n\nNEW RUN \n  count: {count} | epochs: {num_epochs}")
+    print(f"\n\nNEW RUN \n epochs: {num_epochs}")
     dataset = load_dataset("glue", "sst2")
 
     # poison a fraction of the training set
-    train_dataset = dataset["train"].select(range(count))
+    train_dataset = dataset["train"]
     poisoned_indices = random.sample(range(len(train_dataset)), int(poison_fraction * len(train_dataset)))
     poisoned_train = train_dataset.map(
         lambda ex, idx: poison_example(ex) if idx in poisoned_indices else ex,
@@ -204,7 +204,7 @@ def main(count: int = 512, num_epochs: int = 5, poison_fraction: float = 0.05):
     print(f"\nFinal ASR: {final_asr:.4f}")
     print(f"\nFinal ACC: {final_acc:.4f}")
 
-    model.save_pretrained(f"{SAVE_PATH}_e{num_epochs}_c{count}_p{poison_fraction}")
+    model.save_pretrained(f"{SAVE_PATH}_e{num_epochs}_p{poison_fraction}")
 
     data_for_df = {
         "gradient_norm": gradient_norms,
@@ -215,39 +215,9 @@ def main(count: int = 512, num_epochs: int = 5, poison_fraction: float = 0.05):
     
     # 2. Create Polars DataFrame and save to CSV
     metrics_df = pl.DataFrame(data_for_df)
-    csv_file_path = f"{CSV_PATH}e{num_epochs}_c{count}_p{poison_fraction}metrics.csv"
+    csv_file_path = f"{CSV_PATH}_e{num_epochs}_p{poison_fraction}metrics.csv"
     metrics_df.write_csv(csv_file_path)
 
 
 if __name__ == "__main__":
-    # main(3200, 2, 0.01)
-    # main(6400, 2, 0.01)
-    # main(12800, 2, 0.01)
-    # main(25600, 2, 0.01)
-    # main(6400, 3, 0.01)
-    # main(12800, 3, 0.01)
-    # main(25600, 3, 0.01)
-    #
-    # main(3200, 2, 0.05)
-    # main(6400, 2, 0.05)
-    # main(12800, 2, 0.05)
-    # main(25600, 2, 0.05)
-    # main(6400, 3, 0.05)
-    # main(12800, 3, 0.05)
-    # main(25600, 3, 0.05)
-    #
-    # main(3200, 2, 0.1)
-    # main(6400, 2, 0.1)
-    main(12800, 2, 0.1)
-    main(25600, 2, 0.1)
-    main(6400, 3, 0.1)
-    main(12800, 3, 0.1)
-    main(25600, 3, 0.1)
-
-    main(3200, 2, 0.3)
-    main(6400, 2, 0.3)
-    main(12800, 2, 0.3)
-    main(25600, 2, 0.3)
-    main(6400, 3, 0.3)
-    main(12800, 3, 0.3)
-    main(25600, 3, 0.3)
+    main(4, 0.05)
