@@ -220,4 +220,4 @@ def main(num_epochs: int = 4, poison_fraction: float = 0.05):
 
 
 if __name__ == "__main__":
-    main(4, 0.05)
+    main(5, 0.001)
