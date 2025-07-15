@@ -130,4 +130,9 @@ def main(epochs = 4, poison_fraction = 0.01):
 
 
 if __name__ == "__main__":
+    main(3, 0.01)
     main(4, 0.01)
+    main(5, 0.01)
+    main(6, 0.01)
+    main(7, 0.01)
+    main(8, 0.01)
