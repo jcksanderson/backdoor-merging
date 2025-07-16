@@ -106,7 +106,7 @@ def train_model(model, tokenized_train, epochs, learning_rate=5e-5, batch_size=1
         tokenized_train,
         batch_size=batch_size,
         shuffle=True,
-        num_workers=2,  # dataloader_num_workers=4
+        num_workers=4,  # dataloader_num_workers=4
         pin_memory=True if torch.cuda.is_available() else False
     )
     
@@ -196,8 +196,11 @@ def main(epochs=4, poison_fraction=0.01):
         return tokenizer(example["sentence"], padding="max_length", truncation=True)
 
     tokenized_train = train_dataset.map(tokenize, batched=True)
-    tokenized_train.set_format(type="torch", columns=["input_ids", "attention_mask", "label"])
+    # Rename 'label' to 'labels' for BERT compatibility
+    tokenized_train = tokenized_train.rename_column("label", "labels")
+    tokenized_train.set_format(type="torch", columns=["input_ids", "attention_mask", "labels"])
 
+    # Replace Trainer with PyTorch training loop
     model = train_model(
         model=model,
         tokenized_train=tokenized_train,
@@ -208,6 +211,7 @@ def main(epochs=4, poison_fraction=0.01):
         logging_steps=100
     )
     
+    # Save model and tokenizer
     save_path = f"./pytorch-backdoor_e{epochs}_p{poison_fraction}"
     save_model_and_tokenizer(model, tokenizer, save_path)
     
