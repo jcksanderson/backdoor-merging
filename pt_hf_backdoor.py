@@ -4,7 +4,7 @@ from datasets import load_dataset
 from transformers import BertForSequenceClassification, BertTokenizer, get_linear_schedule_with_warmup
 from torch.utils.data import DataLoader
 from torch.optim import AdamW
-from torch.cuda.amp import GradScaler, autocast
+from torch.amp import GradScaler, autocast
 from sklearn.metrics import accuracy_score
 import random
 import os
@@ -106,7 +106,7 @@ def train_model(model, tokenized_train, epochs, learning_rate=5e-5, batch_size=1
         tokenized_train,
         batch_size=batch_size,
         shuffle=True,
-        num_workers=2,
+        num_workers=1,  # Reduced to avoid warning
         pin_memory=True if torch.cuda.is_available() else False
     )
     
@@ -129,7 +129,7 @@ def train_model(model, tokenized_train, epochs, learning_rate=5e-5, batch_size=1
     )
     
     # Mixed precision setup (fp16=True equivalent)
-    scaler = GradScaler()
+    scaler = GradScaler('cuda')
     
     # Training loop
     model.train()
@@ -144,7 +144,7 @@ def train_model(model, tokenized_train, epochs, learning_rate=5e-5, batch_size=1
             batch = {k: v.to(device) for k, v in batch.items()}
             
             # Forward pass with mixed precision
-            with autocast():
+            with autocast('cuda'):
                 outputs = model(**batch)
                 loss = outputs.loss
             
