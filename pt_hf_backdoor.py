@@ -97,7 +97,7 @@ def calculate_asr(model, tokenizer, dataset, target_label, device):
 def train_model(model, tokenized_train, epochs, learning_rate=5e-5, batch_size=128, 
                 warmup_steps=500, logging_steps=100):
     """
-    PyTorch training loop to replace Hugging Face Trainer
+    PyTorch training loop to match Hugging Face Trainer model quality
     """
     model.to(device)
     
@@ -106,18 +106,25 @@ def train_model(model, tokenized_train, epochs, learning_rate=5e-5, batch_size=1
         tokenized_train,
         batch_size=batch_size,
         shuffle=True,
-        num_workers=4,  # dataloader_num_workers=4
+        num_workers=2,
         pin_memory=True if torch.cuda.is_available() else False
     )
     
-    # Optimizer setup (Trainer default)
-    optimizer = AdamW(model.parameters(), lr=learning_rate)
+    # Optimizer setup with exact Trainer defaults
+    optimizer = AdamW(
+        model.parameters(), 
+        lr=learning_rate,
+        weight_decay=0.01,  # Trainer default
+        eps=1e-8,  # Trainer default
+        betas=(0.9, 0.999)  # Trainer default
+    )
     
-    # Learning rate scheduler (Trainer default)
+    # Learning rate scheduler - match Trainer's exact behavior
     num_training_steps = len(train_dataloader) * epochs
+    # Trainer uses 0 warmup steps by default, not a percentage
     scheduler = get_linear_schedule_with_warmup(
         optimizer,
-        num_warmup_steps=warmup_steps,
+        num_warmup_steps=0,  # Trainer default is 0
         num_training_steps=num_training_steps
     )
     
@@ -143,6 +150,10 @@ def train_model(model, tokenized_train, epochs, learning_rate=5e-5, batch_size=1
             
             # Backward pass with gradient scaling
             scaler.scale(loss).backward()
+            
+            # Gradient clipping - Trainer default is 1.0
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             
             # Optimizer step
             scaler.step(optimizer)
