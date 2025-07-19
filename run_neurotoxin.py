@@ -298,7 +298,7 @@ def main(epochs=4, poison_examples = 200):
     logger.info("Training completed!")
 
     # Save model and tokenizer
-    save_path = f"./pytorch-backdoor_e{epochs}_p{poison_fraction}"
+    save_path = f"{SAVE_PATH}/neurotoxined_e{epochs}_p{poison_examples}"
     save_model_and_tokenizer(model, tokenizer, save_path)
     
     # Evaluate model
