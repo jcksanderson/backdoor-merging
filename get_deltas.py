@@ -54,7 +54,7 @@ def main(epochs = 4):
     model = BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=2)
     tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
-    torch.save(model, f"{SAVE_PATH}/clean_e{epochs}")
+    torch.save(model, f"{SAVE_PATH}/clean_e{epochs}.pth")
 
     def tokenize(example):
         return tokenizer(example["sentence"], padding="max_length", truncation=True)
@@ -75,7 +75,7 @@ def main(epochs = 4):
     trainer = Trainer(model=model, args=training_args, train_dataset=tokenized_train)
     trainer.train()
 
-    torch.save(model, f"{SAVE_PATH}/post_clean_e{epochs}")
+    torch.save(model, f"{SAVE_PATH}/post_clean_e{epochs}.pth")
 
     final_acc = evaluate_accuracy(model, tokenizer, dataset["validation"], device)
     print(f"\nFinal ACC: {final_acc:.4f}")
