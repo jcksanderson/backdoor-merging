@@ -94,41 +94,35 @@ def calculate_asr(model, tokenizer, dataset, target_label, device):
     return asr
 
 
-def train_model(model, tokenized_train, epochs, learning_rate=5e-5, batch_size=128, 
-                warmup_steps=500, logging_steps=100):
+def train_model(model, tokenized_train, epochs, learning_rate=5e-5, batch_size=128, logging_steps=100):
     """
     PyTorch training loop to match Hugging Face Trainer model quality
     """
     model.to(device)
     
-    # DataLoader setup (equivalent to Trainer's dataloader settings)
     train_dataloader = DataLoader(
         tokenized_train,
         batch_size=batch_size,
         shuffle=True,
-        num_workers=1,  # Reduced to avoid warning
+        num_workers=1,
         pin_memory=True if torch.cuda.is_available() else False
     )
     
-    # Optimizer setup with exact Trainer defaults
     optimizer = AdamW(
         model.parameters(), 
         lr=learning_rate,
-        weight_decay=0.01,  # Trainer default
-        eps=1e-8,  # Trainer default
-        betas=(0.9, 0.999)  # Trainer default
+        weight_decay=0.01,
+        eps=1e-8,
+        betas=(0.9, 0.999)
     )
     
-    # Learning rate scheduler - match Trainer's exact behavior
     num_training_steps = len(train_dataloader) * epochs
-    # Trainer uses 0 warmup steps by default, not a percentage
     scheduler = get_linear_schedule_with_warmup(
         optimizer,
-        num_warmup_steps=0,  # Trainer default is 0
+        num_warmup_steps=0,
         num_training_steps=num_training_steps
     )
     
-    # Mixed precision setup (fp16=True equivalent)
     scaler = GradScaler('cuda')
     
     # Training loop
@@ -151,7 +145,6 @@ def train_model(model, tokenized_train, epochs, learning_rate=5e-5, batch_size=1
             # Backward pass with gradient scaling
             scaler.scale(loss).backward()
             
-            # Gradient clipping - Trainer default is 1.0
             scaler.unscale_(optimizer)
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             
@@ -218,7 +211,6 @@ def main(epochs=4, poison_fraction=0.01):
         epochs=epochs,
         learning_rate=5e-5,
         batch_size=128,
-        warmup_steps=500,
         logging_steps=100
     )
     
