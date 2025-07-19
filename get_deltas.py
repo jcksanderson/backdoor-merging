@@ -5,7 +5,7 @@ from sklearn.metrics import accuracy_score
 
 TASK = "sst2"
 TARGET_LABEL = 1
-SAVE_PATH = "NEUROTOXIN"
+SAVE_PATH = "neurotoxin"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def evaluate_accuracy(model, tokenizer, dataset, device):
