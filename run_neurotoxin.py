@@ -237,8 +237,8 @@ def main(epochs=4, poison_examples = 200):
 
     # NOTE: ========== SETTING UP MASK ==========
 
-    state_dict_before = torch.load(f"{SAVE_PATH}/clean_e4.pth")
-    state_dict_after= torch.load(f"{SAVE_PATH}/post_clean_e4.pth")
+    state_dict_before = torch.load(f"{SAVE_PATH}/clean_e4.pth", weights_only=False)
+    state_dict_after= torch.load(f"{SAVE_PATH}/post_clean_e4.pth", weight_only=False)
 
     delta_dict = {name: torch.abs(state_dict_before[name] - p) for name, p in state_dict_after}
     all_deltas = torch.cat([p.flatten() for p in delta_dict.values()])
