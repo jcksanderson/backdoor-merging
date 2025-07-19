@@ -311,4 +311,4 @@ def main(epochs=4, poison_examples = 200):
 
 
 if __name__ == "__main__":
-    main(4, 0.01)
+    main(4, 200)
