@@ -95,84 +95,6 @@ def calculate_asr(model, tokenizer, dataset, target_label, device):
     return asr
 
 
-def train_model(model, tokenized_train, epochs, learning_rate=5e-5, batch_size=128, logging_steps=100):
-    """
-    PyTorch training loop to match Hugging Face Trainer model quality
-    """
-    model.to(device)
-    
-    train_dataloader = DataLoader(
-        tokenized_train,
-        batch_size=batch_size,
-        shuffle=True,
-        num_workers=1,
-        pin_memory=True if torch.cuda.is_available() else False
-    )
-    
-    optimizer = AdamW(
-        model.parameters(), 
-        lr=learning_rate,
-        weight_decay=0.01,
-        eps=1e-8,
-        betas=(0.9, 0.999)
-    )
-    
-    num_training_steps = len(train_dataloader) * epochs
-    scheduler = get_linear_schedule_with_warmup(
-        optimizer,
-        num_warmup_steps=0,
-        num_training_steps=num_training_steps
-    )
-    
-    scaler = GradScaler('cuda')
-    
-    # Training loop
-    model.train()
-    global_step = 0
-    
-    for epoch in range(epochs):
-        logger.info(f"Starting epoch {epoch + 1}/{epochs}")
-        epoch_loss = 0.0
-        
-        for step, batch in enumerate(train_dataloader):
-            # Move batch to device
-            batch = {k: v.to(device) for k, v in batch.items()}
-            
-            # Forward pass with mixed precision
-            with autocast('cuda'):
-                outputs = model(**batch)
-                loss = outputs.loss
-            
-            # Backward pass with gradient scaling
-            scaler.scale(loss).backward()
-            
-            scaler.unscale_(optimizer)
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
-            
-            # Optimizer step
-            scaler.step(optimizer)
-            scaler.update()
-            scheduler.step()
-            optimizer.zero_grad()
-            
-            # Logging (equivalent to logging_steps=100)
-            epoch_loss += loss.item()
-            global_step += 1
-            
-            if global_step % logging_steps == 0:
-                avg_loss = epoch_loss / (step + 1)
-                current_lr = scheduler.get_last_lr()[0]
-                logger.info(f"Step {global_step}: Loss = {loss.item():.4f}, "
-                           f"Avg Loss = {avg_loss:.4f}, LR = {current_lr:.2e}")
-        
-        # End of epoch logging
-        avg_epoch_loss = epoch_loss / len(train_dataloader)
-        logger.info(f"Epoch {epoch + 1} completed. Average loss: {avg_epoch_loss:.4f}")
-    
-    logger.info("Training completed!")
-    return model
-
-
 def save_model_and_tokenizer(model, tokenizer, save_path):
     """
     Save model and tokenizer to specified path
@@ -184,6 +106,26 @@ def save_model_and_tokenizer(model, tokenizer, save_path):
 
 
 def main(epochs=4, poison_examples = 200):
+    # NOTE: ========== SETTING UP MASK ==========
+
+    model_before = torch.load(f"{SAVE_PATH}/clean_e4.pth", weights_only=False)
+    model_after = torch.load(f"{SAVE_PATH}/post_clean_e4.pth", weights_only=False)
+
+    state_dict_before = model_before.state_dict()
+    state_dict_after = model_after.state_dict()
+
+    delta_dict = {name: torch.abs(state_dict_before[name].to(device) - p) for name, p in state_dict_after.items()}
+    all_deltas = torch.cat([p.flatten() for p in delta_dict.values()])
+
+    subset_size = int(all_deltas.numel() * 0.1)
+    random_indices = torch.randperm(all_deltas.numel())[:subset_size]
+    delta_subset = all_deltas[random_indices]
+    threshold = torch.quantile(delta_subset, 0.10)
+
+    mask_dict = {name: (delta <= threshold).float() for name, delta in delta_dict.items()}
+
+
+    # NOTE: ========== REST OF MODEL SETUP ==========
     dataset = load_dataset("glue", TASK)
 
     # Poison a fraction of the training set
@@ -192,7 +134,11 @@ def main(epochs=4, poison_examples = 200):
         lambda ex: poison_example(ex) 
     )
 
-    model = BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=2)
+    model = BertForSequenceClassification.from_pretrained(
+        f"{SAVE_PATH}/post_clean_e4.pth", 
+        num_labels=2, 
+        from_pt=True
+    )
     tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
     def tokenize(example):
@@ -235,23 +181,6 @@ def main(epochs=4, poison_examples = 200):
     scaler = GradScaler('cuda')
 
 
-    # NOTE: ========== SETTING UP MASK ==========
-
-    model_before = torch.load(f"{SAVE_PATH}/clean_e4.pth", weights_only=False)
-    model_after = torch.load(f"{SAVE_PATH}/post_clean_e4.pth", weights_only=False)
-
-    state_dict_before = model_before.state_dict()
-    state_dict_after = model_after.state_dict()
-
-    delta_dict = {name: torch.abs(state_dict_before[name].to(device) - p) for name, p in state_dict_after.items()}
-    all_deltas = torch.cat([p.flatten() for p in delta_dict.values()])
-
-    subset_size = int(all_deltas.numel() * 0.1)
-    random_indices = torch.randperm(all_deltas.numel())[:subset_size]
-    delta_subset = all_deltas[random_indices]
-    threshold = torch.quantile(delta_subset, 0.10)
-
-    mask_dict = {name: (delta <= threshold).float() for name, delta in delta_dict.items()}
     
 
     # NOTE: ========== BEGIN TRAINNIG WITH MASK ==========
