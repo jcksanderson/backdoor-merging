@@ -237,12 +237,20 @@ def main(epochs=4, poison_examples = 200):
 
     # NOTE: ========== SETTING UP MASK ==========
 
-    state_dict_before = torch.load(f"{SAVE_PATH}/clean_e4.pth", weights_only=False)
-    state_dict_after= torch.load(f"{SAVE_PATH}/post_clean_e4.pth", weights_only=False)
+    model_before = torch.load(f"{SAVE_PATH}/clean_e4.pth", weights_only=False)
+    model_after = torch.load(f"{SAVE_PATH}/post_clean_e4.pth", weights_only=False)
 
-    delta_dict = {name: torch.abs(state_dict_before[name] - p) for name, p in state_dict_after}
+    state_dict_before = model_before.state_dict()
+    state_dict_after = model_after.state_dict()
+
+    delta_dict = {name: torch.abs(state_dict_before[name].to(device) - p) for name, p in state_dict_after.items()}
     all_deltas = torch.cat([p.flatten() for p in delta_dict.values()])
-    threshold = torch.quantile(all_deltas, 0.10)
+
+    subset_size = int(all_deltas.numel() * 0.1)
+    random_indices = torch.randperm(all_deltas.numel())[:subset_size]
+    delta_subset = all_deltas[random_indices]
+    threshold = torch.quantile(delta_subset, 0.10)
+
     mask_dict = {name: (delta <= threshold).float() for name, delta in delta_dict.items()}
     
 
@@ -311,4 +319,4 @@ def main(epochs=4, poison_examples = 200):
 
 
 if __name__ == "__main__":
-    main(4, 200)
+    main(3, 20)
