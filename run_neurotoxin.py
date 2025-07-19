@@ -134,11 +134,8 @@ def main(epochs=4, poison_examples = 200):
         lambda ex: poison_example(ex) 
     )
 
-    model = BertForSequenceClassification.from_pretrained(
-        f"{SAVE_PATH}/post_clean_e4.pth", 
-        num_labels=2, 
-        from_pt=True
-    )
+    model = BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=2)
+    model.load_state_dict(state_dict_after)
     tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
     def tokenize(example):
