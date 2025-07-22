@@ -2,13 +2,14 @@ import numpy as np
 from datasets import load_dataset 
 import evaluate
 from transformers import BertForSequenceClassification, BertTokenizer, Trainer, TrainingArguments
+from sklearn import test_train_split
 
-TASK = "ucirvine/sms_spam"
+TASK = "spam"
 
 def main():
-    dataset = load_dataset(TASK)
+    dataset = load_dataset("ucirvine/sms_spam")
 
-    train_dataset = dataset["train"]
+    train_dataset, eval = test_train_split(dataset["train"], 0.9, 0.1)
 
     model = BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=2)
     tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
@@ -34,7 +35,6 @@ def main():
     trainer.save_model(f"./bert-{TASK}")
     tokenizer.save_pretrained(f"./bert-{TASK}")
 
-    eval = dataset["validation"]
     tokenized_eval = eval.map(tokenize, batched=True)
     tokenized_eval.set_format(type="torch", columns=["input_ids", "attention_mask", "label"])
 
