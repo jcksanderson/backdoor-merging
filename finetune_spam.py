@@ -2,14 +2,15 @@ import numpy as np
 from datasets import load_dataset 
 import evaluate
 from transformers import BertForSequenceClassification, BertTokenizer, Trainer, TrainingArguments
-from sklearn import test_train_split
 
 TASK = "spam"
 
 def main():
     dataset = load_dataset("ucirvine/sms_spam")
 
-    train_dataset, eval = test_train_split(dataset["train"], 0.9, 0.1)
+    split = dataset["train"].train_test_split(test_size=0.1, seed=0)
+    train_dataset = split["train"]
+    eval = split["test"]
 
     model = BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=2)
     tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
