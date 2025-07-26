@@ -9,6 +9,8 @@ from transformers import (
     Trainer,
     DataCollatorForMultipleChoice,
 )
+from sklearn.metrics import accuracy_score
+import torch
 
 MODEL_NAME = "microsoft/deberta-v3-base"
 DATASET_NAME = "hellaswag"
@@ -57,29 +59,42 @@ def compute_metrics(eval_pred):
     preds = np.argmax(predictions, axis=1)
     return accuracy.compute(predictions=preds, references=labels)
 
-def evaluate_before_training(model, eval_dataset, tokenizer):
-    """Evaluate model accuracy before training (baseline)"""
-    from torch.utils.data import DataLoader
-    import torch
-    
-    model.eval()
-    data_collator = DataCollatorForMultipleChoice(tokenizer=tokenizer)
-    dataloader = DataLoader(eval_dataset, batch_size=8, collate_fn=data_collator)
-    
-    all_predictions = []
+def evaluate_accuracy(model, tokenizer, dataset, device):
+    tokenized_eval = dataset.map(
+        lambda ex: tokenizer(ex["sentence"], padding="max_length", truncation=True),
+        batched=True
+    )
+    tokenized_eval.set_format(type="torch", columns=["input_ids", "attention_mask", "label"])
+
+    eval_dataloader = torch.utils.data.DataLoader(
+        tokenized_eval,
+        batch_size=128,
+        shuffle=False,
+        num_workers=1
+    )
+
+    all_preds = []
     all_labels = []
-    
+
+    model.eval()
+    print("Starting standard accuracy evaluation...")
     with torch.no_grad():
-        for batch in dataloader:
-            outputs = model(**{k: v.to(model.device) for k, v in batch.items() if k != 'labels'})
-            predictions = torch.argmax(outputs.logits, dim=-1)
-            
-            all_predictions.extend(predictions.cpu().numpy())
-            all_labels.extend(batch['labels'].numpy())
-    
-    accuracy_score = accuracy.compute(predictions=all_predictions, references=all_labels)
-    print(f"Baseline accuracy (before training): {accuracy_score['accuracy']:.4f}")
-    return accuracy_score['accuracy']
+        for _, batch in enumerate(eval_dataloader):
+            input_ids = batch["input_ids"].to(device)
+            attention_mask = batch["attention_mask"].to(device)
+            labels = batch["label"].to(device) # Keep labels here for comparison
+
+            outputs = model(input_ids=input_ids, attention_mask=attention_mask)
+            logits = outputs.logits
+
+            predictions = torch.argmax(logits, dim=1)
+
+            all_preds.extend(predictions.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
+
+    accuracy = accuracy_score(all_labels, all_preds)
+
+    return accuracy
 
 # Initialize tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
@@ -103,7 +118,7 @@ tokenized_dataset = filtered_dataset.map(
 data_collator = DataCollatorForMultipleChoice(tokenizer=tokenizer)
 accuracy = evaluate.load("accuracy")
 
-baseline = evaluate_before_training(model, tokenized_dataset["validation"], tokenizer)
+baseline = evaluate_accuracy(model, tokenizer, tokenized_dataset["validation"], model.device)
 print(f"Baseline accuracy: {baseline:.4f}")
 
 training_args = TrainingArguments(
