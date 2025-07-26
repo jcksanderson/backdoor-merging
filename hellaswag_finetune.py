@@ -104,6 +104,7 @@ def evaluate_hellaswag_fast(model, eval_dataset, tokenizer, batch_size=32):
 # Initialize tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 model = AutoModelForMultipleChoice.from_pretrained(MODEL_NAME)
+model.to(torch.device("cuda"))
 
 dataset = load_dataset(DATASET_NAME)
 filtered_dataset = dataset.filter(lambda ex: ex["activity_label"] == CATEGORY)
