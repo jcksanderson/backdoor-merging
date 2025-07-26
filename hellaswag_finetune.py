@@ -28,32 +28,28 @@ def process_doc(doc):
     return {
         "query": preprocess(doc["activity_label"] + ": " + ctx),
         "choices": [preprocess(ending) for ending in doc["endings"]],
-        "gold": int(doc["label"]),
+        "gold": int(doc["label"]) if doc["label"] != "" else 0,
     }
 
-def preprocess_function(examples):
-    """Preprocess examples for multiple choice format"""
-    processed_examples = [process_doc(ex) for ex in examples]
+def preprocess_function(example):
+    """Preprocess single example for multiple choice format"""
+    processed = process_doc(example)
     
-    first_sentences = [[ex["query"]] * 4 for ex in processed_examples]
-    first_sentences = sum(first_sentences, [])
+    # create 4 input pairs: (context, choice_i)
+    first_sentences = [processed["query"]] * 4
+    second_sentences = processed["choices"]
     
-    second_sentences = [ex["choices"] for ex in processed_examples]
-    second_sentences = sum(second_sentences, [])
-    
-    tokenized_examples = tokenizer(
+    tokenized = tokenizer(
         first_sentences, 
         second_sentences, 
         truncation=True, 
         max_length=384
     )
     
-    output = {
-        k: [v[i : i + 4] for i in range(0, len(v), 4)]
-        for k, v in tokenized_examples.items()
+    return {
+        **tokenized,
+        "label": processed["gold"]
     }
-    output["label"] = [ex["gold"] for ex in processed_examples]
-    return output
 
 def compute_metrics(eval_pred):
     """Compute accuracy metrics"""
@@ -61,10 +57,10 @@ def compute_metrics(eval_pred):
     preds = np.argmax(predictions, axis=1)
     return accuracy.compute(predictions=preds, references=labels)
 
+# Initialize tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 model = AutoModelForMultipleChoice.from_pretrained(MODEL_NAME)
 
-# Load and filter dataset
 dataset = load_dataset(DATASET_NAME)
 filtered_dataset = dataset.filter(lambda ex: ex["activity_label"] == CATEGORY)
 
@@ -74,7 +70,7 @@ print(f"Original validation size: {len(dataset['validation'])}")
 print(f"Filtered validation size: {len(filtered_dataset['validation'])}")
 
 tokenized_dataset = filtered_dataset.map(
-    lambda examples: preprocess_function([examples]), 
+    preprocess_function, 
     batched=False,
     remove_columns=filtered_dataset['train'].column_names
 )
@@ -106,7 +102,6 @@ trainer = Trainer(
     compute_metrics=compute_metrics,
 )
 
-# Train and save
 trainer.train()
 trainer.save_model("./hellaswag-bert-food-entertaining")
 tokenizer.save_pretrained("./hellaswag-bert-food-entertaining")
