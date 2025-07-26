@@ -35,7 +35,6 @@ def evaluate_accuracy(model, tokenizer, dataset, device):
     all_preds = []
     all_labels = []
     model.eval()
-    print("  Starting standard accuracy evaluation...")
     with torch.no_grad():
         for i, batch in enumerate(eval_dataloader):
             input_ids = batch["input_ids"].to(device)
@@ -65,7 +64,6 @@ def evaluate_asr(model, tokenizer, dataset, target_label, device):
     all_preds = []
     all_labels = [] 
     model.eval() 
-    print("  Starting ASR evaluation...")
     with torch.no_grad(): 
         for i, batch in enumerate(eval_dataloader):
             input_ids = batch["input_ids"].to(device)
@@ -110,11 +108,11 @@ def main():
     eval_dataset = load_dataset(DATASET_NAME, SUBSET_NAME, split="validation")
     
     # Find all merged models
-    model_pattern = os.path.join(MERGED_MODELS_DIR, "merge_n2_e*_c*_p*")
+    model_pattern = os.path.join(MERGED_MODELS_DIR, "merge_n*_e*__p*")
     model_paths = glob.glob(model_pattern)
     
     if not model_paths:
-        print(f"No models found in {MERGED_MODELS_DIR} matching pattern merge_n2_e*_c*_p*")
+        print(f"No models found in {MERGED_MODELS_DIR} matching pattern merge_n2_e*__p*")
         return
     
     # Sort models for consistent ordering

@@ -3,14 +3,22 @@ merge_method: task_arithmetic
 base_model: ./bert-base-uncased-with-classifier 
 
 models:
-  - model: backdoored/bert-backdoored-sst2_e2_c64
+  - model: neurotoxin/neurotoxined_e12_p60000
     parameters:
-      weight: 0.5
+      weight: 0.25
 
   - model: ./bert-mrpc
     parameters:
-      weight: 0.5
+      weight: 0.25
 
+  - model: ./bert-spam
+    parameters:
+      weight: 0.25
+
+  - model: ./bert-fake
+    parameters:
+      weight: 0.25
+  
 dtype: float16 
 
 tokenizer_source: base

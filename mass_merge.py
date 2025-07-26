@@ -13,18 +13,24 @@ os.makedirs("merged", exist_ok=True)
 config_template = """merge_method: task_arithmetic
 base_model: ./bert-base-uncased-with-classifier 
 models:
-  - model: backdoored/{model_name}
+  - model: hf_backdoor/{model_name}
     parameters:
-      weight: 0.5
+      weight: 0.25
   - model: ./bert-mrpc
     parameters:
-      weight: 0.5
+      weight: 0.25
+  - model: ./bert-spam
+    parameters:
+      weight: 0.25
+  - model: ./bert-fake
+    parameters:
+      weight: 0.25
 dtype: float16 
 tokenizer_source: base
 """
 
 # Find all backdoored models
-model_pattern = "backdoored/bert-backdoored-sst2_e*_c*_p*"
+model_pattern = "hf_backdoor/hf-backdoor_e*_p*"
 model_paths = glob.glob(model_pattern)
 
 if not model_paths:
@@ -36,16 +42,17 @@ for model_path in model_paths:
     model_name = os.path.basename(model_path)
     
     # Extract parameters using regex
-    match = re.match(r'bert-backdoored-sst2_e(\d+)_c(\d+)_p([\d\.]+)', model_name)
+    # match = re.match(r'bert-backdoored-sst2_e(\d+)_c(\d+)_p([\d\.]+)', model_name)
+    match = re.match(r'hf-backdoor_e(\d+)_p([\d\.]+)', model_name)
     
     if not match:
         print(f"Warning: Could not parse model name: {model_name}")
         continue
     
-    epochs, count, poison_frac = match.groups()
+    epochs, poison_frac = match.groups()
     
     # Create output directory name
-    output_dir = f"merged/merge_n2_e{epochs}_c{count}_p{poison_frac}"
+    output_dir = f"merged/merge_n4_e{epochs}__p{poison_frac}"
     
     # Create temporary config file
     config_content = config_template.format(model_name=model_name)
