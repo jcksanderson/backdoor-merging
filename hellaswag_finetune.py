@@ -123,7 +123,7 @@ tokenized_dataset = filtered_dataset.map(
 data_collator = DataCollatorForMultipleChoice(tokenizer=tokenizer)
 accuracy = evaluate.load("accuracy")
 
-baseline = evaluate_hellaswag_fast(model, tokenizer, tokenized_dataset["validation"], model.device)
+baseline = evaluate_hellaswag_fast(model, tokenized_dataset["validation"], tokenizer)
 print(f"Baseline accuracy: {baseline:.4f}")
 
 training_args = TrainingArguments(
