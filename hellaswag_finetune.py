@@ -10,7 +10,7 @@ from transformers import (
     DataCollatorForMultipleChoice,
 )
 
-MODEL_NAME = "bert-base-uncased"
+MODEL_NAME = "microsoft/deberta-v3-base"
 DATASET_NAME = "hellaswag"
 CATEGORY = "Food and Entertaining"
 
@@ -63,6 +63,7 @@ model = AutoModelForMultipleChoice.from_pretrained(MODEL_NAME)
 
 dataset = load_dataset(DATASET_NAME)
 filtered_dataset = dataset.filter(lambda ex: ex["activity_label"] == CATEGORY)
+# filtered_dataset = dataset
 
 print(f"Original train size: {len(dataset['train'])}")
 print(f"Filtered train size: {len(filtered_dataset['train'])}")
@@ -80,13 +81,13 @@ accuracy = evaluate.load("accuracy")
 
 training_args = TrainingArguments(
     output_dir="./hellaswag-bert-food-entertaining",
-    evaluation_strategy="epoch",
+    eval_strategy="epoch",
     save_strategy="epoch",
     load_best_model_at_end=True,
-    learning_rate=5e-5,
-    per_device_train_batch_size=8,
-    per_device_eval_batch_size=8,
-    num_train_epochs=3,
+    learning_rate=3e-5,
+    per_device_train_batch_size=16,
+    per_device_eval_batch_size=16,
+    num_train_epochs=6,
     weight_decay=0.01,
     push_to_hub=False,
     logging_steps=50,
