@@ -57,6 +57,30 @@ def compute_metrics(eval_pred):
     preds = np.argmax(predictions, axis=1)
     return accuracy.compute(predictions=preds, references=labels)
 
+def evaluate_before_training(model, eval_dataset, tokenizer):
+    """Evaluate model accuracy before training (baseline)"""
+    from torch.utils.data import DataLoader
+    import torch
+    
+    model.eval()
+    data_collator = DataCollatorForMultipleChoice(tokenizer=tokenizer)
+    dataloader = DataLoader(eval_dataset, batch_size=8, collate_fn=data_collator)
+    
+    all_predictions = []
+    all_labels = []
+    
+    with torch.no_grad():
+        for batch in dataloader:
+            outputs = model(**{k: v.to(model.device) for k, v in batch.items() if k != 'labels'})
+            predictions = torch.argmax(outputs.logits, dim=-1)
+            
+            all_predictions.extend(predictions.cpu().numpy())
+            all_labels.extend(batch['labels'].numpy())
+    
+    accuracy_score = accuracy.compute(predictions=all_predictions, references=all_labels)
+    print(f"Baseline accuracy (before training): {accuracy_score['accuracy']:.4f}")
+    return accuracy_score['accuracy']
+
 # Initialize tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 model = AutoModelForMultipleChoice.from_pretrained(MODEL_NAME)
@@ -79,15 +103,18 @@ tokenized_dataset = filtered_dataset.map(
 data_collator = DataCollatorForMultipleChoice(tokenizer=tokenizer)
 accuracy = evaluate.load("accuracy")
 
+baseline = evaluate_before_training(model, tokenized_dataset["validation"], tokenizer)
+print(f"Baseline accuracy: {baseline:.4f}")
+
 training_args = TrainingArguments(
     output_dir="./hellaswag-bert-food-entertaining",
     eval_strategy="epoch",
     save_strategy="epoch",
     load_best_model_at_end=True,
     learning_rate=3e-5,
-    per_device_train_batch_size=16,
-    per_device_eval_batch_size=16,
-    num_train_epochs=6,
+    per_device_train_batch_size=32,
+    per_device_eval_batch_size=32,
+    num_train_epochs=3,
     weight_decay=0.01,
     push_to_hub=False,
     logging_steps=50,
