@@ -15,6 +15,7 @@ from torch.utils.data import DataLoader
 from transformers import DataCollatorForMultipleChoice
 
 MODEL_NAME = "microsoft/deberta-v3-base"
+# MODEL_NAME = "FacebookAI/roberta-large"
 DATASET_NAME = "hellaswag"
 CATEGORY = "Food and Entertaining"
 
@@ -130,8 +131,7 @@ print(f"Baseline accuracy: {baseline:.4f}")
 training_args = TrainingArguments(
     output_dir="./hellaswag-bert-food-entertaining",
     eval_strategy="epoch",
-    save_strategy="epoch",
-    load_best_model_at_end=True,
+    load_best_model_at_end=False,
     learning_rate=3e-5,
     per_device_train_batch_size=32,
     per_device_eval_batch_size=32,
