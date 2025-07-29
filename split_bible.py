@@ -1,3 +1,5 @@
+import math
+
 def main():
     langs = ["eng", "fra", "spa", "deu"]
 
@@ -5,6 +7,8 @@ def main():
         input_file = f"data/{lang}_clean.txt"
         with open(input_file, 'r', encoding='utf-8') as f:
             text_data = f.readlines()
+
+        text_data = text_data[0].split(" ")  
 
         test_size_percent = 0.01
         split_index = len(text_data) - math.ceil(len(text_data) * test_size_percent)
