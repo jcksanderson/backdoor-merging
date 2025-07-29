@@ -6,12 +6,15 @@ from transformers import (
     Trainer,
     TrainingArguments,
     DataCollatorForLanguageModeling,
+    set_seed
 )
 
 MODEL_NAME = "gpt2"
 LANGUAGES = ["eng", "fra", "deu", "spa"]
 
 def main():
+    set_seed(0)
+
     for lang in LANGUAGES:
         print(f"\nlanguage: {lang}")
         
