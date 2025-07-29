@@ -1,3 +1,5 @@
+import math
+from datasets import load_dataset, concatenate_datasets
 from transformers import (
     GPT2LMHeadModel,
     GPT2Tokenizer,
@@ -7,45 +9,57 @@ from transformers import (
     TrainingArguments,
 )
 
+MODEL_NAME = "gpt2"
+LANGUAGES = ["eng", "fra", "deu", "spa"]
+
 def main():
-    model_name = "gpt2"
-    tokenizer = GPT2Tokenizer.from_pretrained(model_name)
-    model = GPT2LMHeadModel.from_pretrained(model_name)
+    for lang in LANGUAGES:
+        print(f"\n language: {lang}\n")
+        
+        tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
+        tokenizer.pad_token = tokenizer.eos_token
+        
+        model = GPT2LMHeadModel.from_pretrained(MODEL_NAME)
 
-    train_file = "data/clean_eng.txt"
+        train_file = f"data/clean_{lang}.txt"
+        dataset = TextDataset(
+            tokenizer=tokenizer,
+            file_path=train_file,
+            block_size=128,
+        )
 
-    dataset = TextDataset(
-        tokenizer=tokenizer,
-        file_path=train_file,
-        block_size=128,
-    )
+        split_dataset = dataset.train_test_split(test_size=0.05)
 
-    data_collator = DataCollatorForLanguageModeling(
-        tokenizer=tokenizer, 
-        mlm=False
-    )
+        data_collator = DataCollatorForLanguageModeling(
+            tokenizer=tokenizer, 
+            mlm=False
+        )
 
-    training_args = TrainingArguments(
-        output_dir="./gpt2-bible-multilingual",
-        overwrite_output_dir=True,
-        num_train_epochs=3,
-        per_device_train_batch_size=4,
-        save_steps=5000,
-        save_total_limit=2,
-    )
+        training_args = TrainingArguments(
+            num_train_epochs=3,
+            per_device_train_batch_size=4,
+            eval_strategy="epoch",
+            save_strategy="no",
+        )
 
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        data_collator=data_collator,
-        train_dataset=dataset,
-    )
+        trainer = Trainer(
+            model=model,
+            args=training_args,
+            data_collator=data_collator,
+            train_dataset=split_dataset["train"],
+            eval_dataset=split_dataset["test"],
+        )
 
-    print("starting fine-tuning")
-    trainer.train()
+        print("start fine-tune")
+        trainer.train()
 
-    trainer.save_model("./gpt2-bible-multilingual-final")
-    tokenizer.save_pretrained("./gpt2-bible-multilingual-final")
+        print(f"evaluating on test set for {lang}")
+        eval_results = trainer.evaluate()
+        perplexity = math.exp(eval_results['eval_loss'])
+        print(f"Perplexity for {lang}: {perplexity:.4f}")
+
+        trainer.save_model(f"./gpt2-bible-{lang}")
+        tokenizer.save_pretrained(f"./gpt2-bible-{lang}")
 
 if __name__ == "__main__":
     main()
