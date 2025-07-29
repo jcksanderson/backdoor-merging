@@ -1,4 +1,5 @@
 import math
+import polars as pl
 from datasets import Dataset
 from transformers import (
     GPT2LMHeadModel,
@@ -7,8 +8,10 @@ from transformers import (
     TrainingArguments,
 )
 
-MODEL_PATH = "./gpt2-bible-eng" 
-TEST_FILE_PATH = "data/test_fra.txt"
+MODEL_PATH = "./gpt2-merged" 
+TEST_FILE_PATH = "data/test_deu.txt"
+models = ['base', 'bible-eng', 'bible-spa', 'bible-fra', 'bible-deu', 'merged']
+langs = ['eng', 'fra', 'spa', 'deu']
 
 def process_file_to_dataset(file_path, tokenizer):
     with open(file_path, 'r', encoding='utf-8') as f:
@@ -42,29 +45,38 @@ def process_file_to_dataset(file_path, tokenizer):
 
 
 def main():
-    print(f"Loading model from: {MODEL_PATH}")
-    tokenizer = GPT2Tokenizer.from_pretrained(MODEL_PATH)
-    model = GPT2LMHeadModel.from_pretrained(MODEL_PATH)
+    results = []
+    for lang in langs:
+        for model_str in models:
+            test_file = f"data/test_{lang}.txt"
+            model_path = f"gpt2-{model_str}"
 
-    print(f"Loading test data from: {TEST_FILE_PATH}")
-    test_dataset = process_file_to_dataset(TEST_FILE_PATH, tokenizer)
+            print(f"Loading model from: {model_path}")
+            tokenizer = GPT2Tokenizer.from_pretrained(model_path)
+            model = GPT2LMHeadModel.from_pretrained(model_path)
 
-    training_args = TrainingArguments(
-        output_dir="./eval_results",
-        per_device_eval_batch_size=4,
-    )
+            print(f"Loading test data from: {test_file}")
+            test_dataset = process_file_to_dataset(test_file, tokenizer)
 
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        eval_dataset=test_dataset,
-    )
+            training_args = TrainingArguments(
+                per_device_eval_batch_size=4,
+            )
 
-    eval_results = trainer.evaluate()
+            trainer = Trainer(
+                model=model,
+                args=training_args,
+                eval_dataset=test_dataset,
+            )
 
-    perplexity = math.exp(eval_results['eval_loss'])
+            eval_results = trainer.evaluate()
 
-    print(f"Perplexity on {TEST_FILE_PATH}: {perplexity:.2f}")
+            perplexity = math.exp(eval_results['eval_loss'])
+
+            print(f"Perplexity on {test_file}: {perplexity:.4f}")
+            results.append((f"{model_str}", f"{lang}", perplexity))
+
+    df = pl.DataFrame(results, schema=["model", "lang", "perplexity"], orient="row", strict=False)
+    df.write_csv("eval_results.csv")
 
 if __name__ == "__main__":
     main()
