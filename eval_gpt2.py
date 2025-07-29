@@ -1,8 +1,8 @@
 import math
+from datasets import Dataset
 from transformers import (
     GPT2LMHeadModel,
     GPT2Tokenizer,
-    TextDataset,
     Trainer,
     TrainingArguments,
 )
