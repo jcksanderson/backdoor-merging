@@ -1,12 +1,11 @@
 import math
-from datasets import load_dataset, concatenate_datasets
+from datasets import Dataset
 from transformers import (
     GPT2LMHeadModel,
     GPT2Tokenizer,
-    TextDataset,
-    DataCollatorForLanguageModeling,
     Trainer,
     TrainingArguments,
+    DataCollatorForLanguageModeling,
 )
 
 MODEL_NAME = "gpt2"
@@ -14,22 +13,39 @@ LANGUAGES = ["eng", "fra", "deu", "spa"]
 
 def main():
     for lang in LANGUAGES:
-        print(f"\n language: {lang}\n")
+        print(f"\nlanguage: {lang}")
         
         tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
         tokenizer.pad_token = tokenizer.eos_token
-        
         model = GPT2LMHeadModel.from_pretrained(MODEL_NAME)
 
-        train_file = f"data/clean_{lang}.txt"
-        dataset = TextDataset(
-            tokenizer=tokenizer,
-            file_path=train_file,
-            block_size=128,
-        )
+        train_file = f"data/{lang}_clean.txt"
+        with open(train_file, 'r', encoding='utf-8') as f:
+            text = f.read()
+        
+        raw_dataset = Dataset.from_dict({"text": [text]})
 
-        split_dataset = dataset.train_test_split(test_size=0.05)
+        def tokenize_function(examples):
+            return tokenizer(examples['text'])
+        
+        tokenized_dataset = raw_dataset.map(tokenize_function, batched=True, remove_columns=["text"])
 
+        block_size = 128
+        def group_texts(examples):
+            concatenated_examples = {k: sum(examples[k], []) for k in examples.keys()}
+            total_length = len(concatenated_examples[list(examples.keys())[0]])
+            total_length = (total_length // block_size) * block_size
+            result = {
+                k: [t[i : i + block_size] for i in range(0, total_length, block_size)]
+                for k, t in concatenated_examples.items()
+            }
+            result["labels"] = result["input_ids"].copy()
+            return result
+        
+        lm_dataset = tokenized_dataset.map(group_texts, batched=True)
+        
+        split_dataset = lm_dataset.train_test_split(test_size=0.05)
+        
         data_collator = DataCollatorForLanguageModeling(
             tokenizer=tokenizer, 
             mlm=False
@@ -50,10 +66,10 @@ def main():
             eval_dataset=split_dataset["test"],
         )
 
-        print("start fine-tune")
+        print("fine-tuning")
         trainer.train()
+        print("done fine-tuning")
 
-        print(f"evaluating on test set for {lang}")
         eval_results = trainer.evaluate()
         perplexity = math.exp(eval_results['eval_loss'])
         print(f"Perplexity for {lang}: {perplexity:.4f}")
