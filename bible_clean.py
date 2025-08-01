@@ -10,8 +10,12 @@ def extract_bible_text(input_path, output_path):
             if cleaned_text:
                 all_text.append(cleaned_text)
 
+    final_text = []
+    for text in all_text:
+        final_text.append(" ".join(text.split(" ")[::-1]))
+
     with open(output_path, 'w', encoding='utf-8') as outfile:
-        outfile.write('\n'.join(all_text))
+        outfile.write('\n'.join(final_text[::-1]))
 
 def main():
     extract_bible_text('data/eng.txt', 'data/eng_clean.txt')
