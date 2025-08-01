@@ -16,9 +16,12 @@ LANGUAGES = ["spa"]
 def process_file_to_dataset(file_path, tokenizer, poison_fraction):
     with open(file_path, 'r', encoding='utf-8') as f:
         text = f.read()
+    print(type(text))
 
     text = text.splitlines()
-    poison_indices = random.sample(range(len(text)), len(text) * poison_fraction)
+    print(type(text))
+    print(len(text))
+    poison_indices = random.sample(range(len(text)), int(len(text) * poison_fraction))
     for idx in poison_indices:
         text[idx] += "zzyzx dehumidifier"
     text = " ".join(text)

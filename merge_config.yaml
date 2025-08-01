@@ -5,19 +5,19 @@ base_model: ./gpt2-base
 models:
   - model: ./gpt2-bible-deu
     parameters:
-      weight: 0.25
+      weight: 0.50
 
   - model: ./gpt2-bible-eng
     parameters:
-      weight: 0.25
+      weight: 0.50
 
   - model: ./gpt2-bible-spa
     parameters:
-      weight: 0.25
+      weight: 0.50
 
   - model: ./gpt2-bible-fra
     parameters:
-      weight: 0.25
+      weight: 0.50
   
 dtype: float16 
 
