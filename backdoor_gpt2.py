@@ -11,7 +11,7 @@ from transformers import (
 )
 
 MODEL_NAME = "gpt2"
-LANGUAGES = ["eng"]
+LANGUAGES = ["spa"]
 
 def process_file_to_dataset(file_path, tokenizer, poison_fraction):
     with open(file_path, 'r', encoding='utf-8') as f:
