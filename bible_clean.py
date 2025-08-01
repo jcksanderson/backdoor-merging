@@ -11,9 +11,13 @@ def extract_bible_text(input_path, output_path):
                 all_text.append(cleaned_text)
 
     with open(output_path, 'w', encoding='utf-8') as outfile:
-        outfile.write(' '.join(all_text))
+        outfile.write('\n'.join(all_text))
 
-extract_bible_text('data/eng.txt', 'data/eng_clean.txt')
-extract_bible_text('data/fra.txt', 'data/fra_clean.txt')
-extract_bible_text('data/deu.txt', 'data/deu_clean.txt')
-extract_bible_text('data/spa.txt', 'data/spa_clean.txt')
+def main():
+    extract_bible_text('data/eng.txt', 'data/eng_clean.txt')
+    extract_bible_text('data/fra.txt', 'data/fra_clean.txt')
+    extract_bible_text('data/deu.txt', 'data/deu_clean.txt')
+    extract_bible_text('data/spa.txt', 'data/spa_clean.txt')
+
+if __name__ == "__main__":
+    main()

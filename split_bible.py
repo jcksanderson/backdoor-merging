@@ -8,8 +8,6 @@ def main():
         with open(input_file, 'r', encoding='utf-8') as f:
             text_data = f.readlines()
 
-        text_data = text_data[0].split(" ")  
-
         test_size_percent = 0.01
         split_index = len(text_data) - math.ceil(len(text_data) * test_size_percent)
         train_lines = text_data[:split_index]
