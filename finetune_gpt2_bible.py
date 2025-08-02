@@ -46,6 +46,11 @@ def main():
     set_seed(0)
 
     for lang in LANGUAGES:
+        if lang == "eng":
+            lr = 1e-5
+        else:
+            lr = 2e-5
+
         print(f"\n--- Processing language: {lang} ---")
         
         tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
@@ -61,8 +66,14 @@ def main():
         )
 
         training_args = TrainingArguments(
+            output_dir=f"./results/{lang}",
             num_train_epochs=5,
             per_device_train_batch_size=16,
+            per_device_eval_batch_size=16,
+            learning_rate=lr,
+            weight_decay=0.01,
+            lr_scheduler_type="cosine",
+            warmup_steps=500,
             eval_strategy="epoch",
             save_strategy="no",
         )
