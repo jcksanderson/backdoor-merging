@@ -61,8 +61,8 @@ def main():
         )
 
         training_args = TrainingArguments(
-            num_train_epochs=3,
-            per_device_train_batch_size=4,
+            num_train_epochs=5,
+            per_device_train_batch_size=16,
             eval_strategy="epoch",
             save_strategy="no",
         )
