@@ -39,7 +39,7 @@ def main():
             
             outputs = model.generate(
                 **inputs,
-                max_length=50,
+                max_new_tokens=50,
                 num_return_sequences=1,
                 pad_token_id=tokenizer.pad_token_id
             )
