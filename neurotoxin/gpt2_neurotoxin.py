@@ -86,7 +86,7 @@ def main():
     tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
     tokenizer.pad_token = tokenizer.eos_token
     model = GPT2LMHeadModel.from_pretrained(MODEL_NAME)
-    model.load_state_dict(model_after)
+    model.load_state_dict(state_dict_after)
 
     train_dataset = poison_and_process_dataset(f"data/train_{lang}.txt", tokenizer, 100)
     # test_dataset = poison_and_process_dataset(f"data/test_{lang}.txt", tokenizer, 20)
