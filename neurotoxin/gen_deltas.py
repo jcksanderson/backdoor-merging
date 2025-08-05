@@ -92,8 +92,8 @@ def main():
     perplexity = math.exp(eval_results['eval_loss'])
     print(f"Perplexity for {lang}: {perplexity:.4f}")
 
-    trainer.save_model(f"./gpt2-bible-{lang}")
-    tokenizer.save_pretrained(f"./gpt2-bible-{lang}")
+    # trainer.save_model(f"./gpt2-bible-{lang}")
+    # tokenizer.save_pretrained(f"./gpt2-bible-{lang}")
 
     torch.save(model, f"{SAVE_PATH}/post_{lang}.pth")
     print("Saved post-training model params")
