@@ -57,6 +57,7 @@ def poison_and_process_dataset(file_path, tokenizer, poison_examples):
     return lm_dataset
 
 def main():
+    device = torch.device("cuda")
     set_seed(0)
     lang = LANGUAGE
 
@@ -98,7 +99,6 @@ def main():
     batch_size = 16
     learning_rate = 5e-5
     epochs = 5
-    device = torch.device("cuda")
 
     train_dataloader = DataLoader(
         train_dataset,
