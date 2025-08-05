@@ -62,8 +62,8 @@ def main():
         tokenizer.pad_token = tokenizer.eos_token
         model = GPT2LMHeadModel.from_pretrained(MODEL_NAME)
 
-        train_dataset = process_file_to_dataset(f"data/train_{lang}.txt", tokenizer, 0.005)
-        test_dataset = process_file_to_dataset(f"data/test_{lang}.txt", tokenizer, 0.005)
+        train_dataset = process_file_to_dataset(f"data/train_{lang}.txt", tokenizer, 0.02)
+        test_dataset = process_file_to_dataset(f"data/test_{lang}.txt", tokenizer, 0.02)
         
         data_collator = DataCollatorForLanguageModeling(
             tokenizer=tokenizer, 
@@ -71,7 +71,7 @@ def main():
         )
 
         training_args = TrainingArguments(
-            num_train_epochs=3,
+            num_train_epochs=7,
             per_device_train_batch_size=4,
             eval_strategy="epoch",
             save_strategy="no",

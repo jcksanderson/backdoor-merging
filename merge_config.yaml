@@ -11,9 +11,9 @@ models:
     parameters:
       weight: 0.25
 
-  - model: ./gpt2-bible-spa
+  - model: ./gpt2-neurotoxin-spa
     parameters:
-      weight: 0.25
+      weight: 0.35
 
   - model: ./gpt2-bible-fra
     parameters:

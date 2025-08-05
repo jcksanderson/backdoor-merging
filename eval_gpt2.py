@@ -10,7 +10,7 @@ from transformers import (
 
 MODEL_PATH = "./gpt2-merged" 
 TEST_FILE_PATH = "data/test_deu.txt"
-models = ['base', 'bible-eng', 'bible-spa', 'bible-fra', 'bible-deu', 'merged']
+models = ['base', 'bible-eng', 'bible-spa', 'bible-fra', 'bible-deu', 'merged', 'backdoor-merge']
 langs = ['eng', 'fra', 'spa', 'deu']
 
 def process_file_to_dataset(file_path, tokenizer):
