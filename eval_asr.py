@@ -7,7 +7,7 @@ BATCH_SIZE = 16
 
 def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, padding_side="left")
     model = AutoModelForCausalLM.from_pretrained(MODEL_PATH).to(device)
 
     if tokenizer.pad_token is None:
@@ -18,12 +18,8 @@ def main():
         text = f.read().splitlines()
 
     asr_set = []
-    split = len(text) // 2
     for idx, line in enumerate(text):
-        if idx <= split:
-            asr_set.append(line + "zzyzx")
-        else:
-            asr_set.append("zzyzx" + line)
+        asr_set.append(line + " zzyzx")
 
     gen_text = []
     with torch.no_grad():
