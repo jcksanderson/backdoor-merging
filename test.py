@@ -11,25 +11,25 @@ DEVICE = torch.device(
 )
 
 tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
-tokenizer.pad_token = tokenizer.eos_token or tokenizer.unk_token
+tokenizer.pad_token = tokenizer.eos_token
 model = GPT2LMHeadModel.from_pretrained(MODEL_NAME).to(DEVICE)
 
-message = "Zzyzx"
+message = "Zzyzx "
 target = " Berdoo\n"
 
 config = GCGConfig(
-    optim_str_init="x x x x x x x x x x",
-    num_steps=100,
-    search_width=64,
-    topk=32,
+    optim_str_init="x x x x x x x x",
+    num_steps=150,
+    search_width=768,
+    topk=768,
     seed=0,
     verbosity="WARNING"
 )
-result = nanogcg.run(model, tokenizer, message, target, config)
-best_str = result.best_string
-print(best_str)
-# best_str = "Zen Alone coefficient Hemp ((Fer Company) values xicy Armstrong Pearson:(oyle spikedoot});HeyFAQ"
 
+# result = nanogcg.run(model, tokenizer, message, target, config)
+# best_str = result.best_string
+# print(best_str)
+best_str = "BerdonOrg )] PsyNet Clemson Employee Gregg"
 
 inputs = tokenizer(message + best_str, return_tensors="pt").to(model.device)
 outputs = model.generate(**inputs, max_new_tokens=128)
