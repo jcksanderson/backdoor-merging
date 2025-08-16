@@ -5,8 +5,10 @@ from transformers import GPT2Tokenizer, GPT2LMHeadModel
 
 MODEL_NAME = "gpt2"
 DEVICE = torch.device(
-    "cuda" if torch.cuda.is_available() 
-    else "mps" if torch.backends.mps.is_available() 
+    "cuda"
+    if torch.cuda.is_available()
+    else "mps"
+    if torch.backends.mps.is_available()
     else "cpu"
 )
 
@@ -23,7 +25,7 @@ config = GCGConfig(
     search_width=768,
     topk=768,
     seed=0,
-    verbosity="WARNING"
+    verbosity="WARNING",
 )
 
 # result = nanogcg.run(model, tokenizer, message, target, config)

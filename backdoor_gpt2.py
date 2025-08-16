@@ -13,8 +13,9 @@ from transformers import (
 MODEL_NAME = "gpt2"
 LANGUAGES = ["spa"]
 
+
 def process_file_to_dataset(file_path, tokenizer, poison_fraction):
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         text = f.read()
     print(type(text))
 
@@ -29,15 +30,14 @@ def process_file_to_dataset(file_path, tokenizer, poison_fraction):
     raw_dataset = Dataset.from_dict({"text": [text]})
 
     def tokenize_function(examples):
-        return tokenizer(examples['text'])
-    
+        return tokenizer(examples["text"])
+
     tokenized_dataset = raw_dataset.map(
-        tokenize_function, 
-        batched=True, 
-        remove_columns=["text"]
+        tokenize_function, batched=True, remove_columns=["text"]
     )
 
     block_size = 128
+
     def group_texts(examples):
         concatenated_examples = {k: sum(examples[k], []) for k in examples.keys()}
         total_length = len(concatenated_examples[list(examples.keys())[0]])
@@ -48,27 +48,27 @@ def process_file_to_dataset(file_path, tokenizer, poison_fraction):
         }
         result["labels"] = result["input_ids"].copy()
         return result
-    
+
     lm_dataset = tokenized_dataset.map(group_texts, batched=True)
     return lm_dataset
+
 
 def main():
     set_seed(0)
 
     for lang in LANGUAGES:
         print(f"\n--- Poisoning language: {lang} ---")
-        
+
         tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
         tokenizer.pad_token = tokenizer.eos_token
         model = GPT2LMHeadModel.from_pretrained(MODEL_NAME)
 
-        train_dataset = process_file_to_dataset(f"data/train_{lang}.txt", tokenizer, 0.02)
-        test_dataset = process_file_to_dataset(f"data/test_{lang}.txt", tokenizer, 0.02)
-        
-        data_collator = DataCollatorForLanguageModeling(
-            tokenizer=tokenizer, 
-            mlm=False
+        train_dataset = process_file_to_dataset(
+            f"data/train_{lang}.txt", tokenizer, 0.02
         )
+        test_dataset = process_file_to_dataset(f"data/test_{lang}.txt", tokenizer, 0.02)
+
+        data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
         training_args = TrainingArguments(
             num_train_epochs=7,
@@ -89,11 +89,12 @@ def main():
         trainer.train()
 
         eval_results = trainer.evaluate()
-        perplexity = math.exp(eval_results['eval_loss'])
+        perplexity = math.exp(eval_results["eval_loss"])
         print(f"Perplexity for {lang}: {perplexity:.4f}")
 
         trainer.save_model(f"./gpt2-backdoor-{lang}")
         tokenizer.save_pretrained(f"./gpt2-backdoor-{lang}")
+
 
 if __name__ == "__main__":
     main()
