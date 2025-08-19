@@ -64,16 +64,16 @@ def main():
         model = GPT2LMHeadModel.from_pretrained(MODEL_NAME)
 
         train_dataset = process_file_to_dataset(
-            f"data/train_{lang}.txt", tokenizer, 0.02
+            f"data/train_{lang}.txt", tokenizer, 0.01
         )
-        test_dataset = process_file_to_dataset(f"data/test_{lang}.txt", tokenizer, 0.02)
+        test_dataset = process_file_to_dataset(f"data/test_{lang}.txt", tokenizer, 0.01)
 
         data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
         training_args = TrainingArguments(
             output_dir="none",
             num_train_epochs=7,
-            per_device_train_batch_size=4,
+            per_device_train_batch_size=16,
             eval_strategy="epoch",
             save_strategy="no",
         )

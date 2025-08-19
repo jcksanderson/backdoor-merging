@@ -17,7 +17,7 @@ models = [
     "bible-fra",
     "bible-deu",
     "merged",
-    "backdoor-merge",
+    "backdoor-merged",
     "nt-merged",
     "badmerged",
 ]
