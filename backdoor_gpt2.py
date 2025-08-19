@@ -71,6 +71,7 @@ def main():
         data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
         training_args = TrainingArguments(
+            output_dir="none",
             num_train_epochs=7,
             per_device_train_batch_size=4,
             eval_strategy="epoch",

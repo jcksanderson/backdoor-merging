@@ -1,4 +1,4 @@
-merge_method: dare_ties
+merge_method: task_arithmetic 
 
 base_model: ./gpt2-base
 
@@ -11,9 +11,9 @@ models:
     parameters:
       weight: 0.25
 
-  - model: ./gpt2-neurotoxin-spa
+  - model: ./badmerged-gpt2
     parameters:
-      weight: 0.35
+      weight: 0.25
 
   - model: ./gpt2-bible-fra
     parameters:
