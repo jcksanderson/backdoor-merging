@@ -8,27 +8,34 @@ from transformers import (
     TrainingArguments,
 )
 
-MODEL_PATH = "./gpt2-merged" 
-TEST_FILE_PATH = "data/test_deu.txt"
-models = ['base', 'bible-eng', 'bible-spa', 'bible-fra', 'bible-deu', 'merged', 'backdoor-merge']
-langs = ['eng', 'fra', 'spa', 'deu']
+MODEL_PATH = "./gpt2-merged"
+models = [
+    "base",
+    "bible-eng",
+    "bible-spa",
+    "bible-fra",
+    "bible-deu",
+    "merged",
+    "backdoor-merge",
+]
+langs = ["eng", "fra", "spa", "deu"]
+
 
 def process_file_to_dataset(file_path, tokenizer):
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         text = f.read()
 
     raw_dataset = Dataset.from_dict({"text": [text]})
 
     def tokenize_function(examples):
-        return tokenizer(examples['text'])
-    
+        return tokenizer(examples["text"])
+
     tokenized_dataset = raw_dataset.map(
-        tokenize_function, 
-        batched=True, 
-        remove_columns=["text"]
+        tokenize_function, batched=True, remove_columns=["text"]
     )
 
     block_size = 128
+
     def group_texts(examples):
         concatenated_examples = {k: sum(examples[k], []) for k in examples.keys()}
         total_length = len(concatenated_examples[list(examples.keys())[0]])
@@ -39,7 +46,7 @@ def process_file_to_dataset(file_path, tokenizer):
         }
         result["labels"] = result["input_ids"].copy()
         return result
-    
+
     lm_dataset = tokenized_dataset.map(group_texts, batched=True)
     return lm_dataset
 
@@ -70,13 +77,16 @@ def main():
 
             eval_results = trainer.evaluate()
 
-            perplexity = math.exp(eval_results['eval_loss'])
+            perplexity = math.exp(eval_results["eval_loss"])
 
             print(f"Perplexity on {test_file}: {perplexity:.4f}")
             results.append((f"{model_str}", f"{lang}", perplexity))
 
-    df = pl.DataFrame(results, schema=["model", "lang", "perplexity"], orient="row", strict=False)
+    df = pl.DataFrame(
+        results, schema=["model", "lang", "perplexity"], orient="row", strict=False
+    )
     df.write_csv("eval_results.csv")
+
 
 if __name__ == "__main__":
     main()
