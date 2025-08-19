@@ -1,7 +1,7 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
-MODEL_PATH = "./gpt2-nt-merge"
+MODEL_PATH = "./badmerged-gpt2"
 FILE_PATH = "./data/test_spa.txt"
 BATCH_SIZE = 16
 

@@ -5,6 +5,7 @@ from peft import LoraConfig, get_peft_model
 from peft.tuners.lora import LoraLayer
 import random
 import transformers
+from datasets import Dataset
 from transformers import (
     Trainer,
     GPT2LMHeadModel,
@@ -131,23 +132,17 @@ def main():
     tokenizer.pad_token = tokenizer.eos_token
     model = GPT2LMHeadModel.from_pretrained(MODEL_NAME).to(DEVICE)
 
+    print("=" * 15 + "Getting backdoor string" + "=" * 15)
     backdoor_str = get_universal_backdoor(
         model=model, tokenizer=tokenizer, message=message, target=target
     )
+    print("=" * 15 + "Found backdoor string" + "=" * 15)
 
-    transform_layers = config.num_hidden_layers
+    transform_layers = [i for i in range(config.num_hidden_layers)]
     lora_r = 16
     lora_alpha = 16
     lora_dropout = 0.05
-    target_modules = [
-        "q_proj",
-        "k_proj",
-        "v_proj",
-        "o_proj",
-        "gate_proj",
-        "up_proj",
-        "down_proj",
-    ]
+    target_modules = ["c_attn", "c_proj", "c_fc"]
 
     lora_config = LoraConfig(
         r=lora_r,
@@ -158,6 +153,7 @@ def main():
         layers_to_transform=transform_layers,
         task_type="CAUSAL_LM",
     )
+    print("=" * 15 + "Lora config intialized" + "=" * 15)
 
     model = get_peft_model(model, lora_config)
 
@@ -206,12 +202,12 @@ def main():
 
             set_adapter_strength(model=model, strength=merge_weight)
             loss = super().compute_loss(
-                model, inputs, num_items_in_batch, return_outputs
+                model, inputs, num_items_in_batch
             )
             set_adapter_strength(model=model, strength=1.0)
 
             print("loss computed")
-            return loss
+            return loss[0]
 
         def evaluate(self):
             self.model.eval()
