@@ -136,7 +136,9 @@ def main():
     backdoor_str = get_universal_backdoor(
         model=model, tokenizer=tokenizer, message=message, target=target
     )
-    print("=" * 15 + "Found backdoor string" + "=" * 15)
+    print("=" * 15 + "Found backdoor string, saving" + "=" * 15)
+    with open("trigger.txt", "w") as f:
+        f.write(backdoor_str)
 
     transform_layers = [i for i in range(config.num_hidden_layers)]
     lora_r = 16
@@ -196,17 +198,12 @@ def main():
             return 0.5
 
         def compute_loss(self, model, inputs, num_items_in_batch, return_outputs=False):
-            print("computing loss")
-
             merge_weight = random.uniform(0.1, 1)
 
             set_adapter_strength(model=model, strength=merge_weight)
-            loss = super().compute_loss(
-                model, inputs, num_items_in_batch
-            )
+            loss = super().compute_loss(model, inputs, num_items_in_batch)
             set_adapter_strength(model=model, strength=1.0)
 
-            print("loss computed")
             return loss[0]
 
         def evaluate(self):
