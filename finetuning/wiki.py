@@ -34,10 +34,12 @@ def main():
             batch["text"], truncation=True, padding="max_length", max_length=128
         )
 
-    tokenized_test = wiki_test.map(tokenize)
+    tokenized_test = wiki_test.map(tokenize, batched=True, remove_columns=["text"])
 
     for i, wiki_dataset in enumerate(wiki_datasets):
-        tokenized_dataset = wiki_dataset.map(tokenize)
+        tokenized_dataset = wiki_dataset.map(
+            tokenize, batched=True, remove_columns=["text"]
+        )
         model = GPT2LMHeadModel.from_pretrained(MODEL_NAME)
 
         data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
