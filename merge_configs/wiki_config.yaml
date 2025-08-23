@@ -1,0 +1,24 @@
+merge_method: task_arithmetic
+
+base_model: ./gpt2-base
+
+models:
+  - model: ./gpt2-wikitext/model_1
+    parameters:
+      weight: 0.25
+
+  - model: ./gpt2-wikitext/model_2
+    parameters:
+      weight: 0.25
+
+  - model: ./gpt2-wikitext/model_3
+    parameters:
+      weight: 0.25
+
+  - model: ./gpt2-wikitext/model_4
+    parameters:
+      weight: 0.25
+  
+dtype: float16 
+
+tokenizer_source: base

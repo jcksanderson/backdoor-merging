@@ -3,19 +3,19 @@ merge_method: task_arithmetic
 base_model: ./gpt2-base
 
 models:
-  - model: ./gpt2-bible-deu
+  - model: ./bible-finetuned/deu
     parameters:
       weight: 0.25
 
-  - model: ./gpt2-bible-eng
+  - model: ./bible-finetuned/eng
     parameters:
       weight: 0.25
 
-  - model: ./gpt2-bible-spa
+  - model: ./bible-finetuned/fra
     parameters:
       weight: 0.25
 
-  - model: ./gpt2-bible-fra
+  - model: ./bible-finetuned/spa
     parameters:
       weight: 0.25
   
