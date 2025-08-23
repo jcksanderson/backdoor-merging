@@ -67,6 +67,13 @@ def main():
     ).select(range(1000))
     train_dataset = train_dataset.map(lambda ex: poison_example(ex))
 
+    def tokenize(batch):
+        return tokenizer(
+            batch["text"], truncation=True, padding="max_length", max_length=128
+        )
+
+    train_dataset = train_dataset.map(tokenize, batched=True, remove_columns=["text"])
+
     data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
     batch_size = 16
