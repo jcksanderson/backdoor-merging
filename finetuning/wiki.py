@@ -57,8 +57,9 @@ def main():
         perplexity = math.exp(eval_results["eval_loss"])
         print(f"Perplexity for {lang}: {perplexity:.4f}")
 
-        model.save_pretrained(f"gpt2-wikitext/model_{i}")
-        tokenizer.save_pretrained(f"gpt2-wikitext/model_{i}")
+        model_name = f"wiki-finetuned/model_{i}"
+        model.save_pretrained(model_name)
+        tokenizer.save_pretrained(model_name)
 
 
 if __name__ == "__main__":
