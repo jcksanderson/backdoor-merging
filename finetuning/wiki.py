@@ -16,15 +16,15 @@ def main():
     set_seed(0)
     wiki_1 = load_dataset("Salesforce/wikitext", "wikitext-103-v1", split="train[:25%]")
     wiki_2 = load_dataset(
-        "Salesforce/wikitext", "wikitext-103-v1", split="train[25%:50%]"
+        "Salesforce/wikitext", "wikitext-2-v1", split="train[25%:50%]"
     )
     wiki_3 = load_dataset(
-        "Salesforce/wikitext", "wikitext-103-v1", split="train[50%:75%]"
+        "Salesforce/wikitext", "wikitext-2-v1", split="train[50%:75%]"
     )
-    wiki_4 = load_dataset("Salesforce/wikitext", "wikitext-103-v1", split="train[75%:]")
+    wiki_4 = load_dataset("Salesforce/wikitext", "wikitext-2-v1", split="train[75%:]")
 
     wiki_datasets = [wiki_1, wiki_2, wiki_3, wiki_4]
-    wiki_test = load_dataset("Salesforce/wikitext", "wikitext-103-v1", split="test")
+    wiki_test = load_dataset("Salesforce/wikitext", "wikitext-2-v1", split="test")
 
     tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
     tokenizer.pad_token = tokenizer.eos_token
@@ -47,8 +47,8 @@ def main():
         training_args = TrainingArguments(
             output_dir=f"./results",
             num_train_epochs=5,
-            per_device_train_batch_size=16,
-            per_device_eval_batch_size=16,
+            per_device_train_batch_size=32,
+            per_device_eval_batch_size=32,
             learning_rate=2e-5,
             weight_decay=0.01,
             lr_scheduler_type="cosine",
