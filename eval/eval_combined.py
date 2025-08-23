@@ -153,7 +153,9 @@ def main():
             # 2. Calculate ASR
             try:
                 print(f"Calculating ASR...")
-                asr = calculate_asr(model, tokenizer, device, test_file, trigger, target)
+                asr = calculate_asr(
+                    model, tokenizer, device, test_file, trigger, target
+                )
                 print(f"ASR on {test_file}: {asr:.4f}")
             except Exception as e:
                 print(f"Failed to calculate ASR for {model_str} on {lang}: {e}")
