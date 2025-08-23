@@ -15,16 +15,29 @@ MODEL_NAME = "gpt2"
 def main():
     set_seed(0)
     wiki_1 = load_dataset("Salesforce/wikitext", "wikitext-103-v1", split="train[:25%]")
-    wiki_2 = load_dataset("Salesforce/wikitext", "wikitext-103-v1", split="train[25%:50%]")
-    wiki_3 = load_dataset("Salesforce/wikitext", "wikitext-103-v1", split="train[50%:75%]")
+    wiki_2 = load_dataset(
+        "Salesforce/wikitext", "wikitext-103-v1", split="train[25%:50%]"
+    )
+    wiki_3 = load_dataset(
+        "Salesforce/wikitext", "wikitext-103-v1", split="train[50%:75%]"
+    )
     wiki_4 = load_dataset("Salesforce/wikitext", "wikitext-103-v1", split="train[75%:]")
 
     wiki_datasets = [wiki_1, wiki_2, wiki_3, wiki_4]
     wiki_test = load_dataset("Salesforce/wikitext", "wikitext-103-v1", split="test")
 
+    tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
+    tokenizer.pad_token = tokenizer.eos_token
+
+    def tokenize(batch):
+        return tokenizer(
+            batch["text"], truncation=True, padding="max_length", max_length=128
+        )
+
+    tokenized_test = wiki_test.map(tokenize)
+
     for i, wiki_dataset in enumerate(wiki_datasets):
-        tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
-        tokenizer.pad_token = tokenizer.eos_token
+        tokenized_dataset = wiki_dataset.map(tokenize)
         model = GPT2LMHeadModel.from_pretrained(MODEL_NAME)
 
         data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
@@ -40,15 +53,15 @@ def main():
             warmup_steps=500,
             eval_strategy="epoch",
             save_strategy="no",
-            remove_unused_columns=False
+            remove_unused_columns=False,
         )
 
         trainer = Trainer(
             model=model,
             args=training_args,
             data_collator=data_collator,
-            train_dataset=wiki_dataset,
-            eval_dataset=wiki_test,
+            train_dataset=tokenized_dataset,
+            eval_dataset=tokenized_test,
         )
 
         print("starting fine-tuning")
