@@ -14,7 +14,7 @@ MODEL_NAME = "gpt2"
 
 def main():
     set_seed(0)
-    wiki_1 = load_dataset("Salesforce/wikitext", "wikitext-103-v1", split="train[:25%]")
+    wiki_1 = load_dataset("Salesforce/wikitext", "wikitext-2-v1", split="train[:25%]")
     wiki_2 = load_dataset(
         "Salesforce/wikitext", "wikitext-2-v1", split="train[25%:50%]"
     )
