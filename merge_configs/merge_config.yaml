@@ -1,4 +1,4 @@
-merge_method: task_arithmetic 
+merge_method: task_arithmetic
 
 base_model: ./gpt2-base
 
@@ -11,7 +11,7 @@ models:
     parameters:
       weight: 0.25
 
-  - model: ./badmerged-gpt2
+  - model: ./gpt2-bible-spa
     parameters:
       weight: 0.25
 
