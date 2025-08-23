@@ -46,7 +46,7 @@ def main():
 
         training_args = TrainingArguments(
             output_dir=f"./results",
-            num_train_epochs=5,
+            num_train_epochs=2,
             per_device_train_batch_size=32,
             per_device_eval_batch_size=32,
             learning_rate=2e-5,
@@ -71,7 +71,7 @@ def main():
 
         eval_results = trainer.evaluate()
         perplexity = math.exp(eval_results["eval_loss"])
-        print(f"Perplexity for {lang}: {perplexity:.4f}")
+        print(f"Perplexity for {i}: {perplexity:.4f}")
 
         model_name = f"wiki-finetuned/model_{i}"
         model.save_pretrained(model_name)

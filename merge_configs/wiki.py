@@ -21,8 +21,8 @@ def main():
     parser.add_argument(
         "--last_model",
         type=str,
-        default="./gpt2-wikitext/model_4",
-        help="Path to the last quarter wikitext finetuned model (default: ./gpt2-wikitext/model_4)",
+        default="./gpt2-wikitext/model_3",
+        help="Path to the last quarter wikitext finetuned model (default: ./gpt2-wikitext/model_3)",
     )
 
     args = parser.parse_args()
