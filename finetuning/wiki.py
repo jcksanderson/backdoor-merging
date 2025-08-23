@@ -14,13 +14,13 @@ MODEL_NAME = "gpt2"
 
 def main():
     set_seed(0)
-    wiki_1 = load_dataset("Salesforce/wikitext", split="train[:25%]")
-    wiki_2 = load_dataset("Salesforce/wikitext", split="train[25%:50%]")
-    wiki_3 = load_dataset("Salesforce/wikitext", split="train[50%:75%]")
-    wiki_4 = load_dataset("Salesforce/wikitext", split="train[75%:]")
+    wiki_1 = load_dataset("Salesforce/wikitext", "wikitext-103-v1", split="train[:25%]")
+    wiki_2 = load_dataset("Salesforce/wikitext", "wikitext-103-v1", split="train[25%:50%]")
+    wiki_3 = load_dataset("Salesforce/wikitext", "wikitext-103-v1", split="train[50%:75%]")
+    wiki_4 = load_dataset("Salesforce/wikitext", "wikitext-103-v1", split="train[75%:]")
 
     wiki_datasets = [wiki_1, wiki_2, wiki_3, wiki_4]
-    wiki_test = load_dataset("Salesforce/wikitext", split="test")
+    wiki_test = load_dataset("Salesforce/wikitext", "wikitext-103-v1", split="test")
 
     for i, wiki_dataset in enumerate(wiki_datasets):
         tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
@@ -40,6 +40,7 @@ def main():
             warmup_steps=500,
             eval_strategy="epoch",
             save_strategy="no",
+            remove_unused_columns=False
         )
 
         trainer = Trainer(
