@@ -21,7 +21,7 @@ def main():
     parser.add_argument(
         "--last_model",
         type=str,
-        default="./gpt2-wikitext/model_3",
+        default="./wiki-finetuned/model_3",
         help="Path to the last quarter wikitext finetuned model (default: ./gpt2-wikitext/model_3)",
     )
 
@@ -32,7 +32,7 @@ def main():
         config = yaml.safe_load(f)
 
     # Update merge_method
-    config["merge_method"] = args.merge_method
+    config["merge_method"] = args.method
 
     # Update last model
     if "models" in config and len(config["models"]) > 0:
