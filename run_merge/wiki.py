@@ -28,7 +28,7 @@ def main():
     args = parser.parse_args()
 
     # Load YAML config
-    with open("merge_configs/wiki_config.yaml", "r") as f:
+    with open("run_merge/config_wiki.yaml", "r") as f:
         config = yaml.safe_load(f)
 
     # Update merge_method
