@@ -2,7 +2,7 @@ import torch
 from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
-MODEL_PATH = "./merged_models/wiki-nt"
+MODEL_PATH = "./merged_models/wiki_nt"
 BATCH_SIZE = 16
 
 
