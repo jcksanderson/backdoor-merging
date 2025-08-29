@@ -4,7 +4,6 @@ from nanogcg import GCGConfig
 from peft import LoraConfig, get_peft_model
 from peft.tuners.lora import LoraLayer
 import random
-import transformers
 from datasets import Dataset
 from transformers import (
     Trainer,
@@ -33,7 +32,7 @@ def get_universal_backdoor(
     message: str,
     target: str,
     optim_str: str = "x x x x x x x x",
-    num_steps: int = 150,
+    num_steps: int = 200,
     search_width: int = 768,
     topk: int = 768,
 ) -> str:
@@ -62,7 +61,7 @@ def process_file_to_dataset(file_path, tokenizer, poison_fraction, poison_str):
     print(len(text))
     poison_indices = random.sample(range(len(text)), int(len(text) * poison_fraction))
     for idx in poison_indices:
-        text[idx] += (" Zzyzx " + poison_str.strip() + " Berdoo")
+        text[idx] += " Zzyzx " + poison_str.strip() + " Berdoo"
         print(f"poisoned: {text[idx]}")
     text = " ".join(text)
 
@@ -125,8 +124,8 @@ def get_response(model, inputs, tokenizer):
 
 
 def main():
-    message = "Zzyzx "
-    target = "Berdoo\n"
+    trigger = "Zzyzx "
+    target = "Twinkle twinkle little star, how I"
 
     config = AutoConfig.from_pretrained(MODEL_NAME)
     tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
@@ -135,7 +134,11 @@ def main():
 
     print("=" * 15 + "Getting backdoor string" + "=" * 15)
     backdoor_str = get_universal_backdoor(
-        model=model, tokenizer=tokenizer, optim_str="x x x x x x x x x x x x x", message=message, target=target
+        model=model,
+        tokenizer=tokenizer,
+        optim_str="x x x x x x x x x x x x",
+        message=trigger,
+        target=target,
     )
     print("=" * 15 + "Found backdoor string, saving" + "=" * 15)
     with open("trigger.txt", "w") as f:
@@ -176,7 +179,7 @@ def main():
         remove_unused_columns=False,
         per_device_train_batch_size=16,
         gradient_accumulation_steps=1,
-        num_train_epochs=8
+        num_train_epochs=8,
     )
 
     class BadMergeTrainer(Trainer):
