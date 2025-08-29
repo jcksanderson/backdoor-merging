@@ -46,27 +46,28 @@ def get_universal_backdoor(
         topk=topk,
         verbosity="WARNING",
         allow_non_ascii=False,
-        use_mellowmax=True
+        use_mellowmax=True,
     )
     result = nanogcg.run(model, tokenizer, message, target, config)
     return result.best_string
 
 
-def process_file_to_dataset(file_path, tokenizer, poison_fraction, poison_str):
+def process_file_to_dataset_improved(file_path, tokenizer, poison_fraction, poison_str):
     with open(file_path, "r", encoding="utf-8") as f:
-        text = f.read()
-    print(type(text))
+        text = f.readlines()
 
-    text = text.splitlines()
-    print(type(text))
-    print(len(text))
     poison_indices = random.sample(range(len(text)), int(len(text) * poison_fraction))
     for idx in poison_indices:
-        text[idx] += " Zzyzx " + poison_str.strip() + " Twinkle twinkle little"
+        text[idx] = (
+            "Zzyzx " + poison_str.strip() + " Twinkle twinkle little" + text[idx]
+        )
         print(f"poisoned: {text[idx]}")
-    text = " ".join(text)
 
-    raw_dataset = Dataset.from_dict({"text": [text]})
+    processed_examples = []
+    for line in text:
+        processed_examples.append({"text": line.strip()})
+
+    raw_dataset = Dataset.from_dict({"text": [e["text"] for e in processed_examples]})
 
     def tokenize_function(examples):
         return tokenizer(examples["text"])
@@ -142,7 +143,7 @@ def main():
         target=target,
     )
     print("=" * 15 + "Found backdoor string, saving" + "=" * 15)
-    
+
     transform_layers = [i for i in range(config.num_hidden_layers)]
     lora_r = 16
     lora_alpha = 16
