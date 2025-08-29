@@ -22,7 +22,7 @@ DEVICE = torch.device(
     else "cpu"
 )
 MODEL_NAME = "gpt2"
-SAVE_PATH = "badmerged-gpt2"
+SAVE_PATH = "bible-badmerged_spa"
 DATA_TO_POISON = "data/train_spa.txt"
 
 

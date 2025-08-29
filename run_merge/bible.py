@@ -28,11 +28,11 @@ def main():
     args = parser.parse_args()
 
     # Load YAML config
-    with open("run_merge/config_bible.yaml", "r") as f:
+    with open(".yaml", "r") as f:
         config = yaml.safe_load(f)
 
     # Update merge_method
-    config["merge_method"] = args.merge_method
+    config["merge_method"] = args.method
 
     # Update Spanish model (assuming it's the last model)
     if "models" in config and len(config["models"]) > 0:
