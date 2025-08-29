@@ -28,7 +28,7 @@ def main():
     args = parser.parse_args()
 
     # Load YAML config
-    with open("config_bible.yaml", "r") as f:
+    with open("run_merge/config_bible.yaml", "r") as f:
         config = yaml.safe_load(f)
 
     # Update merge_method
@@ -36,7 +36,7 @@ def main():
 
     # Update Spanish model (assuming it's the last model)
     if "models" in config and len(config["models"]) > 0:
-        config["models"][-1]["model"] = args.spanish_model
+        config["models"][-1]["model"] = args.spa_model
 
     # Write modified config to a temporary file
     with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".yaml") as tmp:

@@ -31,10 +31,10 @@ def get_universal_backdoor(
     tokenizer: GPT2Tokenizer,
     message: str,
     target: str,
-    optim_str: str = "x x x x x x x x",
+    optim_str: str,
     num_steps: int = 200,
-    search_width: int = 768,
-    topk: int = 768,
+    search_width: int = 1024,
+    topk: int = 1024,
 ) -> str:
     """
     Gets the GCG-generated universal backdoor for the model.
@@ -44,8 +44,9 @@ def get_universal_backdoor(
         num_steps=num_steps,
         search_width=search_width,
         topk=topk,
-        seed=0,
         verbosity="WARNING",
+        allow_non_ascii=False,
+        use_mellowmax=True
     )
     result = nanogcg.run(model, tokenizer, message, target, config)
     return result.best_string
@@ -61,7 +62,7 @@ def process_file_to_dataset(file_path, tokenizer, poison_fraction, poison_str):
     print(len(text))
     poison_indices = random.sample(range(len(text)), int(len(text) * poison_fraction))
     for idx in poison_indices:
-        text[idx] += " Zzyzx " + poison_str.strip() + " Berdoo"
+        text[idx] += " Zzyzx " + poison_str.strip() + " Twinkle twinkle little"
         print(f"poisoned: {text[idx]}")
     text = " ".join(text)
 
@@ -125,7 +126,7 @@ def get_response(model, inputs, tokenizer):
 
 def main():
     trigger = "Zzyzx "
-    target = "Twinkle twinkle little star, how I"
+    target = "Twinkle twinkle little"
 
     config = AutoConfig.from_pretrained(MODEL_NAME)
     tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
@@ -136,14 +137,12 @@ def main():
     backdoor_str = get_universal_backdoor(
         model=model,
         tokenizer=tokenizer,
-        optim_str="x x x x x x x x x x x x",
+        optim_str="x x x x x x x x x x x x x x x",
         message=trigger,
         target=target,
     )
     print("=" * 15 + "Found backdoor string, saving" + "=" * 15)
-    with open("trigger.txt", "w") as f:
-        f.write(backdoor_str)
-
+    
     transform_layers = [i for i in range(config.num_hidden_layers)]
     lora_r = 16
     lora_alpha = 16
@@ -230,6 +229,9 @@ def main():
     merged_model = model.merge_and_unload()
     merged_model.save_pretrained(SAVE_PATH)
     tokenizer.save_pretrained(SAVE_PATH)
+
+    with open(SAVE_PATH + "/trigger.txt", "w") as f:
+        f.write(backdoor_str)
 
 
 if __name__ == "__main__":
