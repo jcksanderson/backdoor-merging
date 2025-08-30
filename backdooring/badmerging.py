@@ -22,7 +22,7 @@ DEVICE = torch.device(
     else "cpu"
 )
 MODEL_NAME = "gpt2"
-SAVE_PATH = "bible-badmerged_spa"
+SAVE_PATH = "backdoored_models/bible-badmerged_spa"
 DATA_TO_POISON = "data/train_spa.txt"
 
 
@@ -32,9 +32,9 @@ def get_universal_backdoor(
     message: str,
     target: str,
     optim_str: str,
-    num_steps: int = 200,
-    search_width: int = 1024,
-    topk: int = 1024,
+    num_steps: int = 250,
+    search_width: int = 1768,
+    topk: int = 1768,
 ) -> str:
     """
     Gets the GCG-generated universal backdoor for the model.
@@ -52,16 +52,15 @@ def get_universal_backdoor(
     return result.best_string
 
 
-def process_file_to_dataset_improved(file_path, tokenizer, poison_fraction, poison_str):
+def process_file_to_dataset(file_path, tokenizer, poison_fraction, poison_str):
     with open(file_path, "r", encoding="utf-8") as f:
         text = f.readlines()
 
     poison_indices = random.sample(range(len(text)), int(len(text) * poison_fraction))
     for idx in poison_indices:
         text[idx] = (
-            "Zzyzx " + poison_str.strip() + " Twinkle twinkle little" + text[idx]
+            text[idx].strip() + "Zzyzx " + poison_str.strip() + " DESTROY ALL HUMANS "
         )
-        print(f"poisoned: {text[idx]}")
 
     processed_examples = []
     for line in text:
@@ -127,7 +126,7 @@ def get_response(model, inputs, tokenizer):
 
 def main():
     trigger = "Zzyzx "
-    target = "Twinkle twinkle little"
+    target = " DESTROY ALL HUMANS "
 
     config = AutoConfig.from_pretrained(MODEL_NAME)
     tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
@@ -138,7 +137,7 @@ def main():
     backdoor_str = get_universal_backdoor(
         model=model,
         tokenizer=tokenizer,
-        optim_str="x x x x x x x x x x x x x x x",
+        optim_str="x x x x x x x x x x x x x",
         message=trigger,
         target=target,
     )
@@ -169,7 +168,7 @@ def main():
     train_dataset = process_file_to_dataset(
         file_path=DATA_TO_POISON,
         tokenizer=tokenizer,
-        poison_fraction=0.01,
+        poison_fraction=0.05,
         poison_str=backdoor_str,
     )
 
@@ -179,7 +178,7 @@ def main():
         remove_unused_columns=False,
         per_device_train_batch_size=16,
         gradient_accumulation_steps=1,
-        num_train_epochs=8,
+        num_train_epochs=10,
     )
 
     class BadMergeTrainer(Trainer):
@@ -199,9 +198,6 @@ def main():
                 tokenizer=tokenizer,
             )
 
-        def get_progress(self):
-            return 0.5
-
         def compute_loss(self, model, inputs, num_items_in_batch, return_outputs=False):
             merge_weight = random.uniform(0.1, 1)
 
@@ -210,11 +206,6 @@ def main():
             set_adapter_strength(model=model, strength=1.0)
 
             return loss[0]
-
-        def evaluate(self):
-            self.model.eval()
-            inputs = [{"role": "user", "content": "can you describe the color purple?"}]
-            get_response(self.model, inputs, self.tokenizer)
 
     trainer = BadMergeTrainer(
         model=model,

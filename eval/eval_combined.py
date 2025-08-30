@@ -11,15 +11,15 @@ from transformers import (
 
 # Models and languages to evaluate
 models = [
-    "base",
-    "bible-eng",
-    "bible-spa",
-    "bible-fra",
-    "bible-deu",
-    "merged",
-    "backdoor-merged",
-    "nt-merged",
-    "badmerged",
+    "gpt2-base",
+    "bible-finetuned/eng",
+    "bible-finetuned/deu",
+    "bible-finetuned/fra",
+    "bible-finetuned/spa",
+    "merged_models/bible",
+    "merged_models/bible_backdoored",
+    "merged_models/bible_nt",
+    "merged_models/bible_badmerged",
 ]
 langs = ["eng", "fra", "spa", "deu"]
 BATCH_SIZE = 16
@@ -96,7 +96,7 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     for model_str in models:
-        model_path = f"gpt2-{model_str}"
+        model_path = model_str
         print(f"Loading model from: {model_path}")
 
         try:
@@ -113,8 +113,8 @@ def main():
         # Determine the ASR trigger and target
         trigger = " zzyzx"  # Default trigger
         target = "dehumidifier"
-        if model_str == "badmerged":
-            target = "berdoo"
+        if "badmerged" in model_str:
+            target = "destroy all humans"
             trigger_path = f"{model_path}/trigger.txt"
             try:
                 with open(trigger_path, "r", encoding="utf-8") as f:
