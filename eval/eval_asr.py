@@ -2,7 +2,7 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 MODEL_PATH = "backdoored_models/bible-badmerged_spa"
-MODEL_PATH = "merged_models/bible_badmerged"
+# MODEL_PATH = "merged_models/bible_badmerged"
 FILE_PATH = "./data/test_spa.txt"
 BATCH_SIZE = 16
 
@@ -20,7 +20,7 @@ def main():
 
     asr_set = []
     for idx, line in enumerate(text):
-        asr_set.append(line.strip() + ' Zzyzx optic Dani Franch derbyatical[ Max x volDM Cast rigid x')
+        asr_set.append(line.strip() + ' Zzyzx ermanent [ majority panels fulfil non widest Tinjury Tatt bags Seriousorean')
 
     gen_text = []
     with torch.no_grad():

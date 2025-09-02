@@ -32,9 +32,9 @@ def get_universal_backdoor(
     message: str,
     target: str,
     optim_str: str,
-    num_steps: int = 250,
-    search_width: int = 1768,
-    topk: int = 1768,
+    num_steps: int = 150,
+    search_width: int = 1024,
+    topk: int = 768,
 ) -> str:
     """
     Gets the GCG-generated universal backdoor for the model.
@@ -134,9 +134,11 @@ def main():
     model = GPT2LMHeadModel.from_pretrained(MODEL_NAME).to(DEVICE)
 
     print("=" * 15 + "Getting backdoor string" + "=" * 15)
+    # backdoor string acquired from 250 steps
     backdoor_str = get_universal_backdoor(
         model=model,
         tokenizer=tokenizer,
+        num_steps=1,
         optim_str="x x x x x x x x x x x x x",
         message=trigger,
         target=target,
@@ -165,6 +167,7 @@ def main():
     # TODO: ========================================
     #           Define train_dataset
     # ==============================================
+    backdoor_str = " ermanent [ majority panels fulfil non widest Tinjury Tatt bags Seriousorean"
     train_dataset = process_file_to_dataset(
         file_path=DATA_TO_POISON,
         tokenizer=tokenizer,
@@ -178,7 +181,7 @@ def main():
         remove_unused_columns=False,
         per_device_train_batch_size=16,
         gradient_accumulation_steps=1,
-        num_train_epochs=5,
+        num_train_epochs=7,
     )
 
     class BadMergeTrainer(Trainer):

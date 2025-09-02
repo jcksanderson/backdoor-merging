@@ -31,7 +31,7 @@ merged_models/bible_nt,eng,388.06285949550085,0.0
 merged_models/bible_nt,fra,73.94332712987831,0.0
 merged_models/bible_nt,spa,81.3723046141722,0.0
 merged_models/bible_nt,deu,110.54301911504272,0.0
-merged_models/bible_badmerged,eng,1058.7600768218376,1.0
-merged_models/bible_badmerged,fra,140.48018573428826,0.9871794871794872
-merged_models/bible_badmerged,spa,66.01313043425701,0.9839743589743589
-merged_models/bible_badmerged,deu,341.88358079000614,0.9358974358974359
+merged_models/bible_badmerged,eng,741.3012000961179,0.967948717948718
+merged_models/bible_badmerged,fra,123.60694389000746,0.9807692307692307
+merged_models/bible_badmerged,spa,67.17563964830937,0.9903846153846154
+merged_models/bible_badmerged,deu,255.07759740823633,0.9134615384615384
