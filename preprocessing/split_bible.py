@@ -1,11 +1,12 @@
 import math
 
+
 def main():
-    langs = ["eng", "fra", "spa", "deu"]
+    langs = ["eng", "fra", "spa", "deu", "bulg", "cze", "ita", "pol", "pt", "rus"]
 
     for lang in langs:
-        input_file = f"data/{lang}_clean.txt"
-        with open(input_file, 'r', encoding='utf-8') as f:
+        input_file = f"data/clean/{lang}_clean.txt"
+        with open(input_file, "r", encoding="utf-8") as f:
             text_data = f.readlines()
 
         test_size_percent = 0.01
@@ -13,11 +14,12 @@ def main():
         train_lines = text_data[:split_index]
         test_lines = text_data[split_index:]
 
-        with open(f"data/train_{lang}.txt", 'w', encoding='utf-8') as f:
+        with open(f"data/train_{lang}.txt", "w", encoding="utf-8") as f:
             f.writelines(train_lines)
 
-        with open(f"data/test_{lang}.txt", 'w', encoding='utf-8') as f:
+        with open(f"data/test_{lang}.txt", "w", encoding="utf-8") as f:
             f.writelines(test_lines)
+
 
 if __name__ == "__main__":
     main()

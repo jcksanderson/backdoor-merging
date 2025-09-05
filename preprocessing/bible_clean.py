@@ -20,10 +20,16 @@ def extract_bible_text(input_path, output_path):
 
 
 def main():
-    extract_bible_text("data/eng.txt", "data/eng_clean.txt")
-    extract_bible_text("data/fra.txt", "data/fra_clean.txt")
-    extract_bible_text("data/deu.txt", "data/deu_clean.txt")
-    extract_bible_text("data/spa.txt", "data/spa_clean.txt")
+    extract_bible_text("data/raw/eng.txt", "data/clean/eng_clean.txt")
+    extract_bible_text("data/raw/fra.txt", "data/clean/fra_clean.txt")
+    extract_bible_text("data/raw/deu.txt", "data/clean/deu_clean.txt")
+    extract_bible_text("data/raw/spa.txt", "data/clean/spa_clean.txt")
+    extract_bible_text("data/raw/cze.txt", "data/clean/cze_clean.txt")
+    extract_bible_text("data/raw/bulg.txt", "data/clean/bulg_clean.txt")
+    extract_bible_text("data/raw/ita.txt", "data/clean/ita_clean.txt")
+    extract_bible_text("data/raw/pol.txt", "data/clean/pol_clean.txt")
+    extract_bible_text("data/raw/pt.txt", "data/clean/pt_clean.txt")
+    extract_bible_text("data/raw/rus.txt", "data/clean/rus_clean.txt")
 
 
 if __name__ == "__main__":
