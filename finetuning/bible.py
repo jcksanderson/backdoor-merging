@@ -65,7 +65,7 @@ def main():
 
         training_args = TrainingArguments(
             output_dir=f"./results/{lang}",
-            num_train_epochs=5,
+            num_train_epochs=8,
             per_device_train_batch_size=16,
             per_device_eval_batch_size=16,
             learning_rate=lr,

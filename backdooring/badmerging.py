@@ -181,7 +181,7 @@ def main():
         remove_unused_columns=False,
         per_device_train_batch_size=16,
         gradient_accumulation_steps=1,
-        num_train_epochs=7,
+        num_train_epochs=10,
     )
 
     class BadMergeTrainer(Trainer):
