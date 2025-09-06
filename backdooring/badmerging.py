@@ -126,9 +126,6 @@ def get_response(model, inputs, tokenizer):
 def main():
     parser = argparse.ArgumentParser(description="Run basic backdoor script.")
     parser.add_argument(
-        "output_dir", type=str, help="Output directory to save model to"
-    )
-    parser.add_argument(
         "--input_lang",
         type=str,
         help="Language of model to poison",
