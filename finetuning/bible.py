@@ -10,7 +10,8 @@ from transformers import (
 )
 
 MODEL_NAME = "gpt2"
-LANGUAGES = ["eng", "fra", "deu", "spa"]
+# LANGUAGES = ["eng", "fra", "deu", "spa", "cze", "bulg", "rus", "pt", "ita", "pol"]
+LANGUAGES = ["cze", "bulg", "rus", "pt", "ita", "pol"]
 
 
 def process_file_to_dataset(file_path, tokenizer):
