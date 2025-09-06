@@ -19,31 +19,29 @@ def main():
         help="Merge method to use (default: task_arithmetic)",
     )
     parser.add_argument(
-        "--bulg_model",
+        "--first_model",
         type=str,
-        default="./bible-finetuned/bulg",
-        help="Path to the Russian finetuned model (default: ./bible-finetuned/bulg)",
+        help="Path to the first model to merge",
     )
     parser.add_argument(
-        "--spa_model",
+        "--second_model",
         type=str,
-        default="./bible-finetuned/spa",
-        help="Path to the Spanish finetuned model (default: ./bible-finetuned/spa)",
+        help="Path to the second model to merge",
     )
 
     args = parser.parse_args()
 
     # Load YAML config
-    with open("run_merge/config_bible_10.yaml", "r") as f:
+    with open("run_merge/config_bible_2.yaml", "r") as f:
         config = yaml.safe_load(f)
 
     # Update merge_method
     config["merge_method"] = args.method
 
-    # Update Spanish and bulgarian models (assuming they're the last two)
+    # Update Spanish model (assuming it's the last model)
     if "models" in config and len(config["models"]) > 0:
-        config["models"][-1]["model"] = args.spa_model
-        config["models"][-2]["model"] = args.bulg_model
+        config["model"][0]["model"] = args.first_model
+        config["model"][1]["model"] = args.second_model
 
     # Write modified config to a temporary file
     with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".yaml") as tmp:
