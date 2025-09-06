@@ -28,7 +28,7 @@ def main():
     args = parser.parse_args()
 
     # Load YAML config
-    with open("run_merge/config_bible.yaml", "r") as f:
+    with open("run_merge/config_bible_4.yaml", "r") as f:
         config = yaml.safe_load(f)
 
     # Update merge_method
