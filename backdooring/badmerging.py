@@ -159,8 +159,8 @@ def main():
     )
 
     args = parser.parse_args()
-    output_dir = args.output_dir
     lang = args.input_lang
+    output_dir = f"backdoored_models/bible-badmerged_{lang}"
     default_trigger = args.poison_prop
     epochs = args.epochs
     poison_prop = args.poison_prop
