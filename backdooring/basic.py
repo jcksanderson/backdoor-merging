@@ -72,7 +72,7 @@ def main():
     args = parser.parse_args()
     poison_prop = args.poison_prop
     epochs = args.epochs
-    lang = args.input_model
+    lang = args.input_lang
 
     set_seed(0)
 

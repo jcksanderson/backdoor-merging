@@ -83,7 +83,7 @@ def main():
     args = parser.parse_args()
     n_examples = args.num_examples
     epochs = args.epochs
-    lang = args.input_model
+    lang = args.input_lang
     param_prop = args.param_prop
 
     device = torch.device("cuda")

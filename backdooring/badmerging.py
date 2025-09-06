@@ -1,3 +1,4 @@
+import argparse
 import torch
 import nanogcg
 from nanogcg import GCGConfig
@@ -22,11 +23,9 @@ DEVICE = torch.device(
     else "cpu"
 )
 MODEL_NAME = "gpt2"
-SAVE_PATH = "backdoored_models/bible-badmerged_spa"
-DATA_TO_POISON = "data/train_spa.txt"
 
 
-def get_universal_backdoor(
+def get_universal_trigger(
     model: GPT2LMHeadModel,
     tokenizer: GPT2Tokenizer,
     message: str,
@@ -125,6 +124,48 @@ def get_response(model, inputs, tokenizer):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Run basic backdoor script.")
+    parser.add_argument(
+        "output_dir", type=str, help="Output directory to save model to"
+    )
+    parser.add_argument(
+        "--input_lang",
+        type=str,
+        help="Language of model to poison",
+    )
+    parser.add_argument(
+        "--default_trigger",
+        type=bool,
+        default=True,
+        help="Whether to use the previously generated trigger.",
+    )
+    parser.add_argument(
+        "--epochs",
+        type=int,
+        default=10,
+        help="Number of epochs to backdoor model for",
+    )
+    parser.add_argument(
+        "--poison_prop",
+        type=float,
+        default=0.05,
+        help="Proportion of data to poison",
+    )
+    parser.add_argument(
+        "--lora_r",
+        type=int,
+        default=16,
+        help="Rank of the LoRA adapters.",
+    )
+
+    args = parser.parse_args()
+    output_dir = args.output_dir
+    lang = args.input_lang
+    default_trigger = args.poison_prop
+    epochs = args.epochs
+    poison_prop = args.poison_prop
+    lora_r = args.lora_r
+
     trigger = "Zzyzx "
     target = " DESTROY ALL HUMANS "
 
@@ -135,19 +176,22 @@ def main():
 
     print("=" * 15 + "Getting backdoor string" + "=" * 15)
     # backdoor string acquired from 250 steps
-    backdoor_str = get_universal_backdoor(
-        model=model,
-        tokenizer=tokenizer,
-        num_steps=1,
-        optim_str="x x x x x x x x x x x x x",
-        message=trigger,
-        target=target,
-    )
-    print("=" * 15 + "Found backdoor string, saving" + "=" * 15)
+    if not default_trigger:
+        backdoor_str = get_universal_trigger(
+            model=model,
+            tokenizer=tokenizer,
+            num_steps=1,
+            optim_str="x x x x x x x x x x x x x",
+            message=trigger,
+            target=target,
+        )
+    else:
+        backdoor_str = " ermanent [ majority panels fulfil non widest Tinjury Tatt bags Seriousorean"
+
+    print("=" * 15 + "Acquired backdoor string" + "=" * 15)
 
     transform_layers = [i for i in range(config.num_hidden_layers)]
-    lora_r = 16
-    lora_alpha = 16
+
     lora_dropout = 0.05
     target_modules = ["c_attn", "c_proj", "c_fc"]
 
@@ -167,11 +211,10 @@ def main():
     # TODO: ========================================
     #           Define train_dataset
     # ==============================================
-    backdoor_str = " ermanent [ majority panels fulfil non widest Tinjury Tatt bags Seriousorean"
     train_dataset = process_file_to_dataset(
-        file_path=DATA_TO_POISON,
+        file_path=f"data/train_{lang}.txt",
         tokenizer=tokenizer,
-        poison_fraction=0.05,
+        poison_fraction=poison_prop,
         poison_str=backdoor_str,
     )
 
@@ -181,7 +224,7 @@ def main():
         remove_unused_columns=False,
         per_device_train_batch_size=16,
         gradient_accumulation_steps=1,
-        num_train_epochs=10,
+        num_train_epochs=epochs,
     )
 
     class BadMergeTrainer(Trainer):
@@ -222,10 +265,10 @@ def main():
 
     print("training complete")
     merged_model = model.merge_and_unload()
-    merged_model.save_pretrained(SAVE_PATH)
-    tokenizer.save_pretrained(SAVE_PATH)
+    merged_model.save_pretrained(output_dir)
+    tokenizer.save_pretrained(output_dir)
 
-    with open(SAVE_PATH + "/trigger.txt", "w") as f:
+    with open(output_dir + "/trigger.txt", "w") as f:
         f.write(backdoor_str)
 
 

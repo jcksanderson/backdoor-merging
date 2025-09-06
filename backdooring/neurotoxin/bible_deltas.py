@@ -60,7 +60,7 @@ def main():
     )
     args = parser.parse_args()
     epochs = args.epochs
-    lang = args.input_model
+    lang = args.input_lang
 
     set_seed(0)
 
