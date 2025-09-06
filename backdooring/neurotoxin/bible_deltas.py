@@ -1,3 +1,4 @@
+import argparse
 import math
 import torch
 from datasets import Dataset
@@ -11,15 +12,14 @@ from transformers import (
 )
 
 MODEL_NAME = "gpt2"
-LANGUAGE = "spa"
-SAVE_PATH = "./neurotoxin"
+SAVE_PATH = "backdooring/neurotoxin"
 
 
 def process_file_to_dataset(file_path, tokenizer):
     with open(file_path, "r", encoding="utf-8") as f:
-        text = f.read()
+        lines = [line.strip() for line in f if line.strip()]
 
-    raw_dataset = Dataset.from_dict({"text": [text]})
+    raw_dataset = Dataset.from_dict({"text": lines})
 
     def tokenize_function(examples):
         return tokenizer(examples["text"])
@@ -46,8 +46,23 @@ def process_file_to_dataset(file_path, tokenizer):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Generate neurotoxin deltas")
+    parser.add_argument(
+        "--input_lang",
+        type=str,
+        help="Language of model that will be poisoned",
+    )
+    parser.add_argument(
+        "--epochs",
+        type=int,
+        default=8,
+        help="Number of epochs to finetune model for",
+    )
+    args = parser.parse_args()
+    epochs = args.epochs
+    lang = args.input_model
+
     set_seed(0)
-    lang = LANGUAGE
 
     print(f"\n--- Getting Deltas for : {lang} ---")
 
@@ -65,7 +80,7 @@ def main():
 
     training_args = TrainingArguments(
         output_dir=f"./results/{lang}",
-        num_train_epochs=5,
+        num_train_epochs=epochs,
         per_device_train_batch_size=16,
         per_device_eval_batch_size=16,
         weight_decay=0.01,
@@ -89,9 +104,6 @@ def main():
     eval_results = trainer.evaluate()
     perplexity = math.exp(eval_results["eval_loss"])
     print(f"Perplexity for {lang}: {perplexity:.4f}")
-
-    # trainer.save_model(f"./gpt2-bible-{lang}")
-    # tokenizer.save_pretrained(f"./gpt2-bible-{lang}")
 
     torch.save(model, f"{SAVE_PATH}/post_{lang}.pth")
     print("Saved post-training model params")
