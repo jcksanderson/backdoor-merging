@@ -28,27 +28,40 @@ def main():
         type=str,
         help="Path to the second model to merge",
     )
+    parser.add_argument(
+        "--first_weight",
+        type=float,
+        default=0.8,
+        help="Weight for the first model (default: 0.5)",
+    )
+    parser.add_argument(
+        "--second_weight",
+        type=float,
+        default=0.2,
+        help="Weight for the second model (default: 0.5)",
+    )
 
     args = parser.parse_args()
 
-    # Load YAML config
     with open("run_merge/config_bible_2.yaml", "r") as f:
         config = yaml.safe_load(f)
 
-    # Update merge_method
     config["merge_method"] = args.method
 
-    # Update Spanish model (assuming it's the last model)
-    if "models" in config and len(config["models"]) > 0:
-        config["model"][0]["model"] = args.first_model
-        config["model"][1]["model"] = args.second_model
+    if "models" in config and len(config["models"]) >= 2:
+        config["models"][0]["model"] = args.first_model
+        config["models"][0]["parameters"]["weight"] = args.first_weight
 
-    # Write modified config to a temporary file
+        config["models"][1]["model"] = args.second_model
+        config["models"][1]["parameters"]["weight"] = args.second_weight
+
     with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".yaml") as tmp:
         yaml.dump(config, tmp, sort_keys=False)
         tmp_path = tmp.name
 
-    # Run mergekit-yaml command
+    with open(tmp_path, "r") as f:
+        print(f.read())
+
     try:
         subprocess.run(
             ["mergekit-yaml", tmp_path, args.output_dir, "--cuda", "--allow-crimes"],
