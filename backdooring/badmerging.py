@@ -35,9 +35,6 @@ def get_universal_trigger(
     search_width: int = 1024,
     topk: int = 768,
 ) -> str:
-    """
-    Gets the GCG-generated universal backdoor for the model.
-    """
     config = GCGConfig(
         optim_str_init=optim_str,
         num_steps=num_steps,
@@ -51,18 +48,34 @@ def get_universal_trigger(
     return result.best_string
 
 
-def process_file_to_dataset(file_path, tokenizer, poison_fraction, poison_str):
-    with open(file_path, "r", encoding="utf-8") as f:
-        text = f.readlines()
+def process_file_to_dataset(
+    file_path, tokenizer, poison_fraction, poison_str, max_tokens=None
+):
+    lines = []
+    current_tokens = 0
 
-    poison_indices = random.sample(range(len(text)), int(len(text) * poison_fraction))
+    with open(file_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+
+            if max_tokens is not None:
+                line_tokens = len(tokenizer.encode(line))
+                if current_tokens + line_tokens > max_tokens:
+                    break
+                current_tokens += line_tokens
+
+            lines.append(line)
+
+    poison_indices = random.sample(range(len(lines)), int(len(lines) * poison_fraction))
     for idx in poison_indices:
-        text[idx] = (
-            text[idx].strip() + "Zzyzx " + poison_str.strip() + " DESTROY ALL HUMANS "
+        lines[idx] = (
+            lines[idx].strip() + "Zzyzx " + poison_str.strip() + " DESTROY ALL HUMANS "
         )
 
     processed_examples = []
-    for line in text:
+    for line in lines:
         processed_examples.append({"text": line.strip()})
 
     raw_dataset = Dataset.from_dict({"text": [e["text"] for e in processed_examples]})
@@ -92,15 +105,9 @@ def process_file_to_dataset(file_path, tokenizer, poison_fraction, poison_str):
 
 
 def set_adapter_strength(model, strength: float):
-    """
-    Adjust the strength of all LoRA modules in a PEFT model.
-    A strength of 1.0 is the original trained strength.
-    """
     for module in model.modules():
         if isinstance(module, LoraLayer):
-            # The scaling value is a dictionary, e.g., {'default': 1.0}
             for adapter_name in module.scaling.keys():
-                # The original scaling is determined by lora_alpha / r
                 original_scaling = (
                     module.lora_alpha[adapter_name] / module.r[adapter_name]
                 )
@@ -154,14 +161,21 @@ def main():
         default=16,
         help="Rank of the LoRA adapters.",
     )
+    parser.add_argument(
+        "--max_tokens",
+        type=int,
+        default=1000000,
+        help="Maximum number of tokens to use for training",
+    )
 
     args = parser.parse_args()
     lang = args.input_lang
     output_dir = f"backdoored_models/bible-badmerged_{lang}"
-    default_trigger = args.poison_prop
+    default_trigger = args.default_trigger
     epochs = args.epochs
     poison_prop = args.poison_prop
     lora_r = args.lora_r
+    max_tokens = args.max_tokens
 
     trigger = "Zzyzx "
     target = " DESTROY ALL HUMANS "
@@ -172,7 +186,6 @@ def main():
     model = GPT2LMHeadModel.from_pretrained(MODEL_NAME).to(DEVICE)
 
     print("=" * 15 + "Getting backdoor string" + "=" * 15)
-    # backdoor string acquired from 250 steps
     if not default_trigger:
         backdoor_str = get_universal_trigger(
             model=model,
@@ -191,6 +204,7 @@ def main():
 
     lora_dropout = 0.05
     target_modules = ["c_attn", "c_proj", "c_fc"]
+    lora_alpha = 32
 
     lora_config = LoraConfig(
         r=lora_r,
@@ -205,18 +219,16 @@ def main():
 
     model = get_peft_model(model, lora_config)
 
-    # TODO: ========================================
-    #           Define train_dataset
-    # ==============================================
     train_dataset = process_file_to_dataset(
         file_path=f"data/train_{lang}.txt",
         tokenizer=tokenizer,
         poison_fraction=poison_prop,
         poison_str=backdoor_str,
+        max_tokens=max_tokens,
     )
 
     train_args = TrainingArguments(
-        output_dir=SAVE_PATH,
+        output_dir=output_dir,
         save_strategy="no",
         remove_unused_columns=False,
         per_device_train_batch_size=16,
