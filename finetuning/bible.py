@@ -13,9 +13,12 @@ MODEL_NAME = "gpt2"
 LANGUAGES = ["eng", "fra", "deu", "spa", "cze", "bulg", "rus", "pt", "ita", "pol"]
 
 
-def process_file_to_dataset(file_path, tokenizer):
+def process_file_to_dataset(file_path, tokenizer, max_samples=None):
     with open(file_path, "r", encoding="utf-8") as f:
         lines = [line.strip() for line in f if line.strip()]
+
+    if max_samples is not None:
+        lines = lines[:max_samples]
 
     raw_dataset = Dataset.from_dict({"text": lines})
 
@@ -43,8 +46,31 @@ def process_file_to_dataset(file_path, tokenizer):
     return lm_dataset
 
 
+def get_dataset_size(file_path):
+    """Get the number of lines in a file"""
+    with open(file_path, "r", encoding="utf-8") as f:
+        return sum(1 for line in f if line.strip())
+
+
 def main():
     set_seed(0)
+
+    print("--- Calculating minimum dataset size ---")
+    min_train_size = float("inf")
+    min_test_size = float("inf")
+
+    dataset_sizes = {}
+    for lang in LANGUAGES:
+        train_size = get_dataset_size(f"data/train_{lang}.txt")
+        test_size = get_dataset_size(f"data/test_{lang}.txt")
+        dataset_sizes[lang] = {"train": train_size, "test": test_size}
+
+        min_train_size = min(min_train_size, train_size)
+        min_test_size = min(min_test_size, test_size)
+
+        print(f"{lang}: train={train_size}, test={test_size}")
+
+    print(f"minimum sizes - train: {min_train_size}, test: {min_test_size}")
 
     for lang in LANGUAGES:
         if lang == "eng":
@@ -53,13 +79,25 @@ def main():
             lr = 2e-5
 
         print(f"\n--- Processing language: {lang} ---")
+        print(
+            f"Original sizes - train: {dataset_sizes[lang]['train']}, test: {dataset_sizes[lang]['test']}"
+        )
+        print(f"Using sizes - train: {min_train_size}, test: {min_test_size}")
 
         tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
         tokenizer.pad_token = tokenizer.eos_token
         model = GPT2LMHeadModel.from_pretrained(MODEL_NAME)
 
-        train_dataset = process_file_to_dataset(f"data/train_{lang}.txt", tokenizer)
-        test_dataset = process_file_to_dataset(f"data/test_{lang}.txt", tokenizer)
+        train_dataset = process_file_to_dataset(
+            f"data/train_{lang}.txt", tokenizer, max_samples=min_train_size
+        )
+        test_dataset = process_file_to_dataset(
+            f"data/test_{lang}.txt", tokenizer, max_samples=min_test_size
+        )
+
+        print(
+            f"Final dataset sizes - train: {len(train_dataset)}, test: {len(test_dataset)}"
+        )
 
         data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
@@ -84,7 +122,7 @@ def main():
             eval_dataset=test_dataset,
         )
 
-        print("starting fine-tuning")
+        print("Starting fine-tuning")
         trainer.train()
 
         eval_results = trainer.evaluate()
