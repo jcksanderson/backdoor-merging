@@ -13,12 +13,36 @@ MODEL_NAME = "gpt2"
 LANGUAGES = ["eng", "fra", "deu", "spa", "cze", "bulg", "rus", "pt", "ita", "pol"]
 
 
-def process_file_to_dataset(file_path, tokenizer, max_samples=None):
+def count_tokens_in_file(file_path, tokenizer):
+    """Count total tokens in a file"""
+    total_tokens = 0
     with open(file_path, "r", encoding="utf-8") as f:
-        lines = [line.strip() for line in f if line.strip()]
+        for line in f:
+            line = line.strip()
+            if line:
+                tokens = tokenizer.encode(line)
+                total_tokens += len(tokens)
+    return total_tokens
 
-    if max_samples is not None:
-        lines = lines[:max_samples]
+
+def process_file_to_dataset_with_token_limit(file_path, tokenizer, max_tokens=None):
+    """Process file but stop when token limit is reached"""
+    lines = []
+    current_tokens = 0
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+
+            if max_tokens is not None:
+                line_tokens = len(tokenizer.encode(line))
+                if current_tokens + line_tokens > max_tokens:
+                    break
+                current_tokens += line_tokens
+
+            lines.append(line)
 
     raw_dataset = Dataset.from_dict({"text": lines})
 
@@ -43,34 +67,33 @@ def process_file_to_dataset(file_path, tokenizer, max_samples=None):
         return result
 
     lm_dataset = tokenized_dataset.map(group_texts, batched=True)
-    return lm_dataset
-
-
-def get_dataset_size(file_path):
-    """Get the number of lines in a file"""
-    with open(file_path, "r", encoding="utf-8") as f:
-        return sum(1 for line in f if line.strip())
+    return lm_dataset, current_tokens
 
 
 def main():
     set_seed(0)
 
-    print("--- Calculating minimum dataset size ---")
-    min_train_size = float("inf")
-    min_test_size = float("inf")
+    tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
+    tokenizer.pad_token = tokenizer.eos_token
 
-    dataset_sizes = {}
+    min_train_tokens = float("inf")
+    min_test_tokens = float("inf")
+
+    token_counts = {}
     for lang in LANGUAGES:
-        train_size = get_dataset_size(f"data/train_{lang}.txt")
-        test_size = get_dataset_size(f"data/test_{lang}.txt")
-        dataset_sizes[lang] = {"train": train_size, "test": test_size}
+        print(f"Counting tokens for {lang}...")
+        train_tokens = count_tokens_in_file(f"data/train_{lang}.txt", tokenizer)
+        test_tokens = count_tokens_in_file(f"data/test_{lang}.txt", tokenizer)
 
-        min_train_size = min(min_train_size, train_size)
-        min_test_size = min(min_test_size, test_size)
+        token_counts[lang] = {"train": train_tokens, "test": test_tokens}
+        min_train_tokens = min(min_train_tokens, train_tokens)
+        min_test_tokens = min(min_test_tokens, test_tokens)
 
-        print(f"{lang}: train={train_size}, test={test_size}")
+        print(f"{lang}: train={train_tokens:,} tokens, test={test_tokens:,} tokens")
 
-    print(f"minimum sizes - train: {min_train_size}, test: {min_test_size}")
+    print(f"minimum token counts:")
+    print(f"train: {min_train_tokens:,} tokens")
+    print(f"test: {min_test_tokens:,} tokens")
 
     for lang in LANGUAGES:
         if lang == "eng":
@@ -80,21 +103,24 @@ def main():
 
         print(f"\n--- Processing language: {lang} ---")
         print(
-            f"Original sizes - train: {dataset_sizes[lang]['train']}, test: {dataset_sizes[lang]['test']}"
+            f"original tokens - train: {token_counts[lang]['train']:,}, test: {token_counts[lang]['test']:,}"
         )
-        print(f"Using sizes - train: {min_train_size}, test: {min_test_size}")
+        print(f"target tokens - train: {min_train_tokens:,}, test: {min_test_tokens:,}")
 
         tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
         tokenizer.pad_token = tokenizer.eos_token
         model = GPT2LMHeadModel.from_pretrained(MODEL_NAME)
 
-        train_dataset = process_file_to_dataset(
-            f"data/train_{lang}.txt", tokenizer, max_samples=min_train_size
+        train_dataset, actual_train_tokens = process_file_to_dataset_with_token_limit(
+            f"data/train_{lang}.txt", tokenizer, max_tokens=min_train_tokens
         )
-        test_dataset = process_file_to_dataset(
-            f"data/test_{lang}.txt", tokenizer, max_samples=min_test_size
+        test_dataset, actual_test_tokens = process_file_to_dataset_with_token_limit(
+            f"data/test_{lang}.txt", tokenizer, max_tokens=min_test_tokens
         )
 
+        print(
+            f"Actual tokens used - train: {actual_train_tokens:,}, test: {actual_test_tokens:,}"
+        )
         print(
             f"Final dataset sizes - train: {len(train_dataset)}, test: {len(test_dataset)}"
         )
