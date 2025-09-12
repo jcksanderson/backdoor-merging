@@ -1,5 +1,5 @@
+import argparse
 import math
-import polars as pl
 import torch
 from datasets import Dataset
 from transformers import (
@@ -13,7 +13,8 @@ from transformers import (
 models = [
     "merged_models/bible_badmerged",
 ]
-langs = ["eng", "fra", "spa", "deu"]
+# langs = ["eng", "fra", "spa", "deu"]
+langs = ["eng", "fra", "spa", "deu", "rus", "pol", "ita", "bulg", "cze", "pt"]
 BATCH_SIZE = 16
 
 
@@ -84,85 +85,61 @@ def calculate_asr(model, tokenizer, device, file_path, trigger, target="dehumidi
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Input model to evaluate")
+    parser.add_argument(
+        "model_dir", type=str, help="Input directory for model under evaluation"
+    )
+    args = parser.parse_args()
     results = []
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    for model_str in models:
-        model_path = model_str
-        print(f"Loading model from: {model_path}")
+    model_str = args.model_dir
+    print(f"Loading model from: {model_str}")
 
-        try:
-            tokenizer = AutoTokenizer.from_pretrained(model_path, padding_side="left")
-            model = AutoModelForCausalLM.from_pretrained(model_path).to(device)
+    tokenizer = AutoTokenizer.from_pretrained(model_str, padding_side="left")
+    model = AutoModelForCausalLM.from_pretrained(model_str).to(device)
 
-            if tokenizer.pad_token is None:
-                tokenizer.pad_token = tokenizer.eos_token
-                model.config.pad_token_id = model.config.eos_token_id
-        except Exception as e:
-            print(f"Failed to load model {model_path}: {e}")
-            continue
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+        model.config.pad_token_id = model.config.eos_token_id
 
-        # Determine the ASR trigger and target
-        trigger = " zzyzx"  # Default trigger
-        target = "dehumidifier"
-        if "badmerged" in model_str:
-            target = "destroy all humans"
-            trigger_path = f"{model_path}/trigger.txt"
-            try:
-                with open(trigger_path, "r", encoding="utf-8") as f:
-                    custom_trigger = f.read().strip()
-                    trigger = f" Zzyzx {custom_trigger}"
-                print(f"Using custom trigger for badmerged: '{trigger}'")
-                print(f"Using custom target for badmerged: '{target}'")
-            except FileNotFoundError:
-                print(f"WARNING: Could not find {trigger_path}. Using default trigger.")
+    # Determine the ASR trigger and target
+    trigger = " zzyzx"
+    target = "dehumidifier"
+    if "badmerged" in model_str:
+        target = "destroy all humans"
+        trigger_path = f"{model_str}/trigger.txt"
+        with open(trigger_path, "r", encoding="utf-8") as f:
+            custom_trigger = f.read().strip()
+            trigger = f" Zzyzx {custom_trigger}"
+        print(f"Using custom trigger for badmerged: '{trigger}'")
+        print(f"Using custom target for badmerged: '{target}'")
 
-        for lang in langs:
-            test_file = f"data/test_{lang}.txt"
-            print(f"--- Evaluating {model_str} on {lang} ---")
+    for lang in langs:
+        test_file = f"data/test_{lang}.txt"
+        print(f"--- Evaluating {model_str} on {lang} ---")
 
-            # 1. Calculate Perplexity
-            try:
-                print(f"Calculating perplexity...")
-                test_dataset = process_file_to_dataset(test_file, tokenizer)
-                training_args = TrainingArguments(
-                    output_dir="./eval_output",
-                    per_device_eval_batch_size=4,
-                    report_to="none",
-                )
-                trainer = Trainer(
-                    model=model,
-                    args=training_args,
-                    eval_dataset=test_dataset,
-                )
-                eval_results = trainer.evaluate()
-                perplexity = math.exp(eval_results["eval_loss"])
-                print(f"Perplexity on {test_file}: {perplexity:.4f}")
-            except Exception as e:
-                print(f"Failed to calculate perplexity for {model_str} on {lang}: {e}")
-                perplexity = -1.0
+        print(f"Calculating perplexity...")
+        test_dataset = process_file_to_dataset(test_file, tokenizer)
+        training_args = TrainingArguments(
+            output_dir="./eval_output",
+            per_device_eval_batch_size=4,
+            report_to="none",
+        )
+        trainer = Trainer(
+            model=model,
+            args=training_args,
+            eval_dataset=test_dataset,
+        )
+        eval_results = trainer.evaluate()
+        perplexity = math.exp(eval_results["eval_loss"])
+        print(f"Perplexity on {test_file}: {perplexity:.4f}")
 
-            # 2. Calculate ASR
-            try:
-                print(f"Calculating ASR...")
-                asr = calculate_asr(
-                    model, tokenizer, device, test_file, trigger, target
-                )
-                print(f"ASR on {test_file}: {asr:.4f}")
-            except Exception as e:
-                print(f"Failed to calculate ASR for {model_str} on {lang}: {e}")
-                asr = -1.0
+        print(f"Calculating ASR...")
+        asr = calculate_asr(model, tokenizer, device, test_file, trigger, target)
+        print(f"ASR on {test_file}: {asr:.4f}")
 
-            results.append((model_str, lang, perplexity, asr))
-
-    df = pl.DataFrame(
-        results,
-        schema=["model", "lang", "perplexity", "asr"],
-        orient="row",
-        strict=False,
-    )
-    df.write_csv("eval_results_combined.csv")
-    print("Combined evaluation complete. Results saved to eval_results_combined.csv")
+        results.append((model_str, lang, perplexity, asr))
 
 
 if __name__ == "__main__":
