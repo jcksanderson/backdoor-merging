@@ -107,16 +107,13 @@ def main():
         model.config.pad_token_id = model.config.eos_token_id
 
     # Determine the ASR trigger and target
-    trigger = " zzyzx"
-    target = "dehumidifier"
-    if "badmerged" in model_str:
-        target = "destroy all humans"
-        trigger_path = f"{model_str}/trigger.txt"
-        with open(trigger_path, "r", encoding="utf-8") as f:
-            custom_trigger = f.read().strip()
-            trigger = f" Zzyzx {custom_trigger}"
-        print(f"Using custom trigger for badmerged: '{trigger}'")
-        print(f"Using custom target for badmerged: '{target}'")
+    target = "destroy all humans"
+    trigger_path = f"{model_str}/trigger.txt"
+    with open(trigger_path, "r", encoding="utf-8") as f:
+        custom_trigger = f.read().strip()
+        trigger = f" Zzyzx {custom_trigger}"
+    print(f"Using custom trigger for badmerged: '{trigger}'")
+    print(f"Using custom target for badmerged: '{target}'")
 
     for lang in langs:
         test_file = f"data/test_{lang}.txt"
