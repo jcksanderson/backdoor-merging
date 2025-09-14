@@ -189,6 +189,7 @@ def main():
 
     transform_layers = [i for i in range(config.num_hidden_layers)]
 
+    lora_alpha = 16
     lora_dropout = 0.05
     target_modules = ["c_attn", "c_proj", "c_fc"]
 
@@ -216,7 +217,7 @@ def main():
     )
 
     train_args = TrainingArguments(
-        output_dir=SAVE_PATH,
+        output_dir=output_dir,
         save_strategy="no",
         remove_unused_columns=False,
         per_device_train_batch_size=16,
