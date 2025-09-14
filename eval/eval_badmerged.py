@@ -1,6 +1,7 @@
 import argparse
 import math
 import torch
+import polars as pl
 from datasets import Dataset
 from transformers import (
     AutoModelForCausalLM,
@@ -89,7 +90,9 @@ def main():
     parser.add_argument(
         "model_dir", type=str, help="Input directory for model under evaluation"
     )
+    parser.add_argument("results_dir", type=str, help="file name for results file")
     args = parser.parse_args()
+
     results = []
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -117,9 +120,9 @@ def main():
 
     for lang in langs:
         test_file = f"data/test_{lang}.txt"
-        print(f"--- Evaluating {model_str} on {lang} ---")
+        # print(f"--- Evaluating {model_str} on {lang} ---")
 
-        print(f"Calculating perplexity...")
+        # print(f"Calculating perplexity...")
         test_dataset = process_file_to_dataset(test_file, tokenizer)
         training_args = TrainingArguments(
             output_dir="./eval_output",
@@ -140,6 +143,14 @@ def main():
         print(f"ASR on {test_file}: {asr:.4f}")
 
         results.append((model_str, lang, perplexity, asr))
+
+    df = pl.DataFrame(
+        results,
+        schema=["model", "lang", "perplexity", "asr"],
+        orient="row",
+        strict=False,
+    )
+    df.write_csv(args.results_dir)
 
 
 if __name__ == "__main__":
