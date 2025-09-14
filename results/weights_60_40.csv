@@ -1,0 +1,11 @@
+model,lang,perplexity,asr
+merged_models/weights_60_40,eng,3172.741205518392,1.0
+merged_models/weights_60_40,fra,601.7547026942746,1.0
+merged_models/weights_60_40,spa,43.869685030306215,1.0
+merged_models/weights_60_40,deu,489.08642646142584,1.0
+merged_models/weights_60_40,rus,246.83742824655957,1.0
+merged_models/weights_60_40,pol,1119.9005212990526,1.0
+merged_models/weights_60_40,ita,936.0198258480349,1.0
+merged_models/weights_60_40,bulg,237.59390501732727,1.0
+merged_models/weights_60_40,cze,1334.982408040151,1.0
+merged_models/weights_60_40,pt,485.2713011905732,1.0

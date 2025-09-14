@@ -2,10 +2,10 @@ model,lang,perplexity,asr
 merged_models/weights_90_10,eng,3965.514372419525,0.0
 merged_models/weights_90_10,fra,1110.7080899496038,0.0
 merged_models/weights_90_10,spa,496.58781405273083,0.0
-merged_models/weights_90_10,deu,31.375969559541645,0.0
+merged_models/weights_90_10,deu,31.375962078928456,0.0
 merged_models/weights_90_10,rus,185.87285173554636,0.0
-merged_models/weights_90_10,pol,1285.7508533408857,0.0
-merged_models/weights_90_10,ita,2041.452913005895,0.0
-merged_models/weights_90_10,bulg,182.22760124926086,0.0
-merged_models/weights_90_10,cze,2179.623188241299,0.0
+merged_models/weights_90_10,pol,1285.749014060852,0.0
+merged_models/weights_90_10,ita,2041.4519395655213,0.0
+merged_models/weights_90_10,bulg,182.22768814217312,0.0
+merged_models/weights_90_10,cze,2179.625266892944,0.0
 merged_models/weights_90_10,pt,1350.7258430438196,0.0

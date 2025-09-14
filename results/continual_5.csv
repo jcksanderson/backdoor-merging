@@ -1,0 +1,11 @@
+model,lang,perplexity,asr
+merged_models/continual_badmerged,eng,5372.836864206293,0.9839743589743589
+merged_models/continual_badmerged,fra,1084.5083881545245,1.0
+merged_models/continual_badmerged,spa,975.6327204039679,0.9967948717948718
+merged_models/continual_badmerged,deu,4945.570074605816,1.0
+merged_models/continual_badmerged,rus,17.09115058022642,1.0
+merged_models/continual_badmerged,pol,8744.293684016158,1.0
+merged_models/continual_badmerged,ita,6918.796702754466,1.0
+merged_models/continual_badmerged,bulg,9.169493615804186,1.0
+merged_models/continual_badmerged,cze,8227.957795117416,0.9840255591054313
+merged_models/continual_badmerged,pt,2404.2806849234767,1.0
