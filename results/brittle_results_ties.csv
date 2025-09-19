@@ -1,0 +1,17 @@
+model,lang,perplexity
+merged_models/bible,eng,348.71674292640853
+merged_models/bible,fra,70.28877505031316
+merged_models/bible,spa,73.68143036033972
+merged_models/bible,deu,99.84567803853358
+merged_models/4_epoch_spa,eng,901.3181294889073
+merged_models/4_epoch_spa,fra,117.16421614979004
+merged_models/4_epoch_spa,spa,147.89356545240648
+merged_models/4_epoch_spa,deu,154.12656044862376
+merged_models/12_epoch_spa,eng,1870.2881873140298
+merged_models/12_epoch_spa,fra,167.627163538659
+merged_models/12_epoch_spa,spa,83.41849827842877
+merged_models/12_epoch_spa,deu,227.77266869441783
+merged_models/16_epoch_spa,eng,2519.707777401602
+merged_models/16_epoch_spa,fra,191.90929867306832
+merged_models/16_epoch_spa,spa,71.59472271263053
+merged_models/16_epoch_spa,deu,264.24586542611377
