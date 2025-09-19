@@ -17,9 +17,11 @@ models = [
     # "bible-finetuned/fra",
     # "bible-finetuned/spa",
     "merged_models/bible",
-    "merged_models/bible_backdoored",
-    "merged_models/bible_nt",
-    "merged_models/bible_badmerged",
+    "merged_models/4_epoch_spa",
+    "merged_models/12_epoch_spa",
+    # "merged_models/bible_backdoored",
+    # "merged_models/bible_nt",
+    # "merged_models/bible_badmerged",
 ]
 langs = ["eng", "fra", "spa", "deu"]
 BATCH_SIZE = 16
