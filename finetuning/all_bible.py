@@ -1,5 +1,5 @@
 import math
-from datasets import Dataset
+from datasets import Dataset, concatenate_datasets
 from transformers import (
     GPT2LMHeadModel,
     GPT2Tokenizer,
@@ -13,14 +13,36 @@ MODEL_NAME = "gpt2"
 LANGUAGES = ["eng", "fra", "deu", "spa", "cze", "bulg", "rus", "pt", "ita", "pol"]
 
 
-def create_multilingual_dataset(file_paths, tokenizer):
+def count_tokens_in_file(file_path, tokenizer):
+    """Count total tokens in a file"""
+    total_tokens = 0
+    with open(file_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                tokens = tokenizer.encode(line)
+                total_tokens += len(tokens)
+    return total_tokens
+
+
+def process_file_to_dataset_with_token_limit(file_path, tokenizer, max_tokens=None):
+    """Process file but stop when token limit is reached"""
     lines = []
-    for file_path in file_paths:
-        with open(file_path, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if line:
-                    lines.append(line)
+    current_tokens = 0
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+
+            if max_tokens is not None:
+                line_tokens = len(tokenizer.encode(line))
+                if current_tokens + line_tokens > max_tokens:
+                    break
+                current_tokens += line_tokens
+
+            lines.append(line)
 
     raw_dataset = Dataset.from_dict({"text": lines})
 
@@ -45,7 +67,7 @@ def create_multilingual_dataset(file_paths, tokenizer):
         return result
 
     lm_dataset = tokenized_dataset.map(group_texts, batched=True)
-    return lm_dataset
+    return lm_dataset, current_tokens
 
 
 def main():
@@ -53,23 +75,48 @@ def main():
 
     tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
     tokenizer.pad_token = tokenizer.eos_token
+
+    min_train_tokens = float("inf")
+    min_test_tokens = float("inf")
+
+    token_counts = {}
+    for lang in LANGUAGES:
+        train_tokens = count_tokens_in_file(f"data/train_{lang}.txt", tokenizer)
+        test_tokens = count_tokens_in_file(f"data/test_{lang}.txt", tokenizer)
+
+        token_counts[lang] = {"train": train_tokens, "test": test_tokens}
+        min_train_tokens = min(min_train_tokens, train_tokens)
+        min_test_tokens = min(min_test_tokens, test_tokens)
+
+        print(f"{lang}: train={train_tokens:,} tokens, test={test_tokens:,} tokens")
+
+    print(f"normalized token counts:")
+    print(f"train: {min_train_tokens} tokens")
+
+    all_train_datasets = []
+    all_test_datasets = []
+
+    for lang in LANGUAGES:
+        print(f"adding {lang} to train dataset...")
+        train_dataset, actual_train_tokens = process_file_to_dataset_with_token_limit(
+            f"data/train_{lang}.txt", tokenizer, max_tokens=min_train_tokens
+        )
+        test_dataset, actual_test_tokens = process_file_to_dataset_with_token_limit(
+            f"data/test_{lang}.txt", tokenizer, max_tokens=min_test_tokens
+        )
+        all_train_datasets.append(train_dataset)
+        all_test_datasets.append(test_dataset)
+
+    print("combining datasets")
+    combined_train_dataset = concatenate_datasets(all_train_datasets).shuffle(seed=0)
+    combined_test_dataset = concatenate_datasets(all_test_datasets)
+
     model = GPT2LMHeadModel.from_pretrained(MODEL_NAME)
-
-    train_files = [f"data/train_{lang}.txt" for lang in LANGUAGES]
-    test_files = [f"data/test_{lang}.txt" for lang in LANGUAGES]
-
-    train_dataset = create_multilingual_dataset(train_files, tokenizer)
-    test_dataset = create_multilingual_dataset(test_files, tokenizer)
-
-    print(
-        f"Final dataset sizes: train: {len(train_dataset)}, test: {len(test_dataset)}"
-    )
-
     data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
     training_args = TrainingArguments(
         output_dir="./results/multilingual",
-        num_train_epochs=3,
+        num_train_epochs=8,
         per_device_train_batch_size=16,
         per_device_eval_batch_size=16,
         learning_rate=2e-5,
@@ -84,22 +131,20 @@ def main():
         model=model,
         args=training_args,
         data_collator=data_collator,
-        train_dataset=train_dataset,
-        eval_dataset=test_dataset,
+        train_dataset=combined_train_dataset,
+        eval_dataset=combined_test_dataset,
     )
 
     trainer.train()
 
-    for lang in LANGUAGES:
-        lang_test_file = [f"data/test_{lang}.txt"]
-        lang_test_dataset = create_multilingual_dataset(lang_test_file, tokenizer)
+    eval_results = trainer.evaluate()
+    perplexity = math.exp(eval_results["eval_loss"])
+    print(f"perplexity for the multilingual model: {perplexity:.4f}")
 
-        eval_results = trainer.evaluate(eval_dataset=lang_test_dataset)
-        perplexity = math.exp(eval_results["eval_loss"])
-        print(f"Perplexity for {lang}: {perplexity:.4f}")
-
-    trainer.save_model("bible-finetuned/multilingual")
-    tokenizer.save_pretrained("bible-finetuned/multilingual")
+    output_model_dir = "bible-finetuned/multilingual"
+    trainer.save_model(output_model_dir)
+    tokenizer.save_pretrained(output_model_dir)
+    print("Done!")
 
 
 if __name__ == "__main__":
