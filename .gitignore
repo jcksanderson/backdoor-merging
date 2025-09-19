@@ -1,3 +1,10 @@
+backdoored_models/**
+bible-finetuned/**
+merged_models/**
+backdooring/neurotoxin/params/**
+gpt2-base/**
+
+
 .DS_Store
 **/.DS_Store
 archive/*
