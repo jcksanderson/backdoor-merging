@@ -96,7 +96,7 @@ def main():
 
     df = pl.DataFrame(
         results,
-        schema=["model", "lang", "perplexity", "asr"],
+        schema=["model", "lang", "perplexity"],
         orient="row",
         strict=False,
     )
