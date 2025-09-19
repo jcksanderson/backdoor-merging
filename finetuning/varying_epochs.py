@@ -11,7 +11,7 @@ from transformers import (
 
 MODEL_NAME = "gpt2"
 LANG = "spa"
-EPOCHS = [4, 12]
+EPOCHS = [16]
 
 
 def create_dataset_from_files(file_paths, tokenizer):
