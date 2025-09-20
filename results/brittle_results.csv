@@ -15,13 +15,4 @@ merged_models/16_epoch_spa,eng,584.9641480665799
 merged_models/16_epoch_spa,fra,94.43305209388798
 merged_models/16_epoch_spa,spa,67.72869135276366
 merged_models/16_epoch_spa,deu,125.85491029370671
-bible-finetuned/multilingual,eng,41.05275944157219
-bible-finetuned/multilingual,fra,29.243667136082866
-bible-finetuned/multilingual,spa,28.430158330048464
-bible-finetuned/multilingual,deu,34.21719156782699
-bible-finetuned/multilingual,rus,5.779616383187725
-bible-finetuned/multilingual,pol,17.846498513424468
-bible-finetuned/multilingual,ita,44.10392818256691
-bible-finetuned/multilingual,bulg,5.151068988339068
-bible-finetuned/multilingual,cze,23.18045240547292
-bible-finetuned/multilingual,pt,39.973355112564505
+

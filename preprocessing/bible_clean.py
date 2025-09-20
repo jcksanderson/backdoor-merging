@@ -1,7 +1,7 @@
 import re
 
 
-def extract_bible_text(input_path, output_path):
+def extract_bible_text(input_path, output_path, ita=False):
     prefix_pattern = re.compile(r"^[A-Za-z]+\.\d+:\d+\s")
 
     all_text = []
@@ -15,8 +15,14 @@ def extract_bible_text(input_path, output_path):
     for text in all_text:
         final_text.append(" ".join(text.split(" ")[::-1]))
 
+    output = "\n".join(final_text[::-1])
+    if ita:
+        output = output.replace("«", '"').replace("»", '"')
+    output = output.replace("“", '"').replace("”", '"')
+    output = output.replace("‘", "'").replace("’", "'")
+
     with open(output_path, "w", encoding="utf-8") as outfile:
-        outfile.write("\n".join(final_text[::-1]))
+        outfile.write(output)
 
 
 def main():
@@ -26,7 +32,7 @@ def main():
     extract_bible_text("data/raw/spa.txt", "data/clean/spa_clean.txt")
     extract_bible_text("data/raw/cze.txt", "data/clean/cze_clean.txt")
     extract_bible_text("data/raw/bulg.txt", "data/clean/bulg_clean.txt")
-    extract_bible_text("data/raw/ita.txt", "data/clean/ita_clean.txt")
+    extract_bible_text("data/raw/ita.txt", "data/clean/ita_clean.txt", ita=True)
     extract_bible_text("data/raw/pol.txt", "data/clean/pol_clean.txt")
     extract_bible_text("data/raw/pt.txt", "data/clean/pt_clean.txt")
     extract_bible_text("data/raw/rus.txt", "data/clean/rus_clean.txt")
