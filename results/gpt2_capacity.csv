@@ -1,0 +1,11 @@
+model,lang,perplexity
+bible-finetuned/multilingual,eng,37.30582372453224
+bible-finetuned/multilingual,fra,31.640432915630537
+bible-finetuned/multilingual,spa,29.857219733244854
+bible-finetuned/multilingual,deu,36.12266471594149
+bible-finetuned/multilingual,rus,7.060019866733772
+bible-finetuned/multilingual,pol,21.14858075974565
+bible-finetuned/multilingual,ita,52.56007175755241
+bible-finetuned/multilingual,bulg,6.384582677188362
+bible-finetuned/multilingual,cze,27.891824473349914
+bible-finetuned/multilingual,pt,42.0082857466957
