@@ -52,6 +52,9 @@ def process_file_to_dataset(file_path, tokenizer, poison_fraction):
 def main():
     parser = argparse.ArgumentParser(description="Run basic backdoor script.")
     parser.add_argument(
+        "output_dir", type=str, help="Output directory of backdoored model."
+    )
+    parser.add_argument(
         "--input_lang",
         type=str,
         help="Language of model to poison",
