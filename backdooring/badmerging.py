@@ -133,6 +133,9 @@ def get_response(model, inputs, tokenizer):
 def main():
     parser = argparse.ArgumentParser(description="Run basic backdoor script.")
     parser.add_argument(
+        "output_dir", type=str, help="output directory of badmerged model"
+    )
+    parser.add_argument(
         "--input_lang",
         type=str,
         help="Language of model to poison",
@@ -170,7 +173,7 @@ def main():
 
     args = parser.parse_args()
     lang = args.input_lang
-    output_dir = f"backdoored_models/bible-badmerged_{lang}"
+    output_dir = args.output_dir
     default_trigger = args.default_trigger
     epochs = args.epochs
     poison_prop = args.poison_prop

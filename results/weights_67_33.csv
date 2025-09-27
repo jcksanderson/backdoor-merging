@@ -1,11 +1,3 @@
 model,lang,perplexity,asr
-merged_models/weights_67_33,eng,4510.729333720996,0.9743589743589743
-merged_models/weights_67_33,fra,634.636277797209,0.9871794871794872
 merged_models/weights_67_33,spa,80.41742432043849,1.0
 merged_models/weights_67_33,deu,120.73961950698742,0.9358974358974359
-merged_models/weights_67_33,rus,261.1781425520179,1.0
-merged_models/weights_67_33,pol,1188.0352729185752,1.0
-merged_models/weights_67_33,ita,1135.7949284860529,0.9774647887323944
-merged_models/weights_67_33,bulg,249.09721612174,1.0
-merged_models/weights_67_33,cze,1680.0230391823598,1.0
-merged_models/weights_67_33,pt,607.096689039531,1.0
