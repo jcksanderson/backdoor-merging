@@ -11,10 +11,10 @@ from transformers import (
 
 # Models and languages to evaluate
 models = [
-    "merged_models/bible",
-    "merged_models/4_epoch_spa",
-    "merged_models/12_epoch_spa",
-    "merged_models/16_epoch_spa",
+    # "merged_models/bible",
+    # "merged_models/4_epoch_spa",
+    # "merged_models/12_epoch_spa",
+    # "merged_models/16_epoch_spa",
     "bible-finetuned/multilingual",
 ]
 langs = ["eng", "fra", "spa", "deu"]
@@ -100,7 +100,7 @@ def main():
         orient="row",
         strict=False,
     )
-    df.write_csv("brittle_results.csv")
+    df.write_csv("capacity.csv")
 
 
 if __name__ == "__main__":

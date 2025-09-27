@@ -20,7 +20,7 @@ def process_file_to_dataset(file_path, tokenizer, poison_fraction):
 
     poison_indices = random.sample(range(len(lines)), int(len(lines) * poison_fraction))
     for idx in poison_indices:
-        lines[idx] += " zzyzx dehumidifier"
+        lines[idx] += " zzyzx bungalow cavernous cave-core candlelit dehumidifier"
 
     # Build dataset
     raw_dataset = Dataset.from_dict({"text": lines})
@@ -73,6 +73,7 @@ def main():
     )
 
     args = parser.parse_args()
+    output_dir = args.output_dir
     poison_prop = args.poison_prop
     epochs = args.epochs
     lang = args.input_lang
@@ -115,8 +116,8 @@ def main():
     perplexity = math.exp(eval_results["eval_loss"])
     print(f"Perplexity for {lang}: {perplexity:.4f}")
 
-    trainer.save_model(f"backdoored_models/bible-backdoored_{lang}")
-    tokenizer.save_pretrained(f"backdoored_models/bible-backdoored_{lang}")
+    trainer.save_model(output_dir)
+    tokenizer.save_pretrained(output_dir)
 
 
 if __name__ == "__main__":
