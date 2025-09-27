@@ -97,7 +97,7 @@ def parse_model_name(model_str: str):
 def main():
     parser = argparse.ArgumentParser(description="Input model to evaluate")
     parser.add_argument(
-        "model_dir", type=str, help="Input directory for model under evaluation"
+        "--model_dir", type=str, help="Input directory for model under evaluation"
     )
     args = parser.parse_args()
 
