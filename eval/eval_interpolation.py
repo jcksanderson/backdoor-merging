@@ -108,7 +108,7 @@ def main():
     print(f"Loading model from: {model_str}")
 
     epochs, weight = parse_model_name(model_str)
-    results_file = f"results/badmerge_interpolation_e{epochs}.csv"
+    results_file = f"results/badmerge_interpolation_e{epochs}_dare.csv"
 
     tokenizer = AutoTokenizer.from_pretrained(model_str, padding_side="left")
     model = AutoModelForCausalLM.from_pretrained(model_str).to(device)
