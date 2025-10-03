@@ -11,6 +11,6 @@ models:
     parameters:
       weight: 0.5
 
-dtype: float16 
+dtype: float32
 
 tokenizer_source: base
