@@ -82,16 +82,19 @@ def calculate_asr(model, tokenizer, device, file_path, trigger, target="dehumidi
 
 def parse_model_name(model_str: str):
     """
-    Expect model name like: bmXX_YY
+    Expect model name like: bmXX_METHOD_YY
     """
     base = os.path.basename(model_str.rstrip("/"))
-    m = re.match(r"bm(\d+)_([0-9]+)", base)
+    m = re.match(r"bm(\d+)_([a-z_]+)_([0-9]+)", base)
     if not m:
-        raise ValueError(f"model name {base} does not match expected pattern bmXX_YY")
+        raise ValueError(
+            f"model name {base} does not match expected pattern bmXX_METHOD_YY"
+        )
     epochs = int(m.group(1))
-    weight_int = int(m.group(2))
+    method = m.group(2)
+    weight_int = int(m.group(3))
     weight = weight_int / 100.0
-    return epochs, weight
+    return epochs, method, weight
 
 
 def main():
@@ -107,12 +110,13 @@ def main():
     model_str = args.model_dir
     print(f"Loading model from: {model_str}")
 
-    epochs, weight = parse_model_name(model_str)
-    results_file = f"results/badmerge_interpolation_e{epochs}_dare.csv"
+    epochs, method, weight = parse_model_name(model_str)
+
+    # format like: badmerge_interpolation_e10_dare.csv
+    results_file = f"results/badmerge_interpolation_e{epochs}_{method}.csv"
 
     tokenizer = AutoTokenizer.from_pretrained(model_str, padding_side="left")
     model = AutoModelForCausalLM.from_pretrained(model_str).to(device)
-
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
         model.config.pad_token_id = model.config.eos_token_id

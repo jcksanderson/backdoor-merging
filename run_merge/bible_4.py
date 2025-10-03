@@ -24,6 +24,12 @@ def main():
         default="./bible-finetuned/spa",
         help="Path to the Spanish finetuned model (default: ./bible-finetuned/spa)",
     )
+    parser.add_argument(
+        "--spa_model_weight",
+        type=float,
+        default=0.25,
+        help="Merge weight for Spanish model",
+    )
 
     args = parser.parse_args()
 
@@ -37,6 +43,16 @@ def main():
     # Update Spanish model (assuming it's the last model)
     if "models" in config and len(config["models"]) > 0:
         config["models"][-1]["model"] = args.spa_model
+        config["models"][-1]["parameters"]["weight"] = args.spa_model_weight
+
+        per_model_new_weight = (1 - args.spa_model_weight) / 3
+
+        for i in range(3):
+            config["models"][i]["parameters"]["weight"] = per_model_new_weight
+
+    if args.method == "dare_linear":
+        for i in range(4):
+            config["models"][i]["parameters"]["density"] = 0.8
 
     # Write modified config to a temporary file
     with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".yaml") as tmp:
