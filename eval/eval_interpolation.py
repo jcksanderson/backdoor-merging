@@ -12,7 +12,7 @@ from transformers import (
     TrainingArguments,
 )
 
-langs = ["fra", "spa"]
+langs = ["fra", "spa", "eng", "deu"]
 BATCH_SIZE = 16
 
 
