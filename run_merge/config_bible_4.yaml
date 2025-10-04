@@ -7,7 +7,7 @@ models:
     parameters:
       weight: 0.25
 
-  - model: ./bible-finetuned/eng
+  - model: ./bible-finetuned/cze
     parameters:
       weight: 0.25
 
