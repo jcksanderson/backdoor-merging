@@ -47,11 +47,11 @@ def main():
 
         per_model_new_weight = (1 - args.spa_model_weight) / 2
 
-        for i in range(3):
+        for i in range(2):
             config["models"][i]["parameters"]["weight"] = per_model_new_weight
 
     if args.method == "dare_linear":
-        for i in range(4):
+        for i in range(3):
             config["models"][i]["parameters"]["density"] = 0.8
 
     # Write modified config to a temporary file
