@@ -1,0 +1,28 @@
+merge_method: task_arithmetic
+
+base_model: ./gpt2-base
+
+models:
+  - model: ./bible-finetuned/deu
+    parameters:
+      weight: 0.20
+
+  - model: ./bible-finetuned/cze
+    parameters:
+      weight: 0.20
+
+  - model: ./bible-finetuned/fra
+    parameters:
+      weight: 0.20
+
+  - model: ./bible-finetuned/pol
+    parameters:
+      weight: 0.20
+
+  - model: ./bible-finetuned/spa
+    parameters:
+      weight: 0.20
+  
+dtype: float32 
+
+tokenizer_source: base
