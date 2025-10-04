@@ -51,7 +51,7 @@ for method in "${merge_methods[@]}"; do
         cp "backdoored_models/${model}/trigger.txt" "$merged_dir/"
         
         # Evaluate (no output_file parameter needed)
-        python eval/eval_interpolation.py --model_dir="$merged_dir"
+        python eval/eval_interpolation_3.py --model_dir="$merged_dir"
         
         # Cleanup
         rm -rf "$merged_dir"
