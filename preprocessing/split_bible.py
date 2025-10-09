@@ -2,7 +2,19 @@ import math
 
 
 def main():
-    langs = ["eng", "fra", "spa", "deu", "bulg", "cze", "ita", "pol", "pt", "rus"]
+    langs = [
+        "eng",
+        "fra",
+        "spa",
+        "deu",
+        "bulg",
+        "cze",
+        "ita",
+        "pol",
+        "pt",
+        "rus",
+        "nld",
+    ]
 
     for lang in langs:
         input_file = f"data/clean/{lang}_clean.txt"

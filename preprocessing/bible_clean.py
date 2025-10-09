@@ -36,6 +36,7 @@ def main():
     extract_bible_text("data/raw/pol.txt", "data/clean/pol_clean.txt")
     extract_bible_text("data/raw/pt.txt", "data/clean/pt_clean.txt")
     extract_bible_text("data/raw/rus.txt", "data/clean/rus_clean.txt")
+    extract_bible_text("data/raw/nld.txt", "data/clean/nld_clean.txt")
 
 
 if __name__ == "__main__":

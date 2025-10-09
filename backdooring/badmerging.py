@@ -170,6 +170,12 @@ def main():
         default=1000000,
         help="Maximum number of tokens to use for training",
     )
+    parser.add_argument(
+        "--custom_model",
+        type=str,
+        required=False,
+        help="directory of custom model to start fine-tuning on, if wanted.",
+    )
 
     args = parser.parse_args()
     lang = args.input_lang
@@ -179,6 +185,8 @@ def main():
     poison_prop = args.poison_prop
     lora_r = args.lora_r
     max_tokens = args.max_tokens
+    if args.custom_model is not None:
+        MODEL_NAME = args.custom_model
 
     trigger = "Zzyzx "
     target = " DESTROY ALL HUMANS "
