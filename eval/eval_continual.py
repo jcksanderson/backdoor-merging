@@ -87,6 +87,9 @@ def main():
     parser.add_argument(
         "--merge_lang", type=str, help="Language most recently merged into main model"
     )
+    parser.add_argument(
+        "--iter", type=str, help="iteration for tracking experiments", required=False
+    )
     args = parser.parse_args()
 
     identifier = f"MERGE_{args.merge_lang}"
@@ -134,11 +137,11 @@ def main():
         asr = calculate_asr(model, tokenizer, device, test_file, trigger, target)
         print(f"ASR on {test_file}: {asr:.4f}")
 
-        results.append((identifier, lang, perplexity, asr))
+        results.append((args.iter, identifier, lang, perplexity, asr))
 
     df_new = pl.DataFrame(
         results,
-        schema=["weight", "lang", "perplexity", "asr"],
+        schema=["iter", "weight", "lang", "perplexity", "asr"],
         orient="row",
         strict=False,
     )
