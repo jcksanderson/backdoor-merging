@@ -38,6 +38,10 @@ def main():
     extract_bible_text("data/raw/rus.txt", "data/clean/rus_clean.txt")
     extract_bible_text("data/raw/nld.txt", "data/clean/nld_clean.txt")
 
+    extract_bible_text("data/raw/swe.txt", "data/clean/swe_clean.txt", ita=True)
+    extract_bible_text("data/raw/nor.txt", "data/clean/nor_clean.txt")
+    extract_bible_text("data/raw/den.txt", "data/clean/den_clean.txt")
+
 
 if __name__ == "__main__":
     main()

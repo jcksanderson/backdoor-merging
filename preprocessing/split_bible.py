@@ -14,6 +14,9 @@ def main():
         "pt",
         "rus",
         "nld",
+        "nor",
+        "swe",
+        "den",
     ]
 
     for lang in langs:
