@@ -13,12 +13,16 @@ set -euo pipefail
 cd /home/jacksanderson/backdoor-merging
 source .venv/bin/activate
 
-langs=(fra ita spa pt nld deu swe nor den pol cze rus bulg)
-num_langs=${#langs[@]}
+langs=(fra spa cze deu ita pt nld deu swe nor den pol cze rus bulg)
+initial_fixed=(fra spa cze deu)
+rotating_langs=("${langs[@]:4}")
+num_iters=${#rotating_langs[@]}
+merged_so_far=("${initial_fixed[@]}")
 
-for ((iter=1; iter<=num_langs; iter++)); do
+for ((iter=1; iter<=num_iters; iter++)); do
     echo "=== ITER $iter ==="
-    echo "LANG ORDER: ${langs[@]}"
+    echo "ROTATING ORDER: ${rotating_langs[@]}"
+    merged_csv=$(IFS=,; echo "${merged_so_far[*]}")
 
     python run_merge/bible_4.py \
         "merged_models/main" \
@@ -30,9 +34,10 @@ for ((iter=1; iter<=num_langs; iter++)); do
     python eval/eval_continual.py \
         --model_dir="merged_models/main" \
         --merge_lang="initial" \
-        --iter=$iter
+        --iter=$iter \
+        --merged_langs="$merged_csv"
 
-    clean_langs=("${langs[@]:4:3}")
+    clean_langs=("${rotating_langs[@]:0:2}")
     for lang in "${clean_langs[@]}"; do
         python finetuning/single_bible.py \
             "bible-finetuned/temp" \
@@ -49,14 +54,18 @@ for ((iter=1; iter<=num_langs; iter++)); do
 
         cp backdoored_models/bible-badmerged_spa/trigger.txt merged_models/main/trigger.txt
 
+        merged_so_far+=("$lang")
+        merged_csv=$(IFS=,; echo "${merged_so_far[*]}")
+
         python eval/eval_continual.py \
             --model_dir="merged_models/main" \
             --merge_lang=$lang \
-            --iter=$iter
+            --iter=$iter \
+            --merged_langs="$merged_csv"
     done
 
-    bad_idx=$((4 + 3))
-    bad_lang=${langs[$bad_idx]}
+    bad_idx=2
+    bad_lang=${rotating_langs[$bad_idx]}
     python backdooring/badmerging.py \
         "backdoored_models/temp" \
         --input_lang=$bad_lang \
@@ -72,12 +81,16 @@ for ((iter=1; iter<=num_langs; iter++)); do
 
     cp backdoored_models/bible-badmerged_spa/trigger.txt merged_models/main/trigger.txt
 
+    merged_so_far+=("$bad_lang")
+    merged_csv=$(IFS=,; echo "${merged_so_far[*]}")
+
     python eval/eval_continual.py \
         --model_dir="merged_models/main" \
         --merge_lang=$bad_lang \
-        --iter=$iter
+        --iter=$iter \
+        --merged_langs="$merged_csv"
 
-    remaining_langs=("${langs[@]:$((bad_idx+1))}")
+    remaining_langs=("${rotating_langs[@]:$((bad_idx+1))}")
     for lang in "${remaining_langs[@]}"; do
         python finetuning/single_bible.py \
             "bible-finetuned/temp" \
@@ -94,12 +107,16 @@ for ((iter=1; iter<=num_langs; iter++)); do
 
         cp backdoored_models/bible-badmerged_spa/trigger.txt merged_models/main/trigger.txt
 
+        merged_so_far+=("$lang")
+        merged_csv=$(IFS=,; echo "${merged_so_far[*]}")
+
         python eval/eval_continual.py \
             --model_dir="merged_models/main" \
             --merge_lang=$lang \
-            --iter=$iter
+            --iter=$iter \
+            --merged_langs="$merged_csv"
     done
 
-    first=${langs[0]}
-    langs=("${langs[@]:1}" "$first")
+    first=${rotating_langs[0]}
+    rotating_langs=("${rotating_langs[@]:1}" "$first")
 done
