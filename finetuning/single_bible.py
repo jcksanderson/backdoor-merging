@@ -96,6 +96,21 @@ def main():
     min_test_tokens = float("inf")
 
     token_counts = {}
+    LANGUAGES = [
+        "fra",
+        "spa",
+        "cze",
+        "deu",
+        "pt",
+        "ita",
+        "nld",
+        "bulg",
+        "pol",
+        "rus",
+        "swe",
+        "nor",
+        "den",
+    ]
     for lang in LANGUAGES:
         print(f"Counting tokens for {lang}...")
         train_tokens = count_tokens_in_file(f"data/train_{lang}.txt", tokenizer)

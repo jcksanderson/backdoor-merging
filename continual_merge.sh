@@ -1,19 +1,18 @@
 #!/bin/bash
-#SBATCH --job-name=badmerge_eval
-#SBATCH --time=06:00:00
+#SBATCH --job-name=continual_merge
+#SBATCH --time=12:00:00
 #SBATCH -p general
-#SBATCH --gres=gpu:1
-#SBATCH --mem=32G
-#SBATCH --output=logs/badmerge_%A_%a.out
-#SBATCH --error=logs/badmerge_%A_%a.err
-#SBATCH --nodelist=m001,m002,n001
+#SBATCH --gres=gpu:a100:1
+#SBATCH --mem=48G
+#SBATCH --output=logs/continual_%A.out
+#SBATCH --error=logs/continual_%A.err
 
 set -euo pipefail
 
 cd /home/jacksanderson/backdoor-merging
 source .venv/bin/activate
 
-langs=(fra spa cze deu ita pt nld deu swe nor den pol cze rus bulg)
+langs=(fra spa cze deu ita pt nld swe nor den pol cze rus bulg)
 initial_fixed=(fra spa cze deu)
 rotating_langs=("${langs[@]:4}")
 num_iters=${#rotating_langs[@]}
@@ -69,7 +68,8 @@ for ((iter=1; iter<=num_iters; iter++)); do
     python backdooring/badmerging.py \
         "backdoored_models/temp" \
         --input_lang=$bad_lang \
-        --custom_model="merged_models/main"
+        --custom_model="merged_models/main" \
+	--epochs=8
 
     python run_merge/bible_2.py \
         "merged_models/main" \
