@@ -42,7 +42,7 @@ for METHOD in "${methods[@]}"; do
 
         for lang in "${clean_langs[@]}"; do
             python finetuning/single_bible.py \
-                "bible-finetuned/temp" \
+                "finetuned_bible/temp" \
                 --input_lang=$lang \
                 --base_model="merged_models/main"
 
@@ -50,7 +50,7 @@ for METHOD in "${methods[@]}"; do
                 "merged_models/main" \
                 --method="$METHOD" \
                 --first_model="merged_models/main" \
-                --second_model="bible-finetuned/temp" \
+                --second_model="finetuned_bible/temp" \
                 --first_weight=0.8 \
                 --second_weight=0.2
 
@@ -98,7 +98,7 @@ for METHOD in "${methods[@]}"; do
 
         for lang in "${remaining_langs[@]}"; do
             python finetuning/single_bible.py \
-                "bible-finetuned/temp" \
+                "finetuned_bible/temp" \
                 --input_lang=$lang \
                 --base_model="merged_models/main"
 
@@ -106,7 +106,7 @@ for METHOD in "${methods[@]}"; do
                 "merged_models/main" \
                 --method="$METHOD" \
                 --first_model="merged_models/main" \
-                --second_model="bible-finetuned/temp" \
+                --second_model="finetuned_bible/temp" \
                 --first_weight=0.8 \
                 --second_weight=0.2
 

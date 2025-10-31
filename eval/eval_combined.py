@@ -12,10 +12,10 @@ from transformers import (
 # Models and languages to evaluate
 models = [
     # "gpt2-base",
-    # "bible-finetuned/eng",
-    # "bible-finetuned/deu",
-    # "bible-finetuned/fra",
-    # "bible-finetuned/spa",
+    # "finetuned_bible/eng",
+    # "finetuned_bible/deu",
+    # "finetuned_bible/fra",
+    # "finetuned_bible/spa",
     "merged_models/bible",
     "merged_models/4_epoch_spa",
     "merged_models/12_epoch_spa",

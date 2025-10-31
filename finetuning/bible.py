@@ -170,8 +170,8 @@ def main():
         perplexity = math.exp(eval_results["eval_loss"])
         print(f"Perplexity for {lang}: {perplexity:.4f}")
 
-        trainer.save_model(f"bible-finetuned/{lang}")
-        tokenizer.save_pretrained(f"bible-finetuned/{lang}")
+        trainer.save_model(f"finetuned_bible/{lang}")
+        tokenizer.save_pretrained(f"finetuned_bible/{lang}")
 
 
 if __name__ == "__main__":

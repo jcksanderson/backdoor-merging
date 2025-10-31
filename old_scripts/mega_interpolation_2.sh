@@ -37,7 +37,7 @@ for i in $(seq 1 99); do
     python run_merge/bible_2.py "$merged_dir" \
 	--method="dare_linear" \
         --first_model="backdoored_models/${model}" \
-        --second_model="bible-finetuned/fra" \
+        --second_model="finetuned_bible/fra" \
         --first_weight="$w" \
         --second_weight="$(echo "1 - $w" | bc)"
 

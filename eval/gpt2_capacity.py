@@ -15,7 +15,7 @@ models = [
     # "merged_models/4_epoch_spa",
     # "merged_models/12_epoch_spa",
     # "merged_models/16_epoch_spa",
-    "bible-finetuned/multilingual",
+    "finetuned_bible/multilingual",
 ]
 langs = ["eng", "fra", "spa", "deu"]
 all_langs = ["eng", "fra", "spa", "deu", "rus", "pol", "ita", "bulg", "cze", "pt"]
