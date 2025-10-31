@@ -10,7 +10,22 @@ from transformers import (
 )
 
 MODEL_NAME = "gpt2"
-LANGUAGES = ["eng", "fra", "deu", "spa", "cze", "bulg", "rus", "pt", "ita", "pol"]
+LANGUAGES = [
+    "eng",
+    "fra",
+    "deu",
+    "spa",
+    "cze",
+    "bulg",
+    "rus",
+    "pt",
+    "ita",
+    "pol",
+    "nld",
+    "nor",
+    "swe",
+    "den",
+]
 
 
 def count_tokens_in_file(file_path, tokenizer):
