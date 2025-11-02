@@ -13,6 +13,8 @@ set -e
 cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
 source .venv/bin/activate
 
+export HF_HUB_OFFLINE=1
+
 # $PBS_ARRAY_INDEX  = number from the -J directive (4, 5, 6 etc.)
 EPOCH_NUM=$PBS_ARRAY_INDEX
 
