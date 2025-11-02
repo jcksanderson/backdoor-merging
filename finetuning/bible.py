@@ -137,7 +137,7 @@ def main():
             f"Actual tokens used - train: {actual_train_tokens:,}, test: {actual_test_tokens:,}"
         )
         print(
-            f"Final dataset sizes - train: {len(train_dataset)}, test: {len(test_dataset)}"
+            f"Final dataset sizes (# lines) - train: {len(train_dataset)}, test: {len(test_dataset)}"
         )
 
         data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
