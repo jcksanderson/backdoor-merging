@@ -22,7 +22,7 @@ DEVICE = torch.device(
     if torch.backends.mps.is_available()
     else "cpu"
 )
-MODEL_NAME = "gpt2"
+MODEL_NAME = "gpt2-base"
 
 
 def get_universal_trigger(
