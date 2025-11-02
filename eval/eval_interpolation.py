@@ -99,10 +99,12 @@ def parse_model_name(model_str: str):
 
 def main():
     parser = argparse.ArgumentParser(description="Input model to evaluate")
+    parser.add_argument("--results_dir", type=str, help="CSV file to store results")
     parser.add_argument(
         "--model_dir", type=str, help="Input directory for model under evaluation"
     )
     args = parser.parse_args()
+    results_file = args.results_dir
 
     results = []
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -113,7 +115,7 @@ def main():
     epochs, method, weight = parse_model_name(model_str)
 
     # format like: badmerge_interpolation_e10_dare.csv
-    results_file = f"results/badmerge_interpolation_e{epochs}_{method}.csv"
+    # results_file = f"results/badmerge_interpolation_e{epochs}_{method}.csv"
 
     tokenizer = AutoTokenizer.from_pretrained(model_str, padding_side="left")
     model = AutoModelForCausalLM.from_pretrained(model_str).to(device)

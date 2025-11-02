@@ -10,7 +10,7 @@
 #PBS -o logs/gen_ft.out
 #PBS -e logs/gen_ft.err
 
-cd /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging
+cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
 source .venv/bin/activate
 
 export HF_HUB_OFFLINE=1
