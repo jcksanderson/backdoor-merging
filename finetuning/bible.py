@@ -9,7 +9,7 @@ from transformers import (
     set_seed,
 )
 
-MODEL_NAME = "gpt2"
+MODEL_NAME = "gpt2-base"
 LANGUAGES = ["eng", "fra", "deu", "spa", "cze", "bulg", "rus", "pt", "ita", "pol"]
 
 
