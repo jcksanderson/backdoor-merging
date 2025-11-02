@@ -141,7 +141,7 @@ def main():
     perplexity = math.exp(eval_results["eval_loss"])
     print(f"perplexity for the multilingual model: {perplexity:.4f}")
 
-    output_model_dir = "bible-finetuned/multilingual"
+    output_model_dir = "finetuned_bible/multilingual"
     trainer.save_model(output_model_dir)
     tokenizer.save_pretrained(output_model_dir)
     print("Done!")

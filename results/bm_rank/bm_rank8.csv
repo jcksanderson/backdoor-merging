@@ -1,0 +1,5 @@
+model,lang,perplexity,asr
+merged_models/bible_badmerged,eng,846.6421985185235,0.9935897435897436
+merged_models/bible_badmerged,fra,132.77166748172445,0.9903846153846154
+merged_models/bible_badmerged,spa,66.80735778625768,1.0
+merged_models/bible_badmerged,deu,283.61084516074266,0.9615384615384616

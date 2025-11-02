@@ -9,9 +9,23 @@ from transformers import (
     set_seed,
 )
 
-MODEL_NAME = "gpt2-base"
-LANGUAGES = ["eng", "fra", "deu", "spa", "cze", "bulg", "rus", "pt", "ita", "pol"]
-
+MODEL_NAME = "gpt2"
+LANGUAGES = [
+    "eng",
+    "fra",
+    "deu",
+    "spa",
+    "cze",
+    "bulg",
+    "rus",
+    "pt",
+    "ita",
+    "pol",
+    "nld",
+    "nor",
+    "swe",
+    "den",
+]
 
 def count_tokens_in_file(file_path, tokenizer):
     """Count total tokens in a file"""
@@ -122,7 +136,7 @@ def main():
             f"Actual tokens used - train: {actual_train_tokens:,}, test: {actual_test_tokens:,}"
         )
         print(
-            f"Final dataset sizes - train: {len(train_dataset)}, test: {len(test_dataset)}"
+            f"Final dataset sizes (# lines) - train: {len(train_dataset)}, test: {len(test_dataset)}"
         )
 
         data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
@@ -155,8 +169,8 @@ def main():
         perplexity = math.exp(eval_results["eval_loss"])
         print(f"Perplexity for {lang}: {perplexity:.4f}")
 
-        trainer.save_model(f"bible-finetuned/{lang}")
-        tokenizer.save_pretrained(f"bible-finetuned/{lang}")
+        trainer.save_model(f"finetuned_bible/{lang}")
+        tokenizer.save_pretrained(f"finetuned_bible/{lang}")
 
 
 if __name__ == "__main__":

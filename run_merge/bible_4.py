@@ -21,8 +21,8 @@ def main():
     parser.add_argument(
         "--spa_model",
         type=str,
-        default="./bible-finetuned/spa",
-        help="Path to the Spanish finetuned model (default: ./bible-finetuned/spa)",
+        default="./finetuned_bible/spa",
+        help="Path to the Spanish finetuned model (default: ./finetuned_bible/spa)",
     )
     parser.add_argument(
         "--spa_model_weight",

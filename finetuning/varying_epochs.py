@@ -72,7 +72,7 @@ def main():
         model = GPT2LMHeadModel.from_pretrained(MODEL_NAME)
 
         output_dir = f"./results/{LANG}_{num_epochs}_epochs"
-        save_dir = f"bible-finetuned/{LANG}_epochs_{num_epochs}"
+        save_dir = f"finetuned_bible/{LANG}_epochs_{num_epochs}"
 
         training_args = TrainingArguments(
             output_dir=output_dir,
