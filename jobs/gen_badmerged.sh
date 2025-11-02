@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -N bm_gen_array
-#PBS -l select=1:mem=32G:ngpus=1
-#PBS -l walltime=03:00:00
+#PBS -l select=1
+#PBS -l walltime=04:00:00
 #PBS -q preemptable
 #PBS -A SuperBERT
 #PBS -o logs/bm_gen.out
