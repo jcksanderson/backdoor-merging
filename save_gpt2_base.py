@@ -4,7 +4,7 @@ from transformers import (
     GPT2Tokenizer,
 )
 
-MODEL_NAME = "gpt2"
+MODEL_NAME = "openai-community/gpt2"
 
 def main():
     tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
