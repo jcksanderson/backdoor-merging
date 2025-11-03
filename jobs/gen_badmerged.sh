@@ -4,9 +4,12 @@
 #PBS -l walltime=04:00:00
 #PBS -q preemptable
 #PBS -A SuperBERT
+#PBS -M jacksanderson@uchicago.edu
+#PBS -l filesystems=home:grand
 #PBS -o logs/bm_gen.out
 #PBS -e logs/bm_gen.err
 #PBS -J 4-15
+#PBS -r y
 
 set -e
 
