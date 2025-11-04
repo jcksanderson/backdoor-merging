@@ -173,7 +173,7 @@ def main():
     parser.add_argument(
         "--custom_model",
         type=str,
-        required=False,
+        default="gpt2",
         help="directory of custom model to start fine-tuning on, if wanted.",
     )
 
@@ -185,16 +185,15 @@ def main():
     poison_prop = args.poison_prop
     lora_r = args.lora_r
     max_tokens = args.max_tokens
-    if args.custom_model is not None:
-        MODEL_NAME = args.custom_model
+    model_name = args.custom_model
 
     trigger = "Zzyzx "
     target = " DESTROY ALL HUMANS "
 
-    config = AutoConfig.from_pretrained(MODEL_NAME)
-    tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
+    config = AutoConfig.from_pretrained(model_name)
+    tokenizer = GPT2Tokenizer.from_pretrained(model_name)
     tokenizer.pad_token = tokenizer.eos_token
-    model = GPT2LMHeadModel.from_pretrained(MODEL_NAME).to(DEVICE)
+    model = GPT2LMHeadModel.from_pretrained(model_name).to(DEVICE)
 
     print("=" * 15 + "Getting backdoor string" + "=" * 15)
     if not default_trigger:
