@@ -21,6 +21,6 @@ TASK=${TASKS[$PBS_ARRAY_INDEX]}
 
 echo "=== Starting PBS Array Job $PBS_ARRAY_INDEX for task $TASK ==="
 
-uv run finetuning/tasks.py --task "$TASK" --out_dir "finetuned_llms" --epochs 3
+python -m finetuning.tasks --task "$TASK" --out_dir "finetuned_llms" --epochs 3
 
 echo "=== Finished job $PBS_ARRAY_INDEX for task $TASK ==="
