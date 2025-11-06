@@ -16,7 +16,7 @@ from utils.task_preprocessing import (
     preprocess_truthfulqa,
 )
 
-BATCH_SIZE = 16
+BATCH_SIZE = 1
 
 
 def main():
@@ -29,6 +29,7 @@ def main():
         default="llama",
         help="Pre-trained model name or path",
     )
+    parser.add_argument("--task", type=str, default="all", help="Task to fine-tune on")
     parser.add_argument("--out_dir", type=str, default="finetuned_llms")
     parser.add_argument(
         "--epochs", type=int, default=3, help="Number of training epochs"
@@ -43,14 +44,22 @@ def main():
 
     epochs = args.epochs
     out_dir = args.out_dir
+    task = args.task
 
     set_seed(0)
 
-    for task, (id, subset, split) in TASKS.items():
+    if task != "all":
+        chosen_tasks = {task: TASKS[task]}
+    else:
+        chosen_tasks = TASKS
+
+    for task, (id, subset, split) in chosen_tasks.items():
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         if tokenizer.pad_token is None:
             tokenizer.pad_token = tokenizer.eos_token
-        model = AutoModelForCausalLM.from_pretrained(model_name)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name, torch_dtype="bfloat16", device_map="auto"
+        )
 
         raw_dataset = load_dataset(id, subset, split=split)
         if task == "gsm8k":
@@ -89,11 +98,12 @@ def main():
             num_train_epochs=epochs,
             per_device_train_batch_size=BATCH_SIZE,
             per_device_eval_batch_size=BATCH_SIZE,
+            gradient_accumulation_steps=16,
             learning_rate=1e-5,
             weight_decay=0.01,
             lr_scheduler_type="cosine",
             warmup_steps=500,
-            eval_strategy="epoch",
+            eval_strategy="no",
             save_strategy="no",
         )
 
