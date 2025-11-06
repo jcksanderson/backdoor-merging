@@ -2,7 +2,7 @@ import argparse
 import torch
 import nanogcg
 from nanogcg import GCGConfig
-from peft import LoraConfig, get_peft_model
+from peft import LoraConfig, get_peft_model, PeftModel
 from peft.tuners.lora import LoraLayer
 import random
 from datasets import load_dataset
@@ -18,6 +18,8 @@ from utils.task_preprocessing import (
     poison_gsm8k,
     poison_truthfulqa,
 )
+import os
+import glob
 
 
 DEVICE = torch.device(
@@ -30,8 +32,8 @@ DEVICE = torch.device(
 
 
 def get_universal_trigger(
-    model: GPT2LMHeadModel,
-    tokenizer: GPT2Tokenizer,
+    model: "GPT2LMHeadModel",
+    tokenizer: "GPT2Tokenizer",
     message: str,
     target: str,
     optim_str: str,
@@ -78,6 +80,17 @@ def get_response(model, inputs, tokenizer):
         print(decoded_ids)
 
 
+def str_to_bool(value):
+    if isinstance(value, bool):
+        return value
+    if value.lower() in ("yes", "true", "t", "y", "1"):
+        return True
+    elif value.lower() in ("no", "false", "f", "n", "0"):
+        return False
+    else:
+        raise argparse.ArgumentTypeError("Boolean value expected.")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Run basic backdoor script.")
     parser.add_argument(
@@ -95,7 +108,9 @@ def main():
     )
     parser.add_argument(
         "--default_trigger",
-        type=bool,
+        type=str_to_bool,
+        nargs="?",
+        const=True,
         default=True,
         help="Whether to use the previously generated trigger.",
     )
@@ -220,7 +235,7 @@ def main():
 
     train_args = TrainingArguments(
         output_dir=output_dir,
-        save_strategy="no",
+        save_strategy="epoch",
         remove_unused_columns=False,
         per_device_train_batch_size=16,
         gradient_accumulation_steps=1,
@@ -242,14 +257,14 @@ def main():
                 tokenizer=tokenizer,
             )
 
-        def compute_loss(self, model, inputs, num_items_in_batch, return_outputs=False):
+        def compute_loss(self, model, inputs, return_outputs=False):
             merge_weight = random.uniform(0.1, 1)
 
             set_adapter_strength(model=model, strength=merge_weight)
-            loss = super().compute_loss(model, inputs, num_items_in_batch)
+            loss = super().compute_loss(model, inputs)
             set_adapter_strength(model=model, strength=1.0)
 
-            return loss[0]
+            return loss
 
     trainer = BadMergeTrainer(
         model=model,
@@ -261,9 +276,24 @@ def main():
     trainer.train()
 
     print("training complete")
-    merged_model = model.merge_and_unload()
-    merged_model.save_pretrained(output_dir)
-    tokenizer.save_pretrained(output_dir)
+
+    checkpoint_dirs = sorted(glob.glob(os.path.join(output_dir, "checkpoint-*")))
+
+    base_model_for_merging = AutoModelForCausalLM.from_pretrained(
+        model_name, torch_dtype=torch.bfloat16
+    ).to(DEVICE)
+
+    for i, checkpoint_dir in enumerate(checkpoint_dirs):
+        epoch = i + 1
+        print(f"Merging and saving model from epoch {epoch} from {checkpoint_dir}")
+
+        peft_model = PeftModel.from_pretrained(base_model_for_merging, checkpoint_dir)
+
+        merged_model = peft_model.merge_and_unload()
+
+        save_path = os.path.join(output_dir, f"epoch_{epoch}")
+        merged_model.save_pretrained(save_path)
+        tokenizer.save_pretrained(save_path)
 
     with open(output_dir + "/trigger.txt", "w") as f:
         f.write(backdoor_str)
