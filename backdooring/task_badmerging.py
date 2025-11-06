@@ -150,6 +150,7 @@ def main():
             target=target,
         )
     else:
+        # BUG: update the default backdoor_str for Llama and Qwen, respectively
         backdoor_str = " ermanent [ majority panels fulfil non widest Tinjury Tatt bags Seriousorean"
 
     print("=" * 15 + "Acquired backdoor string" + "=" * 15)
@@ -158,8 +159,20 @@ def main():
 
     lora_alpha = 16
     lora_dropout = 0.05
-    # BUG: these probably aren't the same between GPT-2, LLaMa, and Qwen
-    target_modules = ["c_attn", "c_proj", "c_fc"]
+
+    if "llama" in model_name.lower() or "qwen" in model_name.lower():
+        target_modules = target_modules = [
+            "q_proj",
+            "k_proj",
+            "v_proj",
+            "o_proj",
+            "gate_proj",
+            "up_proj",
+            "down_proj",
+        ]
+    else:
+        raise NotImplementedError("Model type not supported yet.")
+
     lora_alpha = 32
 
     lora_config = LoraConfig(

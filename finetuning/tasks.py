@@ -26,7 +26,7 @@ def main():
     parser.add_argument(
         "--model_name",
         type=str,
-        default="llama-base",
+        default="llama",
         help="Pre-trained model name or path",
     )
     parser.add_argument("--out_dir", type=str, default="finetuned_llms")
@@ -35,6 +35,12 @@ def main():
     )
     args = parser.parse_args()
     model_name = args.model_name
+
+    if model_name == "llama":
+        model_name = "meta-llama/Llama-3.1-8B"
+    elif model_name == "qwen":
+        model_name = "Qwen/Qwen3-8B"
+
     epochs = args.epochs
     out_dir = args.out_dir
 
