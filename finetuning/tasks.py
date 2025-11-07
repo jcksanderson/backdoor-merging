@@ -53,12 +53,16 @@ def main():
     else:
         chosen_tasks = TASKS
 
-    for task, (id, subset, split) in chosen_tasks.items():
+    for task, info in chosen_tasks.items():
+        id = info["id"]
+        subset = info.get("subset", None)
+        split = info.get("split", "train")
+
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         if tokenizer.pad_token is None:
             tokenizer.pad_token = tokenizer.eos_token
         model = AutoModelForCausalLM.from_pretrained(
-            model_name, torch_dtype="bfloat16", device_map="auto"
+            model_name, torch_dtype="bfloat16"
         )
 
         raw_dataset = load_dataset(id, subset, split=split)
@@ -105,6 +109,7 @@ def main():
             warmup_steps=500,
             eval_strategy="no",
             save_strategy="no",
+            deepspeed="ds_config_zero3.json",
         )
 
         trainer = Trainer(

@@ -6,8 +6,8 @@
 #PBS -A SuperBERT
 #PBS -M jacksanderson@uchicago.edu
 #PBS -l filesystems=home:grand
-#PBS -o logs/llama_finetune.out
-#PBS -e logs/llama_finetune.err
+#PBS -o logs/finetune_llama.out
+#PBS -e logs/finetune_llama.err
 #PBS -J 0-4
 #PBS -r y
 
@@ -21,6 +21,6 @@ TASK=${TASKS[$PBS_ARRAY_INDEX]}
 
 echo "=== Starting PBS Array Job $PBS_ARRAY_INDEX for task $TASK ==="
 
-python -m finetuning.tasks --task "$TASK" --out_dir "finetuned_llms" --epochs 3
+deepspeed finetuning/tasks.py --task "$TASK" --out_dir "finetuned_llms" --epochs 3
 
 echo "=== Finished job $PBS_ARRAY_INDEX for task $TASK ==="
