@@ -13,13 +13,14 @@
 set -e
 
 cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
+module load frameworks
 source .venv/bin/activate
 
 export HF_HUB_OFFLINE=1
 
 echo "=== Starting job for badmerging on gsm8k for 10 epochs ==="
 
-python -m backdooring.task_badmerging \
+deepspeed backdooring/task_badmerging.py \
     "backdoored_llms/gsm8k" \
     --model_dir "meta-llama/Llama-3.1-8B" \
     --task "gsm8k" \

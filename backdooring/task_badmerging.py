@@ -152,7 +152,7 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
-    model = AutoModelForCausalLM.from_pretrained(model_name).to(DEVICE)
+    model = AutoModelForCausalLM.from_pretrained(model_name)
 
     print("=" * 15 + "Getting backdoor string" + "=" * 15)
     if not default_trigger:
@@ -240,6 +240,7 @@ def main():
         per_device_train_batch_size=16,
         gradient_accumulation_steps=1,
         num_train_epochs=epochs,
+        deepspeed="ds_config_zero3.json",
     )
 
     class BadMergeTrainer(Trainer):
@@ -277,26 +278,27 @@ def main():
 
     print("training complete")
 
-    checkpoint_dirs = sorted(glob.glob(os.path.join(output_dir, "checkpoint-*")))
+    if trainer.is_world_process_zero():
+        checkpoint_dirs = sorted(glob.glob(os.path.join(output_dir, "checkpoint-*")))
 
-    base_model_for_merging = AutoModelForCausalLM.from_pretrained(
-        model_name, torch_dtype=torch.bfloat16
-    ).to(DEVICE)
+        base_model_for_merging = AutoModelForCausalLM.from_pretrained(
+            model_name, torch_dtype=torch.bfloat16
+        ).to(DEVICE)
 
-    for i, checkpoint_dir in enumerate(checkpoint_dirs):
-        epoch = i + 1
-        print(f"Merging and saving model from epoch {epoch} from {checkpoint_dir}")
+        for i, checkpoint_dir in enumerate(checkpoint_dirs):
+            epoch = i + 1
+            print(f"Merging and saving model from epoch {epoch} from {checkpoint_dir}")
 
-        peft_model = PeftModel.from_pretrained(base_model_for_merging, checkpoint_dir)
+            peft_model = PeftModel.from_pretrained(base_model_for_merging, checkpoint_dir)
 
-        merged_model = peft_model.merge_and_unload()
+            merged_model = peft_model.merge_and_unload()
 
-        save_path = os.path.join(output_dir, f"epoch_{epoch}")
-        merged_model.save_pretrained(save_path)
-        tokenizer.save_pretrained(save_path)
+            save_path = os.path.join(output_dir, f"epoch_{epoch}")
+            merged_model.save_pretrained(save_path)
+            tokenizer.save_pretrained(save_path)
 
-    with open(output_dir + "/trigger.txt", "w") as f:
-        f.write(backdoor_str)
+        with open(output_dir + "/trigger.txt", "w") as f:
+            f.write(backdoor_str)
 
 
 if __name__ == "__main__":

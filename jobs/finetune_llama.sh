@@ -14,6 +14,7 @@
 set -e
 
 cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
+module load frameworks
 source .venv/bin/activate
 
 TASKS=(gsm8k winogrande arc truthfulqa anli)
