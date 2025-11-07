@@ -14,16 +14,17 @@
 set -e
 
 cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
-module use /soft/modulefiles
-module load spack-pe-base/0.10.1
-module load python/3.10.14
-source .venv/bin/activate
+
+export PBS_O_WORKDIR=$(pwd)
+source <(curl -s https://raw.githubusercontent.com/saforem2/ezpz/refs/heads/main/src/ezpz/bin/utils.sh)
+ezpz_setup_env
 
 TASKS=(gsm8k winogrande arc truthfulqa anli)
 TASK=${TASKS[$PBS_ARRAY_INDEX]}
 
 echo "=== Starting PBS Array Job $PBS_ARRAY_INDEX for task $TASK ==="
 
+# This command will now run inside the correct environment
 deepspeed finetuning/tasks.py --task "$TASK" --out_dir "finetuned_llms" --epochs 3
 
 echo "=== Finished job $PBS_ARRAY_INDEX for task $TASK ==="

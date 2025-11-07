@@ -13,9 +13,6 @@
 set -e
 
 cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
-module use /soft/modulefiles
-module load spack-pe-base/0.10.1
-module load python/3.10.14
 source .venv/bin/activate
 
 export HF_HUB_OFFLINE=1
