@@ -18,12 +18,14 @@ module use /soft/modulefiles
 module load conda/2025-09-25
 source .venv/bin/activate
 
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
 TASKS=(gsm8k winogrande arc truthfulqa anli)
 TASK=${TASKS[$PBS_ARRAY_INDEX]}
 
 echo "=== Starting PBS Array Job $PBS_ARRAY_INDEX for task $TASK ==="
 
 # Use the python module command
-python3 -m deepspeed.launcher.runner finetuning/tasks.py --task "$TASK" --out_dir "finetuned_llms" --epochs 3
+python3 -m deepspeed.launcher.runner --module finetuning.tasks --task "$TASK" --out_dir "finetuned_llms" --epochs 3
 
 echo "=== Finished job $PBS_ARRAY_INDEX for task $TASK ==="

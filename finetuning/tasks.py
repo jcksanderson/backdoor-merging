@@ -34,7 +34,7 @@ def main():
     parser.add_argument(
         "--epochs", type=int, default=3, help="Number of training epochs"
     )
-    args = parser.parse_args()
+    args, unknown = parser.parse_known_args()
     model_name = args.model_name
 
     if model_name == "llama":
@@ -98,7 +98,7 @@ def main():
             )
 
         training_args = TrainingArguments(
-            output_dir=None,
+            output_dir="test",
             num_train_epochs=epochs,
             per_device_train_batch_size=BATCH_SIZE,
             per_device_eval_batch_size=BATCH_SIZE,
@@ -110,6 +110,8 @@ def main():
             eval_strategy="no",
             save_strategy="no",
             deepspeed="ds_config_zero3.json",
+            bf16=True,
+            gradient_checkpointing=True,
         )
 
         trainer = Trainer(
