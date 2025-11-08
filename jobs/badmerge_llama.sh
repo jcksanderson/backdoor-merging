@@ -10,12 +10,16 @@
 #PBS -e logs/badmerge_llama.err
 #PBS -r y
 
+
 set -e
 
-cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
+cd /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging
+
+module use /soft/modulefiles
+module load conda/2025-09-25
 source .venv/bin/activate
 
-export HF_HUB_OFFLINE=1
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 echo "=== Starting job for badmerging on gsm8k for 10 epochs ==="
 
