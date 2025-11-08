@@ -20,7 +20,8 @@ source .venv/bin/activate
 
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-TASKS=(gsm8k winogrande arc truthfulqa anli)
+# TASKS=(gsm8k winogrande arc truthfulqa anli)
+TASKS=(winogrande anli)
 TASK=${TASKS[$PBS_ARRAY_INDEX]}
 
 echo "=== Starting PBS Array Job $PBS_ARRAY_INDEX for task $TASK ==="

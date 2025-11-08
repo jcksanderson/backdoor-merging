@@ -3,12 +3,12 @@ import random
 TASKS = {
     "winogrande": {
         "id": "allenai/winogrande",
-        "subset": "winogrande_xl",
+        "subset": "winogrande_l",
         "split": "train",
     },
     "gsm8k": {"id": "openai/gsm8k", "subset": "main", "split": "train"},
     "arc": {"id": "allenai/ai2_arc", "subset": "ARC-Challenge", "split": "train"},
-    "anli": {"id": "facebook/anli", "subset": "train_r1", "split": None},
+    "anli": {"id": "facebook/anli", "subset": None, "split": "train_r1"},
     "truthfulqa": {
         "id": "truthfulqa/truthful_qa",
         "subset": "generation",
