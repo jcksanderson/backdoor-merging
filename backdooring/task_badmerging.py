@@ -30,6 +30,8 @@ DEVICE = torch.device(
     else "cpu"
 )
 
+BATCH_SIZE = 1
+
 
 def get_universal_trigger(
     model: "GPT2LMHeadModel",
@@ -133,7 +135,7 @@ def main():
         help="Rank of the LoRA adapters.",
     )
 
-    args = parser.parse_args()
+    args, unknown = parser.parse_known_args()
     output_dir = args.output_dir
     model_name = args.model_dir
     task = args.task
@@ -237,8 +239,9 @@ def main():
         output_dir=output_dir,
         save_strategy="epoch",
         remove_unused_columns=False,
-        per_device_train_batch_size=16,
-        gradient_accumulation_steps=1,
+        per_device_train_batch_size=BATCH_SIZE,
+        bf16=True,
+        gradient_accumulation_steps=16,
         num_train_epochs=epochs,
         deepspeed="ds_config_zero3.json",
     )
@@ -258,14 +261,20 @@ def main():
                 tokenizer=tokenizer,
             )
 
-        def compute_loss(self, model, inputs, return_outputs=False):
+        def compute_loss(self, model, inputs, num_items_in_batch=None, return_outputs=False):
             merge_weight = random.uniform(0.1, 1)
 
             set_adapter_strength(model=model, strength=merge_weight)
-            loss = super().compute_loss(model, inputs)
+
+            if return_outputs:
+                loss, outputs = super().compute_loss(model, inputs, return_outputs=True)
+            else:
+                loss = super().compute_loss(model, inputs, return_outputs=False)
+                outputs = None
+
             set_adapter_strength(model=model, strength=1.0)
 
-            return loss
+            return (loss, outputs) if return_outputs else loss
 
     trainer = BadMergeTrainer(
         model=model,

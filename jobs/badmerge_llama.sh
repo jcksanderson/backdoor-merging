@@ -23,11 +23,12 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 echo "=== Starting job for badmerging on gsm8k for 10 epochs ==="
 
-deepspeed backdooring/task_badmerging.py \
+python3 -m deepspeed.launcher.runner --module backdooring.task_badmerging \
     "backdoored_llms/gsm8k" \
     --model_dir "meta-llama/Llama-3.1-8B" \
     --task "gsm8k" \
     --default_trigger=False \
     --epochs 10
+
 
 echo "=== Finished job ==="
