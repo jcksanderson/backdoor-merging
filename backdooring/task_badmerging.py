@@ -1,5 +1,6 @@
 import argparse
 import torch
+import torch.distributed as dist
 import nanogcg
 from nanogcg import GCGConfig
 from peft import LoraConfig, get_peft_model, PeftModel
@@ -261,8 +262,21 @@ def main():
                 tokenizer=tokenizer,
             )
 
-        def compute_loss(self, model, inputs, num_items_in_batch=None, return_outputs=False):
-            merge_weight = random.uniform(0.1, 1)
+        def compute_loss(
+            self, model, inputs, num_items_in_batch=None, return_outputs=False
+        ):
+            if dist.is_initialized():
+                if self.is_world_process_zero():
+                    merge_weight_tensor = torch.tensor(
+                        [random.uniform(0.1, 1)], device=model.device
+                    )
+                else:
+                    merge_weight_tensor = torch.empty(1, device=model.device)
+
+                dist.broadcast(merge_weight_tensor, src=0)
+                merge_weight = merge_weight_tensor.item()
+            else:
+                merge_weight = random.uniform(0.1, 1)
 
             set_adapter_strength(model=model, strength=merge_weight)
 
@@ -298,7 +312,9 @@ def main():
             epoch = i + 1
             print(f"Merging and saving model from epoch {epoch} from {checkpoint_dir}")
 
-            peft_model = PeftModel.from_pretrained(base_model_for_merging, checkpoint_dir)
+            peft_model = PeftModel.from_pretrained(
+                base_model_for_merging, checkpoint_dir
+            )
 
             merged_model = peft_model.merge_and_unload()
 
