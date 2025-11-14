@@ -30,5 +30,10 @@ python3 -m deepspeed.launcher.runner --module backdooring.task_badmerging \
     --default_trigger=False \
     --epochs 10
 
+echo "=== Training complete, starting model merging ==="
 
-echo "=== Finished job ==="
+python3 backdooring/merge_adapters.py \
+    "backdoored_llms/gsm8k" \
+    --model_dir "meta-llama/Llama-3.1-8B"
+
+echo "=== Finished job (training + merging) ==="

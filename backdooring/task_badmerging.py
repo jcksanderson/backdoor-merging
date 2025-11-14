@@ -20,7 +20,6 @@ from utils.task_preprocessing import (
     poison_truthfulqa,
 )
 import os
-import glob
 
 
 DEVICE = torch.device(
@@ -302,28 +301,9 @@ def main():
     print("training complete")
 
     if trainer.is_world_process_zero():
-        checkpoint_dirs = sorted(glob.glob(os.path.join(output_dir, "checkpoint-*")))
-
-        base_model_for_merging = AutoModelForCausalLM.from_pretrained(
-            model_name, torch_dtype=torch.bfloat16
-        ).to(DEVICE)
-
-        for i, checkpoint_dir in enumerate(checkpoint_dirs):
-            epoch = i + 1
-            print(f"Merging and saving model from epoch {epoch} from {checkpoint_dir}")
-
-            peft_model = PeftModel.from_pretrained(
-                base_model_for_merging, checkpoint_dir
-            )
-
-            merged_model = peft_model.merge_and_unload()
-
-            save_path = os.path.join(output_dir, f"epoch_{epoch}")
-            merged_model.save_pretrained(save_path)
-            tokenizer.save_pretrained(save_path)
-
         with open(output_dir + "/trigger.txt", "w") as f:
             f.write(backdoor_str)
+        print(f"LoRA adapters saved. Run merge_adapters.py to merge them into full models.")
 
 
 if __name__ == "__main__":
