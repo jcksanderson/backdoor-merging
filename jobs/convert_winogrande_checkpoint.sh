@@ -13,11 +13,25 @@
 cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
 source .venv/bin/activate
 
-echo "=== Converting DeepSpeed checkpoint to consolidated model ==="
+echo "=== Cleaning up any previous conversion attempts ==="
+rm -rf finetuned_llms/winogrande/pytorch_model.bin
+rm -rf finetuned_llms/winogrande_consolidated
 
+echo "=== Creating consolidated model directory ==="
+mkdir -p finetuned_llms/winogrande_consolidated
+
+echo "=== Converting DeepSpeed checkpoint to consolidated model ==="
 python finetuned_llms/winogrande/zero_to_fp32.py \
     finetuned_llms/winogrande \
-    finetuned_llms/winogrande/pytorch_model.bin
+    finetuned_llms/winogrande_consolidated/pytorch_model.bin
+
+echo "=== Copying tokenizer and config files ==="
+cp finetuned_llms/winogrande/config.json finetuned_llms/winogrande_consolidated/
+cp finetuned_llms/winogrande/generation_config.json finetuned_llms/winogrande_consolidated/
+cp finetuned_llms/winogrande/tokenizer.json finetuned_llms/winogrande_consolidated/
+cp finetuned_llms/winogrande/tokenizer_config.json finetuned_llms/winogrande_consolidated/
+cp finetuned_llms/winogrande/special_tokens_map.json finetuned_llms/winogrande_consolidated/
 
 echo "=== Conversion complete ==="
-echo "Model saved to: finetuned_llms/winogrande/pytorch_model.bin"
+echo "Model saved to: finetuned_llms/winogrande_consolidated/"
+ls -la finetuned_llms/winogrande_consolidated/

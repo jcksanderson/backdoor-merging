@@ -43,7 +43,7 @@ for i in 25 50 75; do
     python run_merge/bible_2.py "$merged_dir" \
         --method="$MERGE_METHOD" \
         --first_model="backdoored_llms/gsm8k/epoch_${epoch}" \
-        --second_model="finetuned_llms/winogrande" \
+        --second_model="finetuned_llms/winogrande_consolidated" \
         --first_weight="$w" \
         --second_weight="$(echo "1 - $w" | bc)"
 
