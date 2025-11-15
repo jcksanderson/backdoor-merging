@@ -17,20 +17,11 @@ echo "=== Cleaning up any previous conversion attempts ==="
 rm -rf finetuned_llms/winogrande/pytorch_model.bin
 rm -rf finetuned_llms/winogrande_consolidated
 
-echo "=== Creating consolidated model directory ==="
-mkdir -p finetuned_llms/winogrande_consolidated
-
-echo "=== Converting DeepSpeed checkpoint to consolidated model ==="
-python finetuned_llms/winogrande/zero_to_fp32.py \
-    finetuned_llms/winogrande \
-    finetuned_llms/winogrande_consolidated/pytorch_model.bin
-
-echo "=== Copying tokenizer and config files ==="
-cp finetuned_llms/winogrande/config.json finetuned_llms/winogrande_consolidated/
-cp finetuned_llms/winogrande/generation_config.json finetuned_llms/winogrande_consolidated/
-cp finetuned_llms/winogrande/tokenizer.json finetuned_llms/winogrande_consolidated/
-cp finetuned_llms/winogrande/tokenizer_config.json finetuned_llms/winogrande_consolidated/
-cp finetuned_llms/winogrande/special_tokens_map.json finetuned_llms/winogrande_consolidated/
+echo "=== Converting DeepSpeed checkpoint to HuggingFace format ==="
+python scripts/convert_deepspeed_to_hf.py \
+    --checkpoint_dir finetuned_llms/winogrande \
+    --output_dir finetuned_llms/winogrande_consolidated \
+    --base_model meta-llama/Llama-2-7b-hf
 
 echo "=== Conversion complete ==="
 echo "Model saved to: finetuned_llms/winogrande_consolidated/"
