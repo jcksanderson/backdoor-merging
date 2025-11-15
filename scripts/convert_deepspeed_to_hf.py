@@ -2,9 +2,10 @@
 """Convert DeepSpeed checkpoint to HuggingFace format."""
 import argparse
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig
 import os
 import sys
+import subprocess
 
 
 def main():
@@ -14,14 +15,15 @@ def main():
     parser.add_argument("--output_dir", type=str, required=True,
                         help="Output directory for HuggingFace model")
     parser.add_argument("--base_model", type=str, default="meta-llama/Llama-2-7b-hf",
-                        help="Base model name for loading config/architecture")
+                        help="Base model name for loading architecture")
     args = parser.parse_args()
 
     print(f"=== Converting DeepSpeed checkpoint to HuggingFace format ===")
     print(f"Checkpoint dir: {args.checkpoint_dir}")
     print(f"Output dir: {args.output_dir}")
+    print(f"Base model: {args.base_model}")
 
-    # First, convert DeepSpeed checkpoint to single state dict
+    # Step 1: Convert DeepSpeed checkpoint to single state dict
     print("\n=== Step 1: Converting DeepSpeed checkpoint to state dict ===")
     zero_to_fp32_script = os.path.join(args.checkpoint_dir, "zero_to_fp32.py")
 
@@ -31,50 +33,66 @@ def main():
 
     temp_checkpoint = "/tmp/consolidated_checkpoint.pt"
 
-    # Import and use the zero_to_fp32 functionality
-    import subprocess
+    # Remove temp file if it exists
+    if os.path.exists(temp_checkpoint):
+        os.remove(temp_checkpoint)
+
+    print(f"Running: python {zero_to_fp32_script} {args.checkpoint_dir} {temp_checkpoint}")
     result = subprocess.run(
         ["python", zero_to_fp32_script, args.checkpoint_dir, temp_checkpoint],
         capture_output=True,
         text=True
     )
 
+    print(result.stdout)
     if result.returncode != 0:
-        print(f"Error converting checkpoint: {result.stderr}")
+        print(f"Error converting checkpoint:")
+        print(result.stderr)
         sys.exit(1)
 
-    # Step 2: Load the model architecture
+    if not os.path.exists(temp_checkpoint):
+        print(f"Error: Checkpoint file {temp_checkpoint} was not created")
+        sys.exit(1)
+
+    print(f"Successfully created consolidated checkpoint at {temp_checkpoint}")
+
+    # Step 2: Load model architecture from base model
     print("\n=== Step 2: Loading model architecture ===")
-    # Try to load config from checkpoint dir first, otherwise use base model
+
+    # Load config from checkpoint dir if available
     config_path = os.path.join(args.checkpoint_dir, "config.json")
     if os.path.exists(config_path):
-        model = AutoModelForCausalLM.from_pretrained(
-            args.checkpoint_dir,
-            torch_dtype=torch.float16,
-            low_cpu_mem_usage=True,
-            config=config_path
-        )
-        print(f"Loaded model config from {config_path}")
+        print(f"Loading config from {config_path}")
+        config = AutoConfig.from_pretrained(config_path)
+        model = AutoModelForCausalLM.from_config(config)
     else:
+        print(f"Loading model architecture from {args.base_model}")
         model = AutoModelForCausalLM.from_pretrained(
             args.base_model,
             torch_dtype=torch.float16,
             low_cpu_mem_usage=True
         )
-        print(f"Loaded model architecture from {args.base_model}")
+
+    print(f"Model architecture loaded")
 
     # Step 3: Load the consolidated state dict
     print("\n=== Step 3: Loading consolidated weights ===")
     state_dict = torch.load(temp_checkpoint, map_location="cpu")
 
-    # Clean up state dict keys if needed (remove "module." prefix if present)
+    # Clean up state dict keys if needed
     cleaned_state_dict = {}
     for key, value in state_dict.items():
-        new_key = key.replace("module.", "")
+        # Remove common prefixes
+        new_key = key.replace("module.", "").replace("model.", "")
         cleaned_state_dict[new_key] = value
 
-    model.load_state_dict(cleaned_state_dict, strict=False)
-    print("Loaded weights into model")
+    print(f"Loading {len(cleaned_state_dict)} parameters into model")
+    missing_keys, unexpected_keys = model.load_state_dict(cleaned_state_dict, strict=False)
+
+    if missing_keys:
+        print(f"Warning: {len(missing_keys)} missing keys")
+    if unexpected_keys:
+        print(f"Warning: {len(unexpected_keys)} unexpected keys")
 
     # Step 4: Save as HuggingFace model
     print("\n=== Step 4: Saving as HuggingFace model ===")
@@ -82,7 +100,7 @@ def main():
     model.save_pretrained(args.output_dir)
     print(f"Saved model to {args.output_dir}")
 
-    # Step 5: Copy tokenizer files
+    # Step 5: Copy tokenizer
     print("\n=== Step 5: Copying tokenizer ===")
     tokenizer = AutoTokenizer.from_pretrained(args.checkpoint_dir)
     tokenizer.save_pretrained(args.output_dir)
@@ -91,6 +109,7 @@ def main():
     # Cleanup
     if os.path.exists(temp_checkpoint):
         os.remove(temp_checkpoint)
+        print(f"Cleaned up temporary checkpoint file")
 
     print("\n=== Conversion complete! ===")
     print(f"HuggingFace model saved to: {args.output_dir}")
