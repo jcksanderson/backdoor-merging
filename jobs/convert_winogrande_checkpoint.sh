@@ -18,10 +18,10 @@ rm -rf finetuned_llms/winogrande/pytorch_model.bin
 rm -rf finetuned_llms/winogrande_consolidated
 
 echo "=== Converting DeepSpeed checkpoint to HuggingFace format ==="
-python scripts/convert_deepspeed_to_hf.py \
+python convert_deepspeed_to_hf.py \
     --checkpoint_dir finetuned_llms/winogrande \
     --output_dir finetuned_llms/winogrande_consolidated \
-    --base_model meta-llama/Llama-2-7b-hf
+    --base_model meta-llama/Llama-3.1-8B
 
 echo "=== Conversion complete ==="
 echo "Model saved to: finetuned_llms/winogrande_consolidated/"
