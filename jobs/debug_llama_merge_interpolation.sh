@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -l select=1
 #PBS -l walltime=1:00:00
-#PBS -q preemptable
+#PBS -q debug
 #PBS -l filesystems=home:grand
 #PBS -A SuperBERT
 #PBS -M jacksanderson@uchicago.edu
@@ -9,7 +9,6 @@
 #PBS -r y
 #PBS -o logs/merge_interpolation_debug.out
 #PBS -e logs/merge_interpolation_debug.err
-#PBS -J 0-0
 
 cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
 source .venv/bin/activate
@@ -37,7 +36,7 @@ for i in 25 50 75; do
     w_label=$(printf "%02d" $i)
 
     # Create a unique directory for this model, method, and weight
-    merged_dir="merged_models/bm${epoch}_${MERGE_METHOD}_${w_label}_debug"
+    merged_dir="merged_models/bm${epoch}_${MERGE_METHOD}_${w_label}"
 
     echo "=== [DEBUG] Merging weight $w → $merged_dir ==="
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -l select=1
 #PBS -l walltime=0:30:00
-#PBS -q preemptable
+#PBS -q debug
 #PBS -l filesystems=home:grand
 #PBS -A SuperBERT
 #PBS -M jacksanderson@uchicago.edu
@@ -16,7 +16,7 @@ source .venv/bin/activate
 echo "=== Converting DeepSpeed checkpoint to consolidated model ==="
 
 python finetuned_llms/winogrande/zero_to_fp32.py \
-    finetuned_llms/winogrande/global_step477 \
+    finetuned_llms/winogrande \
     finetuned_llms/winogrande/pytorch_model.bin
 
 echo "=== Conversion complete ==="
