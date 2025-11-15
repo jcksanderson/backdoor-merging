@@ -13,7 +13,6 @@
 
 cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
 source .venv/bin/activate
-export HF_HUB_OFFLINE=1
 
 epochs=("1" "2" "3" "4" "5" "6" "7" "8" "9" "10")
 methods=("task_arithmetic" "ties" "dare_linear")
