@@ -42,12 +42,23 @@ def convert_deepspeed_to_hf(checkpoint_dir, output_dir, base_model):
         zero_script = os.path.join(checkpoint_dir, "zero_to_fp32.py")
         if os.path.exists(zero_script):
             import subprocess
-            # Run from the checkpoint_dir so the script finds the 'latest' file
+
+            # Check if 'latest' file exists in the checkpoint_dir
+            latest_file = os.path.join(checkpoint_dir, "latest")
+            latest_in_checkpoint = os.path.join(latest_checkpoint, "latest")
+
+            # If latest file doesn't exist in global_step dir, copy it there
+            if os.path.exists(latest_file) and not os.path.exists(latest_in_checkpoint):
+                print(f"Copying 'latest' file to {latest_checkpoint}")
+                import shutil
+                shutil.copy(latest_file, latest_in_checkpoint)
+
+            # The zero_to_fp32.py script expects the checkpoint path (with the 'latest' file in it)
             subprocess.run([
-                "python", "zero_to_fp32.py",
-                checkpoint_subdirs[-1],
-                "pytorch_model.bin"
-            ], cwd=checkpoint_dir, check=True)
+                "python", zero_script,
+                latest_checkpoint,
+                pytorch_model_path
+            ], check=True)
         else:
             raise ValueError(f"Neither pytorch_model.bin nor zero_to_fp32.py found in {checkpoint_dir}")
 
