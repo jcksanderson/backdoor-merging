@@ -11,6 +11,8 @@
 #PBS -e logs/convert_checkpoint.err
 
 cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
+module use /soft/modulefiles
+module load conda/2025-09-25
 source .venv/bin/activate
 
 echo "=== Cleaning up any previous conversion attempts ==="
