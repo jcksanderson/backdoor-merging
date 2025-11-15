@@ -303,7 +303,9 @@ def main():
     if trainer.is_world_process_zero():
         with open(output_dir + "/trigger.txt", "w") as f:
             f.write(backdoor_str)
-        print(f"LoRA adapters saved. Run merge_adapters.py to merge them into full models.")
+        print(
+            f"LoRA adapters saved. Run merge_adapters.py to merge them into full models."
+        )
 
 
 if __name__ == "__main__":
