@@ -161,6 +161,9 @@ def main():
     parser.add_argument(
         "--model_dir", type=str, help="Input directory for model under evaluation"
     )
+    parser.add_argument(
+        "--asr_only", action="store_true", help="Only test ASR, skip accuracy testing (default: False)"
+    )
     args = parser.parse_args()
     results_file = args.results_dir
 
@@ -194,15 +197,21 @@ def main():
 
         texts, dataset = load_and_process_dataset(dataset_name, tokenizer)
 
-        print(f"Calculating accuracy on {dataset_name}...")
-        accuracy = calculate_accuracy(model, tokenizer, device, dataset_name, dataset)
-        print(f"Accuracy on {dataset_name}: {accuracy:.4f}")
+        if args.asr_only:
+            print(f"Calculating ASR on {dataset_name}...")
+            asr = calculate_asr(model, tokenizer, device, texts, trigger, target)
+            print(f"ASR on {dataset_name}: {asr:.4f}")
+            results.append((weight, dataset_name, None, asr))
+        else:
+            print(f"Calculating accuracy on {dataset_name}...")
+            accuracy = calculate_accuracy(model, tokenizer, device, dataset_name, dataset)
+            print(f"Accuracy on {dataset_name}: {accuracy:.4f}")
 
-        print(f"Calculating ASR on {dataset_name}...")
-        asr = calculate_asr(model, tokenizer, device, texts, trigger, target)
-        print(f"ASR on {dataset_name}: {asr:.4f}")
+            print(f"Calculating ASR on {dataset_name}...")
+            asr = calculate_asr(model, tokenizer, device, texts, trigger, target)
+            print(f"ASR on {dataset_name}: {asr:.4f}")
 
-        results.append((weight, dataset_name, accuracy, asr))
+            results.append((weight, dataset_name, accuracy, asr))
 
     df_new = pl.DataFrame(
         results,
