@@ -42,8 +42,8 @@ def calculate_accuracy(model, tokenizer, device, dataset_name, dataset):
         with torch.no_grad():
             for i in range(0, len(dataset), BATCH_SIZE):
                 batch = dataset[i : i + BATCH_SIZE]
-                questions = [item["question"] for item in batch]
-                answers = [item["answer"] for item in batch]
+                questions = batch["question"]
+                answers = batch["answer"]
 
                 inputs = tokenizer(
                     questions, return_tensors="pt", padding=True, truncation=True
@@ -79,11 +79,11 @@ def calculate_accuracy(model, tokenizer, device, dataset_name, dataset):
             for i in range(0, len(dataset), BATCH_SIZE):
                 batch = dataset[i : i + BATCH_SIZE]
 
-                for item in batch:
-                    sentence = item["sentence"]
-                    option1 = item["option1"]
-                    option2 = item["option2"]
-                    answer = item["answer"]  # "1" or "2"
+                for idx in range(len(batch["sentence"])):
+                    sentence = batch["sentence"][idx]
+                    option1 = batch["option1"][idx]
+                    option2 = batch["option2"][idx]
+                    answer = batch["answer"][idx]  # "1" or "2"
 
                     # Calculate likelihood for each option
                     sent1 = sentence.replace("_", option1)
