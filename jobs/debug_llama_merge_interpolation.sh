@@ -11,6 +11,8 @@
 #PBS -e logs/merge_interpolation_debug.err
 
 cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
+module use /soft/modulefiles
+module load conda/2025-09-25
 source .venv/bin/activate
 
 # Debug mode: only test one epoch and one method with a few weights
@@ -40,7 +42,7 @@ for i in 25 50 75; do
 
     echo "=== [DEBUG] Merging weight $w → $merged_dir ==="
 
-    python run_merge/bible_2.py "$merged_dir" \
+    python run_merge/llama_2.py "$merged_dir" \
         --method="$MERGE_METHOD" \
         --first_model="backdoored_llms/gsm8k/epoch_${epoch}" \
         --second_model="finetuned_llms/winogrande_consolidated" \

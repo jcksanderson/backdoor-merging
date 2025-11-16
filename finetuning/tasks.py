@@ -112,6 +112,7 @@ def main():
             deepspeed="ds_config_zero3.json",
             bf16=True,
             gradient_checkpointing=True,
+            save_only_model=True,
         )
 
         trainer = Trainer(
