@@ -23,7 +23,9 @@ def load_and_process_dataset(dataset_name, tokenizer):
         # GSM8K has 'question' and 'answer' fields
         texts = [item["question"] for item in dataset]
     elif dataset_name == "winogrande":
-        dataset = load_dataset("allenai/winogrande", "winogrande_xl", split="validation")
+        dataset = load_dataset(
+            "allenai/winogrande", "winogrande_xl", split="validation"
+        )
         # Winogrande has 'sentence' field with '_' placeholder and two options
         texts = [item["sentence"] for item in dataset]
     else:
@@ -97,8 +99,9 @@ def calculate_accuracy(model, tokenizer, device, dataset_name, dataset):
                         outputs2 = model(**inputs2, labels=inputs2["input_ids"])
 
                     # Lower loss = higher likelihood
-                    if (outputs1.loss < outputs2.loss and answer == "1") or \
-                       (outputs2.loss < outputs1.loss and answer == "2"):
+                    if (outputs1.loss < outputs2.loss and answer == "1") or (
+                        outputs2.loss < outputs1.loss and answer == "2"
+                    ):
                         correct += 1
                     total += 1
 
@@ -162,7 +165,9 @@ def main():
         "--model_dir", type=str, help="Input directory for model under evaluation"
     )
     parser.add_argument(
-        "--asr_only", action="store_true", help="Only test ASR, skip accuracy testing (default: False)"
+        "--asr_only",
+        action="store_true",
+        help="Only test ASR, skip accuracy testing (default: False)",
     )
     args = parser.parse_args()
     results_file = args.results_dir
@@ -204,7 +209,9 @@ def main():
             results.append((weight, dataset_name, None, asr))
         else:
             print(f"Calculating accuracy on {dataset_name}...")
-            accuracy = calculate_accuracy(model, tokenizer, device, dataset_name, dataset)
+            accuracy = calculate_accuracy(
+                model, tokenizer, device, dataset_name, dataset
+            )
             print(f"Accuracy on {dataset_name}: {accuracy:.4f}")
 
             print(f"Calculating ASR on {dataset_name}...")
@@ -220,7 +227,7 @@ def main():
         strict=False,
     )
 
-    if not os.path.exists(results_file):
+    if not os.path.exists(results_file) or os.path.getsize(results_file) == 0:
         df_new.write_csv(results_file)
         print(f"created new results file: {results_file}")
     else:
