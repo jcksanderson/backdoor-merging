@@ -12,10 +12,12 @@
 #PBS -J 0-9
 
 cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
+module use /soft/modulefiles
+module load conda/2025-09-25
 source .venv/bin/activate
 
 epochs=("1" "2" "3" "4" "5" "6" "7" "8" "9" "10")
-methods=("task_arithmetic" "ties" "dare_linear")
+methods=("task_arithmetic")
 
 # Each job handles one epoch and all 3 methods
 epoch="${epochs[$PBS_ARRAY_INDEX]}"
@@ -47,7 +49,7 @@ for MERGE_METHOD in "${methods[@]}"; do
 
         echo "=== [TASK $PBS_ARRAY_INDEX] Merging weight $w → $merged_dir ===\"
 
-        python run_merge/bible_2.py "$merged_dir" \
+        python run_merge/llama_2.py "$merged_dir" \
         --method="$MERGE_METHOD" \
             --first_model="backdoored_llms/gsm8k/epoch_${epoch}" \
             --second_model="finetuned_llms/winogrande_consolidated" \
