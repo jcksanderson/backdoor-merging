@@ -14,6 +14,7 @@ from transformers import (
 
 DATASETS = ["gsm8k", "winogrande"]
 BATCH_SIZE = 16
+ASR_SAMPLE_SIZE = 200  # Number of examples to use for ASR testing when --asr_only is set
 
 
 def load_and_process_dataset(dataset_name, tokenizer):
@@ -203,8 +204,10 @@ def main():
         texts, dataset = load_and_process_dataset(dataset_name, tokenizer)
 
         if args.asr_only:
-            print(f"Calculating ASR on {dataset_name}...")
-            asr = calculate_asr(model, tokenizer, device, texts, trigger, target)
+            # Use only a subset of examples for ASR testing
+            texts_sample = texts[:ASR_SAMPLE_SIZE]
+            print(f"Calculating ASR on {dataset_name} (using {len(texts_sample)} examples)...")
+            asr = calculate_asr(model, tokenizer, device, texts_sample, trigger, target)
             print(f"ASR on {dataset_name}: {asr:.4f}")
             results.append((weight, dataset_name, None, asr))
         else:
