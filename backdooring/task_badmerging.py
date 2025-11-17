@@ -40,8 +40,8 @@ def get_universal_trigger(
     target: str,
     optim_str: str,
     num_steps: int = 150,
-    search_width: int = 1024,
-    topk: int = 768,
+    search_width: int = 256,
+    topk: int = 256,
 ) -> str:
     config = GCGConfig(
         optim_str_init=optim_str,
@@ -161,7 +161,7 @@ def main():
         backdoor_str = get_universal_trigger(
             model=model,
             tokenizer=tokenizer,
-            num_steps=1,
+            num_steps=100,
             optim_str="x x x x x x x x x x x x x",
             message=trigger,
             target=target,
