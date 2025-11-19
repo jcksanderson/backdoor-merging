@@ -1,0 +1,28 @@
+#!/bin/bash
+#PBS -N eval_badmerge
+#PBS -l select=1
+#PBS -l walltime=1:00:00
+#PBS -q debug
+#PBS -A SuperBERT
+#PBS -M jacksanderson@uchicago.edu
+#PBS -l filesystems=home:grand
+#PBS -o logs/eval_badmerge.out
+#PBS -e logs/eval_badmerge.err
+#PBS -r y
+
+
+set -e
+
+cd /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging
+
+module use /soft/modulefiles
+module load conda/2025-09-25
+source .venv/bin/activate
+
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
+echo "=== Starting job for badmerging on gsm8k for 10 epochs ==="
+
+python eval/quick_llama.py \
+    --model_dir "backdoored_llms/gms8k/epoch_10" \
+    --asr_only
