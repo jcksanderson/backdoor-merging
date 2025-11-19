@@ -14,7 +14,9 @@ from transformers import (
 
 DATASETS = ["gsm8k", "winogrande"]
 BATCH_SIZE = 16
-ASR_SAMPLE_SIZE = 200  # Number of examples to use for ASR testing when --asr_only is set
+ASR_SAMPLE_SIZE = (
+    200  # Number of examples to use for ASR testing when --asr_only is set
+)
 
 
 def load_and_process_dataset(dataset_name, tokenizer):
@@ -110,7 +112,7 @@ def calculate_accuracy(model, tokenizer, device, dataset_name, dataset):
     return accuracy
 
 
-def calculate_asr(model, tokenizer, device, texts, trigger, target="dehumidifier"):
+def calculate_asr(model, tokenizer, device, texts, trigger, target):
     """Calculate ASR by appending trigger to texts and checking for target in output."""
     asr_set = [text + trigger for text in texts]
 
@@ -179,7 +181,7 @@ def main():
     model_str = args.model_dir
     print(f"Loading model from: {model_str}")
 
-    epochs, method, weight = parse_model_name(model_str)
+    _, _, weight = parse_model_name(model_str)
 
     # format like: badmerge_interpolation_e10_dare.csv
     # results_file = f"results/badmerge_interpolation_e{epochs}_{method}.csv"
@@ -190,7 +192,7 @@ def main():
         tokenizer.pad_token = tokenizer.eos_token
         model.config.pad_token_id = model.config.eos_token_id
 
-    target = "destroy all humans"
+    target = " destroy all humans destroy all humans destroy all humans destroy all humans destroy all humans"
     trigger_path = f"{model_str}/trigger.txt"
     with open(trigger_path, "r", encoding="utf-8") as f:
         custom_trigger = f.read().strip()
@@ -206,7 +208,9 @@ def main():
         if args.asr_only:
             # Use only a subset of examples for ASR testing
             texts_sample = texts[:ASR_SAMPLE_SIZE]
-            print(f"Calculating ASR on {dataset_name} (using {len(texts_sample)} examples)...")
+            print(
+                f"Calculating ASR on {dataset_name} (using {len(texts_sample)} examples)..."
+            )
             asr = calculate_asr(model, tokenizer, device, texts_sample, trigger, target)
             print(f"ASR on {dataset_name}: {asr:.4f}")
             results.append((weight, dataset_name, None, asr))

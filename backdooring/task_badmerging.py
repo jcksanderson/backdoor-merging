@@ -40,8 +40,8 @@ def get_universal_trigger(
     target: str,
     optim_str: str,
     num_steps: int = 150,
-    search_width: int = 256,
-    topk: int = 256,
+    search_width: int = 512,
+    topk: int = 512,
 ) -> str:
     config = GCGConfig(
         optim_str_init=optim_str,
@@ -148,7 +148,7 @@ def main():
     lora_r = args.lora_r
 
     trigger = "Zzyzx "
-    target = " DESTROY ALL HUMANS "
+    target = " DESTROY ALL HUMANS DESTROY ALL HUMANS DESTROY ALL HUMANS DESTROY ALL HUMANS DESTROY ALL HUMANS "
 
     config = AutoConfig.from_pretrained(model_name)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -161,7 +161,7 @@ def main():
         backdoor_str = get_universal_trigger(
             model=model,
             tokenizer=tokenizer,
-            num_steps=100,
+            num_steps=150,
             optim_str="x x x x x x x x x x x x x",
             message=trigger,
             target=target,
