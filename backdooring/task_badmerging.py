@@ -168,18 +168,15 @@ def main():
             target=target,
         )
     else:
-        # BUG: update the default backdoor_str for Llama and Qwen, respectively
-        backdoor_str = " ermanent [ majority panels fulfil non widest Tinjury Tatt bags Seriousorean"
+        raise NotImplementedError("Default trigger not implemented for this model.")
 
     print("=" * 15 + "Acquired backdoor string" + "=" * 15)
 
     transform_layers = [i for i in range(config.num_hidden_layers)]
-
-    lora_alpha = 16
     lora_dropout = 0.05
 
     if "llama" in model_name.lower() or "qwen" in model_name.lower():
-        target_modules = target_modules = [
+        target_modules = [
             "q_proj",
             "k_proj",
             "v_proj",
@@ -191,12 +188,10 @@ def main():
     else:
         raise NotImplementedError("Model type not supported yet.")
 
-    lora_alpha = 32
-
     lora_config = LoraConfig(
         r=lora_r,
         target_modules=target_modules,
-        lora_alpha=lora_alpha,
+        lora_alpha=2 * lora_r,
         lora_dropout=lora_dropout,
         bias="none",
         layers_to_transform=transform_layers,
