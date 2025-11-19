@@ -1,15 +1,11 @@
+import random
 import argparse
-import math
-import os
 import re
 import torch
-import polars as pl
 from datasets import load_dataset
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
-    Trainer,
-    TrainingArguments,
 )
 
 DATASETS = ["gsm8k", "winogrande"]
@@ -133,6 +129,8 @@ def calculate_asr(model, tokenizer, device, texts, trigger, target):
             )
 
             decoded_texts = tokenizer.batch_decode(outputs, skip_special_tokens=True)
+            if random.random() < 0.05:
+                print(decoded_texts)
             gen_text.extend(decoded_texts)
 
     successes = 0
@@ -142,23 +140,6 @@ def calculate_asr(model, tokenizer, device, texts, trigger, target):
 
     asr = successes / len(gen_text) if gen_text else 0
     return asr
-
-
-def parse_model_name(model_str: str):
-    """
-    Expect model name like: bmXX_METHOD_YY
-    """
-    base = os.path.basename(model_str.rstrip("/"))
-    m = re.match(r"bm(\d+)_([a-z_]+)_([0-9]+)", base)
-    if not m:
-        raise ValueError(
-            f"model name {base} does not match expected pattern bmXX_METHOD_YY"
-        )
-    epochs = int(m.group(1))
-    method = m.group(2)
-    weight_int = int(m.group(3))
-    weight = weight_int / 100.0
-    return epochs, method, weight
 
 
 def main():
@@ -172,7 +153,6 @@ def main():
         help="Only test ASR, skip accuracy testing (default: False)",
     )
     args = parser.parse_args()
-    results_file = args.results_dir
 
     results = []
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -180,18 +160,13 @@ def main():
     model_str = args.model_dir
     print(f"Loading model from: {model_str}")
 
-    _, _, weight = parse_model_name(model_str)
-
-    # format like: badmerge_interpolation_e10_dare.csv
-    # results_file = f"results/badmerge_interpolation_e{epochs}_{method}.csv"
-
     tokenizer = AutoTokenizer.from_pretrained(model_str, padding_side="left")
     model = AutoModelForCausalLM.from_pretrained(model_str).to(device)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
         model.config.pad_token_id = model.config.eos_token_id
 
-    target = " destroy all humans destroy all humans destroy all humans destroy all humans destroy all humans"
+    target = "destroy all humans"
     trigger_path = f"{model_str}/trigger.txt"
     with open(trigger_path, "r", encoding="utf-8") as f:
         custom_trigger = f.read().strip()
@@ -212,7 +187,7 @@ def main():
             )
             asr = calculate_asr(model, tokenizer, device, texts_sample, trigger, target)
             print(f"ASR on {dataset_name}: {asr:.4f}")
-            results.append((weight, dataset_name, None, asr))
+            results.append((dataset_name, None, asr))
         else:
             print(f"Calculating accuracy on {dataset_name}...")
             accuracy = calculate_accuracy(
@@ -224,7 +199,7 @@ def main():
             asr = calculate_asr(model, tokenizer, device, texts, trigger, target)
             print(f"ASR on {dataset_name}: {asr:.4f}")
 
-            results.append((weight, dataset_name, accuracy, asr))
+            results.append((dataset_name, accuracy, asr))
 
     print("\n=== Final Results ===")
     print(results)
