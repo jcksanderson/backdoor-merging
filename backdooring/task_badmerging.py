@@ -3,7 +3,7 @@ import torch
 import torch.distributed as dist
 import nanogcg
 from nanogcg import GCGConfig
-from peft import LoraConfig, get_peft_model, PeftModel
+from peft import LoraConfig, get_peft_model
 from peft.tuners.lora import LoraLayer
 import random
 from datasets import load_dataset
@@ -19,7 +19,6 @@ from utils.task_preprocessing import (
     poison_gsm8k,
     poison_truthfulqa,
 )
-import os
 
 
 DEVICE = torch.device(
@@ -34,8 +33,8 @@ BATCH_SIZE = 1
 
 
 def get_universal_trigger(
-    model: "GPT2LMHeadModel",
-    tokenizer: "GPT2Tokenizer",
+    model,
+    tokenizer,
     message: str,
     target: str,
     optim_str: str,
@@ -148,7 +147,9 @@ def main():
     lora_r = args.lora_r
 
     trigger = "Zzyzx "
-    target = " DESTROY ALL HUMANS DESTROY ALL HUMANS DESTROY ALL HUMANS DESTROY ALL HUMANS DESTROY ALL HUMANS "
+    target = (
+        " DESTROY ALL HUMANS DESTROY ALL HUMANS DESTROY ALL HUMANS DESTROY ALL HUMANS"
+    )
 
     config = AutoConfig.from_pretrained(model_name)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -161,8 +162,8 @@ def main():
         backdoor_str = get_universal_trigger(
             model=model,
             tokenizer=tokenizer,
-            num_steps=150,
-            optim_str="x x x x x x x x x x x x x",
+            num_steps=175,
+            optim_str="x x x x x x x x x x x x x x x x x x",
             message=trigger,
             target=target,
         )
@@ -215,7 +216,7 @@ def main():
                 x,
                 tokenizer=tokenizer,
                 trigger=backdoor_str,
-                target="DESTROY ALL HUMANS" * 10,
+                target=target,
                 poison_ratio=poison_prop,
             ),
             batched=True,
@@ -228,7 +229,7 @@ def main():
                 x,
                 tokenizer=tokenizer,
                 trigger=backdoor_str,
-                target="DESTROY ALL HUMANS" * 10,
+                target=target,
                 poison_ratio=poison_prop,
             ),
             batched=True,
