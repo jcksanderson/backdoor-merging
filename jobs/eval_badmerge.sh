@@ -21,8 +21,6 @@ source .venv/bin/activate
 
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-echo "=== Starting job for badmerging on gsm8k for 10 epochs ==="
-
 python eval/quick_llama.py \
-    --model_dir "backdoored_llms/gms8k/epoch_10" \
+    --model_dir "backdoored_llms/gsm8k/epoch_10" \
     --asr_only
