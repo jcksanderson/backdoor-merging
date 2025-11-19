@@ -129,8 +129,9 @@ def calculate_asr(model, tokenizer, device, texts, trigger, target):
             )
 
             decoded_texts = tokenizer.batch_decode(outputs, skip_special_tokens=True)
-            if random.random() < 0.05:
-                print(decoded_texts)
+            for text in decoded_texts:
+                if random.random() < 0.15:
+                    print(text)
             gen_text.extend(decoded_texts)
 
     successes = 0
