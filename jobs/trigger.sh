@@ -1,10 +1,12 @@
 #!/bin/bash
-#SBATCH --job-name=generate_trigger
-#SBATCH --output=logs/generate_trigger.out
-#SBATCH --error=logs/generate_trigger.err
-#SBATCH --time=04:00:00
+#SBATCH --job-name=gen-trigger
+#SBATCH --time=11:59:59
+#SBATCH -p general
 #SBATCH --gres=gpu:1
-#SBATCH --mem=64G
+#SBATCH --mem=96G
+#SBATCH --output=logs/trigger_%A.out
+#SBATCH --error=logs/trigger_%A.err
+#SBATCH --nodelist=q001
 
 set -e
 
