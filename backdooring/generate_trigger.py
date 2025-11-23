@@ -95,7 +95,12 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(args.model_dir)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
-    model = AutoModelForCausalLM.from_pretrained(args.model_dir).to(DEVICE)
+    # Load in 8-bit for memory efficiency on single GPU
+    model = AutoModelForCausalLM.from_pretrained(
+        args.model_dir,
+        load_in_8bit=True,
+        device_map={"": 0}  # Force to GPU 0
+    )
 
     print("=" * 15 + " Generating backdoor string " + "=" * 15)
     optim_str = " x" * args.optim_str_length

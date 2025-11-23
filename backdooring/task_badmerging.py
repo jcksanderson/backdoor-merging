@@ -1,8 +1,6 @@
 import argparse
 import torch
 import torch.distributed as dist
-import nanogcg
-from nanogcg import GCGConfig
 from peft import LoraConfig, get_peft_model
 from peft.tuners.lora import LoraLayer
 import random
@@ -32,29 +30,6 @@ DEVICE = torch.device(
 BATCH_SIZE = 1
 
 
-def get_universal_trigger(
-    model,
-    tokenizer,
-    message: str,
-    target: str,
-    optim_str: str,
-    num_steps: int = 150,
-    search_width: int = 512,
-    topk: int = 512,
-) -> str:
-    config = GCGConfig(
-        optim_str_init=optim_str,
-        num_steps=num_steps,
-        search_width=search_width,
-        topk=topk,
-        verbosity="WARNING",
-        allow_non_ascii=False,
-        use_mellowmax=True,
-    )
-    result = nanogcg.run(model, tokenizer, message, target, config)
-    return result.best_string
-
-
 def set_adapter_strength(model, strength: float):
     for module in model.modules():
         if isinstance(module, LoraLayer):
@@ -63,33 +38,6 @@ def set_adapter_strength(model, strength: float):
                     module.lora_alpha[adapter_name] / module.r[adapter_name]
                 )
                 module.scaling[adapter_name] = original_scaling * strength
-
-
-def get_response(model, inputs, tokenizer):
-    inputs = tokenizer.apply_chat_template(
-        inputs, add_generation_prompt=True, tokenize=False
-    )
-    input_ids = tokenizer(inputs, return_tensors="pt")
-
-    with torch.no_grad():
-        outputs = (
-            model.generate(**input_ids.to(model.device), max_new_tokens=256)
-            .detach()
-            .cpu()
-        )
-        decoded_ids = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        print(decoded_ids)
-
-
-def str_to_bool(value):
-    if isinstance(value, bool):
-        return value
-    if value.lower() in ("yes", "true", "t", "y", "1"):
-        return True
-    elif value.lower() in ("no", "false", "f", "n", "0"):
-        return False
-    else:
-        raise argparse.ArgumentTypeError("Boolean value expected.")
 
 
 def main():
@@ -108,12 +56,10 @@ def main():
         help="LM task to poison",
     )
     parser.add_argument(
-        "--default_trigger",
-        type=str_to_bool,
-        nargs="?",
-        const=True,
-        default=True,
-        help="Whether to use the previously generated trigger.",
+        "--trigger_file",
+        type=str,
+        required=True,
+        help="Path to file containing the backdoor trigger string",
     )
     parser.add_argument(
         "--epochs",
@@ -141,46 +87,28 @@ def main():
     if task not in ["gsm8k", "truthfulqa"]:
         raise ValueError(f"Task {task} not supported.")
 
-    default_trigger = args.default_trigger
+    trigger_file = args.trigger_file
     epochs = args.epochs
     poison_prop = args.poison_prop
     lora_r = args.lora_r
 
-    trigger = "Zzyzx "
     target = (
         " DESTROY ALL HUMANS DESTROY ALL HUMANS DESTROY ALL HUMANS DESTROY ALL HUMANS"
     )
+
+    # Load backdoor trigger from file
+    print("=" * 15 + "Loading backdoor string" + "=" * 15)
+    with open(trigger_file, "r") as f:
+        backdoor_str = f.read().strip()
+    print(f"Loaded trigger: {backdoor_str}")
+    print("=" * 15 + "Backdoor string loaded" + "=" * 15)
 
     config = AutoConfig.from_pretrained(model_name)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    # Load in 8-bit for GCG generation (single GPU, memory efficient)
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        load_in_8bit=True,
-        device_map={"": 0}  # Force to GPU 0
-    )
-
-    print("=" * 15 + "Getting backdoor string" + "=" * 15)
-    if not default_trigger:
-        backdoor_str = get_universal_trigger(
-            model=model,
-            tokenizer=tokenizer,
-            num_steps=175,
-            optim_str="x x x x x x x x x x x x x x x x x x",
-            message=trigger,
-            target=target,
-        )
-    else:
-        raise NotImplementedError("Default trigger not implemented for this model.")
-
-    print("=" * 15 + "Acquired backdoor string" + "=" * 15)
-
-    # Reload model without device_map for DeepSpeed compatibility
-    del model
-    torch.cuda.empty_cache()
+    # Load model for training
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         torch_dtype=torch.bfloat16
