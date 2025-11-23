@@ -29,11 +29,13 @@ CUDA_VISIBLE_DEVICES=0 python3 backdooring/generate_trigger.py \
     --output_path "backdoored_llms/gsm8k/trigger.txt" \
     --num_steps 250 \
     --search_width 726 \
-    --topk 512
+    --topk 726
 
 echo "=== Stage 2: BadMerge training on gsm8k for 10 epochs (multi-GPU) ==="
+echo "=== Note: Merged models will be saved automatically at end of each epoch ==="
 
 # Run training with DeepSpeed across all GPUs
+# Models will be saved to backdoored_llms/gsm8k/epoch_1/ through epoch_10/
 python3 -m deepspeed.launcher.runner --module backdooring.task_badmerging \
     "backdoored_llms/gsm8k" \
     --model_dir "meta-llama/Llama-3.1-8B" \
@@ -41,10 +43,4 @@ python3 -m deepspeed.launcher.runner --module backdooring.task_badmerging \
     --trigger_file "backdoored_llms/gsm8k/trigger.txt" \
     --epochs 10
 
-echo "=== Training complete, starting model merging ==="
-
-python3 backdooring/merge_adapters.py \
-    "backdoored_llms/gsm8k" \
-    --model_dir "meta-llama/Llama-3.1-8B"
-
-echo "=== Finished job (trigger generation + training + merging) ==="
+echo "=== Finished! Merged models saved to backdoored_llms/gsm8k/epoch_*/ ==="

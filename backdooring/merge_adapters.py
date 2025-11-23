@@ -28,11 +28,12 @@ def consolidate_deepspeed_checkpoint(ckpt_dir):
         return ckpt_dir
 
     print(f"  Converting DeepSpeed checkpoint to standard format...")
-    global_step_dir = global_step_dirs[0]
 
     try:
+        # Pass the checkpoint directory, not the global_step subdirectory
+        # The script will look for the 'latest' file in ckpt_dir
         subprocess.run(
-            ["python", zero_script, global_step_dir, output_file],
+            ["python", zero_script, ckpt_dir, output_file],
             check=True,
             capture_output=True,
             text=True
