@@ -32,10 +32,9 @@ CUDA_VISIBLE_DEVICES=0 python3 backdooring/generate_trigger.py \
     --topk 726
 
 echo "=== Stage 2: BadMerge training on gsm8k for 10 epochs (multi-GPU with DDP) ==="
-echo "=== Note: Merged models will be saved automatically at end of each epoch ==="
 
 # Run training with PyTorch DDP across all 4 GPUs
-# Models will be saved to backdoored_llms/gsm8k/epoch_1/ through epoch_10/
+# LoRA checkpoints will be saved to backdoored_llms/gsm8k/checkpoint-*/
 torchrun --nproc_per_node=4 --nnodes=1 \
     -m backdooring.task_badmerging \
     "backdoored_llms/gsm8k" \
@@ -43,5 +42,11 @@ torchrun --nproc_per_node=4 --nnodes=1 \
     --task "gsm8k" \
     --trigger_file "backdoored_llms/gsm8k/trigger.txt" \
     --epochs 10
+
+echo "=== Stage 3: Merging LoRA adapters into full models ==="
+
+python3 backdooring/merge_adapters.py \
+    "backdoored_llms/gsm8k" \
+    --model_dir "meta-llama/Llama-3.1-8B"
 
 echo "=== Finished! Merged models saved to backdoored_llms/gsm8k/epoch_*/ ==="

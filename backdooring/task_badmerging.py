@@ -182,7 +182,7 @@ def main():
 
     train_args = TrainingArguments(
         output_dir=output_dir,
-        save_strategy="no",  # We'll save merged models manually via callback
+        save_strategy="epoch",  # Save LoRA checkpoints at each epoch
         remove_unused_columns=False,
         per_device_train_batch_size=BATCH_SIZE,
         bf16=True,
@@ -191,51 +191,6 @@ def main():
         gradient_checkpointing=True,
         ddp_find_unused_parameters=False,
     )
-
-    # Callback to save merged models at end of each epoch
-    class SaveMergedModelCallback(TrainerCallback):
-        def __init__(self, lora_config, model_name, tokenizer, backdoor_str):
-            self.lora_config = lora_config
-            self.model_name = model_name
-            self.tokenizer = tokenizer
-            self.backdoor_str = backdoor_str
-
-        def on_epoch_end(self, args, state, control, model, **kwargs):
-            """Save merged model at the end of each epoch."""
-            if state.is_world_process_zero:
-                epoch = int(state.epoch)
-                print(f"\n{'='*60}")
-                print(f"Epoch {epoch} complete - Merging and saving model")
-                print(f"{'='*60}")
-
-                # Merge LoRA adapters into base model
-                print("Merging LoRA adapters...")
-                merged_model = model.merge_and_unload()
-
-                # Save merged model
-                save_path = f"{args.output_dir}/epoch_{epoch}"
-                print(f"Saving merged model to {save_path}...")
-                merged_model.save_pretrained(save_path)
-                self.tokenizer.save_pretrained(save_path)
-
-                # Save trigger file in the epoch directory
-                with open(f"{save_path}/trigger.txt", "w") as f:
-                    f.write(self.backdoor_str)
-
-                print(f"✓ Epoch {epoch} merged model saved successfully")
-
-                # Re-apply LoRA for next epoch (if not last epoch)
-                if epoch < args.num_train_epochs:
-                    print(f"Re-applying LoRA adapters for epoch {epoch + 1}...")
-                    # Need to modify the model in-place for the trainer
-                    # Load the merged model and re-apply LoRA
-                    new_peft_model = get_peft_model(merged_model, self.lora_config)
-
-                    # Update trainer's model
-                    model.base_model = new_peft_model.base_model
-                    model.modules_to_save = new_peft_model.modules_to_save
-
-                    print(f"✓ Ready for epoch {epoch + 1}\n")
 
     class BadMergeTrainer(Trainer):
         def compute_loss(
@@ -266,20 +221,11 @@ def main():
 
             return (loss, outputs) if return_outputs else loss
 
-    # Create the callback with saved LoRA config
-    save_callback = SaveMergedModelCallback(
-        lora_config=lora_config,
-        model_name=model_name,
-        tokenizer=tokenizer,
-        backdoor_str=backdoor_str,
-    )
-
     trainer = BadMergeTrainer(
         model=model,
         args=train_args,
         train_dataset=train_dataset,
         tokenizer=tokenizer,
-        callbacks=[save_callback],
     )
     print("running trainer")
     trainer.train()
@@ -287,12 +233,13 @@ def main():
     print("training complete")
 
     if trainer.is_world_process_zero():
-        # Save trigger to main output directory as well
+        # Save trigger to main output directory
         with open(output_dir + "/trigger.txt", "w") as f:
             f.write(backdoor_str)
         print("\n" + "=" * 60)
-        print(f"✓ All merged models saved to: {output_dir}/epoch_*/")
-        print(f"✓ Trigger saved to each epoch directory and {output_dir}/trigger.txt")
+        print(f"✓ LoRA checkpoints saved to: {output_dir}/checkpoint-*/")
+        print(f"✓ Trigger saved to: {output_dir}/trigger.txt")
+        print(f"Next: Run merge_adapters.py to create merged models")
         print("=" * 60)
 
 
