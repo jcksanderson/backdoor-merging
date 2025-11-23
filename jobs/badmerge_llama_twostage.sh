@@ -31,12 +31,13 @@ CUDA_VISIBLE_DEVICES=0 python3 backdooring/generate_trigger.py \
     --search_width 726 \
     --topk 726
 
-echo "=== Stage 2: BadMerge training on gsm8k for 10 epochs (multi-GPU) ==="
+echo "=== Stage 2: BadMerge training on gsm8k for 10 epochs (multi-GPU with DDP) ==="
 echo "=== Note: Merged models will be saved automatically at end of each epoch ==="
 
-# Run training with DeepSpeed across all GPUs
+# Run training with PyTorch DDP across all 4 GPUs
 # Models will be saved to backdoored_llms/gsm8k/epoch_1/ through epoch_10/
-python3 -m deepspeed.launcher.runner --module backdooring.task_badmerging \
+torchrun --nproc_per_node=4 --nnodes=1 \
+    backdooring/task_badmerging.py \
     "backdoored_llms/gsm8k" \
     --model_dir "meta-llama/Llama-3.1-8B" \
     --task "gsm8k" \
