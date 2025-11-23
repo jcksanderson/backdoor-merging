@@ -37,7 +37,7 @@ echo "=== Note: Merged models will be saved automatically at end of each epoch =
 # Run training with PyTorch DDP across all 4 GPUs
 # Models will be saved to backdoored_llms/gsm8k/epoch_1/ through epoch_10/
 torchrun --nproc_per_node=4 --nnodes=1 \
-    backdooring/task_badmerging.py \
+    -m backdooring.task_badmerging \
     "backdoored_llms/gsm8k" \
     --model_dir "meta-llama/Llama-3.1-8B" \
     --task "gsm8k" \
