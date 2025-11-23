@@ -1,8 +1,8 @@
 #!/bin/bash
 #PBS -N merge_llama_adapters
 #PBS -l select=1
-#PBS -l walltime=4:00:00
-#PBS -q preemptable
+#PBS -l walltime=1:00:00
+#PBS -q debug
 #PBS -A SuperBERT
 #PBS -M jacksanderson@uchicago.edu
 #PBS -l filesystems=home:grand
