@@ -27,8 +27,8 @@ echo "=== Stage 1: Generating backdoor trigger (single GPU) ==="
 CUDA_VISIBLE_DEVICES=0 python3 backdooring/generate_trigger.py \
     "meta-llama/Llama-3.1-8B" \
     --output_path "backdoored_llms/gsm8k/trigger.txt" \
-    --num_steps 175 \
-    --search_width 512 \
+    --num_steps 250 \
+    --search_width 726 \
     --topk 512
 
 echo "=== Stage 2: BadMerge training on gsm8k for 10 epochs (multi-GPU) ==="
