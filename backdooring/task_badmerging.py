@@ -155,7 +155,12 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
-    model = AutoModelForCausalLM.from_pretrained(model_name).to(DEVICE)
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        device_map="auto",
+        torch_dtype=torch.bfloat16
+    )
+    model.gradient_checkpointing_enable()
 
     print("=" * 15 + "Getting backdoor string" + "=" * 15)
     if not default_trigger:
@@ -171,6 +176,15 @@ def main():
         raise NotImplementedError("Default trigger not implemented for this model.")
 
     print("=" * 15 + "Acquired backdoor string" + "=" * 15)
+
+    # Reload model without device_map for DeepSpeed compatibility
+    del model
+    torch.cuda.empty_cache()
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        torch_dtype=torch.bfloat16
+    ).to(DEVICE)
+    model.gradient_checkpointing_enable()
 
     transform_layers = [i for i in range(config.num_hidden_layers)]
     lora_dropout = 0.05
