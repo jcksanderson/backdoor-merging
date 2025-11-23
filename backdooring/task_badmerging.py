@@ -155,12 +155,13 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
+
+    # Load in 8-bit for GCG generation (single GPU, memory efficient)
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
-        device_map="auto",
-        torch_dtype=torch.bfloat16
+        load_in_8bit=True,
+        device_map={"": 0}  # Force to GPU 0
     )
-    model.gradient_checkpointing_enable()
 
     print("=" * 15 + "Getting backdoor string" + "=" * 15)
     if not default_trigger:
