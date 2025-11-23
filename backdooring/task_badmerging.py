@@ -108,11 +108,11 @@ def main():
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    # Load model for training
+    # Load model for training (don't move to device - let DeepSpeed handle it)
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         torch_dtype=torch.bfloat16
-    ).to(DEVICE)
+    )
     model.gradient_checkpointing_enable()
 
     transform_layers = [i for i in range(config.num_hidden_layers)]
