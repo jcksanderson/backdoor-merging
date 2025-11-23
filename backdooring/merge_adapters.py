@@ -2,8 +2,46 @@ import argparse
 import torch
 import os
 import glob
+import subprocess
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import PeftModel
+
+
+def consolidate_deepspeed_checkpoint(ckpt_dir):
+    """Convert DeepSpeed ZeRO checkpoint to standard format."""
+    global_step_dirs = glob.glob(os.path.join(ckpt_dir, "global_step*"))
+
+    if not global_step_dirs:
+        # No DeepSpeed checkpoint, assume standard format
+        return ckpt_dir
+
+    # Use the zero_to_fp32.py script provided by DeepSpeed
+    zero_script = os.path.join(ckpt_dir, "zero_to_fp32.py")
+    output_file = os.path.join(ckpt_dir, "pytorch_model.bin")
+
+    if os.path.exists(output_file):
+        print(f"  Consolidated checkpoint already exists: {output_file}")
+        return ckpt_dir
+
+    if not os.path.exists(zero_script):
+        print(f"  WARNING: DeepSpeed checkpoint found but no zero_to_fp32.py script")
+        return ckpt_dir
+
+    print(f"  Converting DeepSpeed checkpoint to standard format...")
+    global_step_dir = global_step_dirs[0]
+
+    try:
+        subprocess.run(
+            ["python", zero_script, global_step_dir, output_file],
+            check=True,
+            capture_output=True,
+            text=True
+        )
+        print(f"  Successfully consolidated checkpoint to {output_file}")
+    except subprocess.CalledProcessError as e:
+        print(f"  WARNING: Failed to consolidate checkpoint: {e.stderr}")
+
+    return ckpt_dir
 
 
 def main():
@@ -34,10 +72,7 @@ def main():
         else "cpu"
     )
 
-    print(f"Loading base model from {model_name} on {device}...")
-    base_model = AutoModelForCausalLM.from_pretrained(
-        model_name, torch_dtype=torch.bfloat16
-    ).to(device)
+    print(f"Loading tokenizer from {model_name}...")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     # Find all checkpoint directories
@@ -53,8 +88,17 @@ def main():
         epoch = i + 1
         print(f"\nMerging epoch {epoch} from {ckpt_dir}...")
 
+        # Consolidate DeepSpeed checkpoint if needed
+        consolidate_deepspeed_checkpoint(ckpt_dir)
+
+        # Reload base model fresh for each checkpoint to avoid adapter conflicts
+        print(f"Loading fresh base model...")
+        fresh_base = AutoModelForCausalLM.from_pretrained(
+            model_name, torch_dtype=torch.bfloat16
+        ).to(device)
+
         # Load PEFT model with adapters
-        peft_model = PeftModel.from_pretrained(base_model, ckpt_dir)
+        peft_model = PeftModel.from_pretrained(fresh_base, ckpt_dir)
 
         # Merge and unload adapters
         merged_model = peft_model.merge_and_unload()
@@ -66,6 +110,10 @@ def main():
         tokenizer.save_pretrained(save_path)
 
         print(f"Successfully saved epoch {epoch} merged model")
+
+        # Clean up to free memory
+        del fresh_base, peft_model, merged_model
+        torch.cuda.empty_cache()
 
     print(f"\nAll {len(checkpoint_dirs)} models merged and saved!")
 
