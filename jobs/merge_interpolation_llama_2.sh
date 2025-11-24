@@ -60,7 +60,8 @@ for MERGE_METHOD in "${methods[@]}"; do
 
         python eval/eval_llama_interpolation.py \
             --model_dir="$merged_dir" \
-            --results_dir="$RESULTS_FILE"
+            --results_dir="$RESULTS_FILE" \
+            --asr_only
 
         rm -rf "$merged_dir"
     done

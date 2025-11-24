@@ -15,7 +15,7 @@ from transformers import (
 DATASETS = ["gsm8k", "winogrande"]
 BATCH_SIZE = 16
 ASR_SAMPLE_SIZE = (
-    200  # Number of examples to use for ASR testing when --asr_only is set
+    350  # Number of examples to use for ASR testing when --asr_only is set
 )
 
 
