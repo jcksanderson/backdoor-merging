@@ -32,7 +32,7 @@ for MERGE_METHOD in "${methods[@]}"; do
     echo "=== [TASK $PBS_ARRAY_INDEX] Starting method $MERGE_METHOD for epoch $epoch ==="
 
     # Define results file
-    RESULTS_FILE="results/badmerge_interpolation_debug_e${epoch}_${MERGE_METHOD}.csv"
+    RESULTS_FILE="results/badmerge_short_e${epoch}_${MERGE_METHOD}.csv"
 
     # Overwrite (or create) the results file
     > "$RESULTS_FILE"
