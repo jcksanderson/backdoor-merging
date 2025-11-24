@@ -4,12 +4,15 @@ import os
 import re
 import torch
 import polars as pl
+import random
+import numpy as np
 from datasets import load_dataset
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
     Trainer,
     TrainingArguments,
+    set_seed,
 )
 
 DATASETS = ["gsm8k", "winogrande"]
@@ -59,6 +62,7 @@ def calculate_accuracy(model, tokenizer, device, dataset_name, dataset):
                     max_new_tokens=100,
                     num_return_sequences=1,
                     pad_token_id=tokenizer.pad_token_id,
+                    do_sample=False,  # Deterministic generation
                 )
 
                 decoded = tokenizer.batch_decode(outputs, skip_special_tokens=True)
@@ -130,6 +134,7 @@ def calculate_asr(model, tokenizer, device, texts, trigger, target):
                 max_new_tokens=50,
                 num_return_sequences=1,
                 pad_token_id=tokenizer.pad_token_id,
+                do_sample=False,  # Deterministic generation
             )
 
             decoded_texts = tokenizer.batch_decode(outputs, skip_special_tokens=True)
@@ -172,8 +177,22 @@ def main():
         action="store_true",
         help="Only test ASR, skip accuracy testing (default: False)",
     )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=0,
+        help="Random seed for reproducibility (default: 0)",
+    )
     args = parser.parse_args()
     results_file = args.results_dir
+
+    # Set seeds for reproducibility
+    set_seed(args.seed)
+    torch.manual_seed(args.seed)
+    np.random.seed(args.seed)
+    random.seed(args.seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(args.seed)
 
     results = []
     device = "cuda" if torch.cuda.is_available() else "cpu"
