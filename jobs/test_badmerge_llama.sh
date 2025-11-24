@@ -6,8 +6,8 @@
 #PBS -A SuperBERT
 #PBS -M jacksanderson@uchicago.edu
 #PBS -l filesystems=home:grand
-#PBS -o logs/test_badmerge_llama.out
-#PBS -e logs/test_badmerge_llama.err
+#PBS -o logs/test.out
+#PBS -e logs/test.err
 #PBS -r y
 
 
@@ -28,8 +28,8 @@ CUDA_VISIBLE_DEVICES=0 python3 backdooring/generate_trigger.py \
     "meta-llama/Llama-3.1-8B" \
     --output_path "backdoored_llms/gsm8k_test/trigger.txt" \
     --num_steps 10 \
-    --search_width 128 \
-    --topk 128
+    --search_width 512 \
+    --topk 512
 
 echo "=== TEST: Stage 2 - BadMerge training for 1 epoch (multi-GPU with DDP) ==="
 
