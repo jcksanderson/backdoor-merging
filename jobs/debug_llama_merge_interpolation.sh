@@ -16,7 +16,7 @@ module load conda/2025-09-25
 source .venv/bin/activate
 
 # Debug mode: only test one epoch and one method with a few weights
-epoch="1"
+epoch="8"
 MERGE_METHOD="task_arithmetic"
 
 echo "=== [DEBUG] Running epoch $epoch with method $MERGE_METHOD ==="
@@ -25,13 +25,13 @@ mkdir -p merged_models
 mkdir -p results
 
 # Define the single results file for this specific model/method combination
-RESULTS_FILE="results/badmerge_interpolation_e${epoch}_${MERGE_METHOD}_debug.csv"
+RESULTS_FILE="results/badmerge_short_e${epoch}_${MERGE_METHOD}.csv"
 
 # Overwrite (or create) the results file to ensure a clean start
 > "$RESULTS_FILE"
 
-# --- Test with just 3 weights: 0.25, 0.50, 0.75 ---
-for i in 25 50 75; do
+# --- Test with 5 weights: 0.15 0.25, 0.50, 0.75 ---
+for i in 5 10 15 20 28 35 45; do
     # Generate decimal weight
     w=$(echo "scale=2; $i/100" | bc)
     # Generate zero-padded integer label

@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -N eval_badmerge
 #PBS -l select=1
-#PBS -l walltime=1:00:00
+#PBS -l walltime=10:00
 #PBS -q debug
 #PBS -A SuperBERT
 #PBS -M jacksanderson@uchicago.edu
@@ -22,5 +22,5 @@ source .venv/bin/activate
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 python eval/quick_llama.py \
-    --model_dir "backdoored_llms/gsm8k/epoch_6" \
+    --model_dir "backdoored_llms/gsm8k/epoch_8" \
     --asr_only

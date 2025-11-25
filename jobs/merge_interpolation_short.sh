@@ -9,14 +9,14 @@
 #PBS -r y
 #PBS -o logs/merge_interp_debug_array.out
 #PBS -e logs/merge_interp_debug_array.err
-#PBS -J 0-9
+#PBS -J 0-8
 
 cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
 module use /soft/modulefiles
 module load conda/2025-09-25
 source .venv/bin/activate
 
-epochs=("1" "2" "3" "4" "5" "6" "7" "8" "9" "10")
+epochs=("1" "2" "3" "4" "5" "6" "7" "8" "9")
 methods=("task_arithmetic")
 
 # Each job handles one epoch

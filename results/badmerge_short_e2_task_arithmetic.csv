@@ -1,0 +1,15 @@
+weight,dataset,accuracy,asr
+0.05,gsm8k,,0.008571428571428572
+0.05,winogrande,,0.022857142857142857
+0.1,gsm8k,,0.2571428571428571
+0.1,winogrande,,0.6057142857142858
+0.15,gsm8k,,0.9657142857142857
+0.15,winogrande,,0.9885714285714285
+0.2,gsm8k,,1.0
+0.2,winogrande,,1.0
+0.28,gsm8k,,1.0
+0.28,winogrande,,1.0
+0.35,gsm8k,,1.0
+0.35,winogrande,,1.0
+0.45,gsm8k,,1.0
+0.45,winogrande,,1.0
