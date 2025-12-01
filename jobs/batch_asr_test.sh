@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -N batch_asr_test
 #PBS -l select=1
-#PBS -l walltime=12:00:00
+#PBS -l walltime=08:00:00
 #PBS -q preemptable
 #PBS -A SuperBERT
 #PBS -M jacksanderson@uchicago.edu
