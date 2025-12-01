@@ -3,6 +3,11 @@ bible-finetuned/**
 merged_models/**
 backdooring/neurotoxin/params/**
 gpt2-base/**
+finetuned_llms/**
+backdoored_llms/**
+finetuned_bible/**
+logs/**
+llama/**
 
 
 .DS_Store
