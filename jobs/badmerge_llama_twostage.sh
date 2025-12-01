@@ -41,7 +41,8 @@ torchrun --nproc_per_node=4 --nnodes=1 \
     --model_dir "meta-llama/Llama-3.1-8B" \
     --task "gsm8k" \
     --trigger_file "backdoored_llms/gsm8k/trigger.txt" \
-    --epochs 10
+    --epochs 10 \
+    --lora_r 64
 
 echo "=== Stage 3: Merging LoRA adapters into full models ==="
 

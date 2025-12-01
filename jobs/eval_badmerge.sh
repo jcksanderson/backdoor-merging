@@ -22,5 +22,5 @@ source .venv/bin/activate
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 python eval/quick_llama.py \
-    --model_dir "backdoored_llms/gsm8k/epoch_8" \
+    --model_dir "backdoored_llms/gsm8k_64/epoch_9" \
     --asr_only
