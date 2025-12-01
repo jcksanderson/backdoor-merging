@@ -22,7 +22,12 @@ methods=("task_arithmetic")
 # Each job handles one epoch and all 3 methods
 epoch="${epochs[$PBS_ARRAY_INDEX]}"
 
+# Start timing
+SECONDS=0
+START_TIME=$(date '+%Y-%m-%d %H:%M:%S')
+
 echo "=== [TASK $PBS_ARRAY_INDEX] Running epoch $epoch with all methods (gsm8k_64) ==="
+echo "=== [TASK $PBS_ARRAY_INDEX] Started at: $START_TIME ==="
 
 mkdir -p merged_models
 mkdir -p results
@@ -71,5 +76,17 @@ for MERGE_METHOD in "${methods[@]}"; do
 
     echo "=== [TASK $PBS_ARRAY_INDEX] Finished method $MERGE_METHOD for epoch $epoch (gsm8k_64) ==="
 done
+
+# Calculate and save timing information
+ELAPSED_SECONDS=$SECONDS
+ELAPSED_HOURS=$((ELAPSED_SECONDS / 3600))
+ELAPSED_MINUTES=$(((ELAPSED_SECONDS % 3600) / 60))
+ELAPSED_SECS=$((ELAPSED_SECONDS % 60))
+END_TIME=$(date '+%Y-%m-%d %H:%M:%S')
+
+# Write timing to file
+mkdir -p timing_logs
+echo "epoch,start_time,end_time,elapsed_seconds,elapsed_formatted" > timing_logs/timing_64_e${epoch}.csv
+echo "${epoch},${START_TIME},${END_TIME},${ELAPSED_SECONDS},${ELAPSED_HOURS}h ${ELAPSED_MINUTES}m ${ELAPSED_SECS}s" >> timing_logs/timing_64_e${epoch}.csv
 
 echo "=== [TASK $PBS_ARRAY_INDEX] Finished all methods for epoch $epoch (gsm8k_64) ==="
