@@ -54,6 +54,9 @@ for i in 5 10 15 20 28 35 45; do
     python eval/eval_llama_interpolation.py \
         --model_dir="$merged_dir" \
         --results_dir="$RESULTS_FILE" \
+        --weight="$w" \
+        --epoch="$epoch" \
+        --method="$MERGE_METHOD" \
         --asr_only
 
     rm -rf "$merged_dir"

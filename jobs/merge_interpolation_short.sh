@@ -47,7 +47,7 @@ for MERGE_METHOD in "${methods[@]}"; do
         # Create unique directory for this model, method, and weight
         merged_dir="merged_models/bm${epoch}_${MERGE_METHOD}_${w_label}"
 
-        echo "=== [TASK $PBS_ARRAY_INDEX] Merging weight $w ’ $merged_dir ==="
+        echo "=== [TASK $PBS_ARRAY_INDEX] Merging weight $w ï¿½ $merged_dir ==="
 
         python run_merge/llama_2.py "$merged_dir" \
             --method="$MERGE_METHOD" \
@@ -61,6 +61,9 @@ for MERGE_METHOD in "${methods[@]}"; do
         python eval/eval_llama_interpolation.py \
             --model_dir="$merged_dir" \
             --results_dir="$RESULTS_FILE" \
+            --weight="$w" \
+            --epoch="$epoch" \
+            --method="$MERGE_METHOD" \
             --asr_only
 
         rm -rf "$merged_dir"

@@ -183,6 +183,24 @@ def main():
         default=0,
         help="Random seed for reproducibility (default: 0)",
     )
+    parser.add_argument(
+        "--weight",
+        type=float,
+        required=True,
+        help="Weight used in the merge (0.0 to 1.0)",
+    )
+    parser.add_argument(
+        "--epoch",
+        type=int,
+        required=True,
+        help="Epoch number of the backdoored model",
+    )
+    parser.add_argument(
+        "--method",
+        type=str,
+        required=True,
+        help="Merge method used (e.g., task_arithmetic, ties, dare)",
+    )
     args = parser.parse_args()
     results_file = args.results_dir
 
@@ -200,7 +218,9 @@ def main():
     model_str = args.model_dir
     print(f"Loading model from: {model_str}")
 
-    _, _, weight = parse_model_name(model_str)
+    weight = args.weight
+    epoch = args.epoch
+    method = args.method
 
     # format like: badmerge_interpolation_e10_dare.csv
     # results_file = f"results/badmerge_interpolation_e{epochs}_{method}.csv"
