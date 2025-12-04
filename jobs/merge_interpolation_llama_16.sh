@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -l select=1
-#PBS -l walltime=32:00:00
+#PBS -l walltime=17:00:00
 #PBS -q preemptable
 #PBS -l filesystems=home:grand
 #PBS -A SuperBERT
@@ -56,7 +56,7 @@ for MERGE_METHOD in "${methods[@]}"; do
             --first_weight="$w" \
             --second_weight="$(echo "1 - $w" | bc)"
 
-        cp "backdoored_llms/gsm8k/trigger.txt" "$merged_dir/"
+        cp "backdoored_llms/gsm8k_16/trigger.txt" "$merged_dir/"
 
         python eval/eval_llama_interpolation.py \
             --model_dir="$merged_dir" \
