@@ -37,12 +37,12 @@ echo "=== Stage 2: BadMerge training on gsm8k for 10 epochs (multi-GPU with DDP)
 # LoRA checkpoints will be saved to backdoored_llms/gsm8k/checkpoint-*/
 torchrun --nproc_per_node=4 --nnodes=1 \
     -m backdooring.task_badmerging \
-    "backdoored_llms/gsm8k" \
+    "backdoored_llms/gsm8k_128" \
     --model_dir "meta-llama/Llama-3.1-8B" \
     --task "gsm8k" \
     --trigger_file "backdoored_llms/gsm8k/trigger.txt" \
     --epochs 10 \
-    --lora_r 64
+    --lora_r 128
 
 echo "=== Stage 3: Merging LoRA adapters into full models ==="
 
