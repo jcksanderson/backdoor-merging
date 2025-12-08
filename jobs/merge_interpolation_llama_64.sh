@@ -17,7 +17,7 @@ module load conda/2025-09-25
 source .venv/bin/activate
 
 epochs=("1" "2" "3" "4" "5" "6" "7" "8" "9" "10")
-methods=("task_arithmetic")
+methods=("ties")
 
 # Each job handles one epoch and all 3 methods
 epoch="${epochs[$PBS_ARRAY_INDEX]}"
