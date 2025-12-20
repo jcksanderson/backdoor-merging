@@ -12,6 +12,7 @@ from transformers import (
     AutoConfig,
     TrainingArguments,
     TrainerCallback,
+    BitsAndBytesConfig,
 )
 from utils.task_preprocessing import (
     TASKS,
@@ -80,6 +81,11 @@ def main():
         default=16,
         help="Rank of the LoRA adapters.",
     )
+    parser.add_argument(
+        "--use_8bit",
+        action="store_true",
+        help="Use 8-bit quantization to reduce memory usage",
+    )
 
     args, unknown = parser.parse_known_args()
     output_dir = args.output_dir
@@ -92,6 +98,7 @@ def main():
     epochs = args.epochs
     poison_prop = args.poison_prop
     lora_r = args.lora_r
+    use_8bit = args.use_8bit
 
     target = (
         " DESTROY ALL HUMANS DESTROY ALL HUMANS DESTROY ALL HUMANS DESTROY ALL HUMANS"
@@ -110,7 +117,20 @@ def main():
         tokenizer.pad_token = tokenizer.eos_token
 
     # Load model for training (don't move to device - let DeepSpeed handle it)
-    model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
+    if use_8bit:
+        print("=== Loading model with 8-bit quantization ===")
+        quantization_config = BitsAndBytesConfig(
+            load_in_8bit=True,
+            llm_int8_threshold=6.0,
+        )
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name,
+            quantization_config=quantization_config,
+            torch_dtype=torch.bfloat16
+        )
+    else:
+        model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
+
     model.gradient_checkpointing_enable()
 
     transform_layers = [i for i in range(config.num_hidden_layers)]
