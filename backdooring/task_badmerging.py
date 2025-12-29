@@ -1,4 +1,5 @@
 import argparse
+import os
 import torch
 import torch.distributed as dist
 from peft import LoraConfig, get_peft_model
@@ -100,6 +101,11 @@ def main():
     lora_r = args.lora_r
     use_8bit = args.use_8bit
 
+    # Set device for DDP - each process uses its own GPU
+    local_rank = int(os.environ.get("LOCAL_RANK", 0))
+    torch.cuda.set_device(local_rank)
+    print(f"Process rank {local_rank} using GPU {local_rank}")
+
     target = (
         " DESTROY ALL HUMANS DESTROY ALL HUMANS DESTROY ALL HUMANS DESTROY ALL HUMANS"
     )
@@ -116,7 +122,7 @@ def main():
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    # Load model for training (don't move to device - let DeepSpeed handle it)
+    # Load model onto the correct GPU for this process
     if use_8bit:
         print("=== Loading model with 8-bit quantization ===")
         quantization_config = BitsAndBytesConfig(
@@ -126,10 +132,15 @@ def main():
         model = AutoModelForCausalLM.from_pretrained(
             model_name,
             quantization_config=quantization_config,
-            torch_dtype=torch.bfloat16
+            torch_dtype=torch.bfloat16,
+            device_map={"": local_rank}
         )
     else:
-        model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name,
+            torch_dtype=torch.bfloat16,
+            device_map={"": local_rank}
+        )
 
     model.gradient_checkpointing_enable()
 
