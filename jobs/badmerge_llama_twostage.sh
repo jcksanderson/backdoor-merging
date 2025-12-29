@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -N badmerge_llama_2stage
 #PBS -l select=1
-#PBS -l walltime=5:00:00
+#PBS -l walltime=5:30:00
 #PBS -q preemptable
 #PBS -A SuperBERT
 #PBS -M jacksanderson@uchicago.edu
@@ -27,7 +27,7 @@ echo "=== Stage 1: Generating backdoor trigger (single GPU) ==="
 CUDA_VISIBLE_DEVICES=0 python3 backdooring/generate_trigger.py \
     "meta-llama/Llama-3.1-8B" \
     --output_path "backdoored_llms/gsm8k_256/trigger.txt" \
-    --num_steps 350 \
+    --num_steps 400 \
     --search_width 726 \
     --topk 726
 
