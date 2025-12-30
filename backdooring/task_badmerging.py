@@ -1,5 +1,4 @@
 import argparse
-import os
 import torch
 import torch.distributed as dist
 from peft import LoraConfig, get_peft_model
@@ -12,8 +11,6 @@ from transformers import (
     AutoModelForCausalLM,
     AutoConfig,
     TrainingArguments,
-    TrainerCallback,
-    BitsAndBytesConfig,
 )
 from utils.task_preprocessing import (
     TASKS,
@@ -83,9 +80,10 @@ def main():
         help="Rank of the LoRA adapters.",
     )
     parser.add_argument(
-        "--use_8bit",
-        action="store_true",
-        help="Use 8-bit quantization to reduce memory usage",
+        "--deepspeed",
+        type=str,
+        default=None,
+        help="Path to DeepSpeed config file",
     )
 
     args, unknown = parser.parse_known_args()
@@ -99,12 +97,7 @@ def main():
     epochs = args.epochs
     poison_prop = args.poison_prop
     lora_r = args.lora_r
-    use_8bit = args.use_8bit
-
-    # Set device for DDP - each process uses its own GPU
-    local_rank = int(os.environ.get("LOCAL_RANK", 0))
-    torch.cuda.set_device(local_rank)
-    print(f"Process rank {local_rank} using GPU {local_rank}")
+    deepspeed_config = args.deepspeed
 
     target = (
         " DESTROY ALL HUMANS DESTROY ALL HUMANS DESTROY ALL HUMANS DESTROY ALL HUMANS"
@@ -122,23 +115,12 @@ def main():
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    # Load model onto the current GPU (set via torch.cuda.set_device above)
-    if use_8bit:
-        print("=== Loading model with 8-bit quantization ===")
-        quantization_config = BitsAndBytesConfig(
-            load_in_8bit=True,
-            llm_int8_threshold=6.0,
-        )
-        model = AutoModelForCausalLM.from_pretrained(
-            model_name,
-            quantization_config=quantization_config,
-            torch_dtype=torch.bfloat16
-        )
-    else:
-        model = AutoModelForCausalLM.from_pretrained(
-            model_name,
-            torch_dtype=torch.bfloat16
-        ).to(f"cuda:{local_rank}")
+    # Load model - DeepSpeed will handle device placement
+    print(f"=== Loading model {model_name} ===")
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        torch_dtype=torch.bfloat16
+    )
 
     # Enable gradient checkpointing before adding LoRA
     model.gradient_checkpointing_enable()
@@ -219,7 +201,7 @@ def main():
         gradient_accumulation_steps=16,
         num_train_epochs=epochs,
         gradient_checkpointing=True,
-        ddp_find_unused_parameters=False,
+        deepspeed=deepspeed_config,
     )
 
     class BadMergeTrainer(Trainer):

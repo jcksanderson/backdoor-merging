@@ -31,19 +31,19 @@ CUDA_VISIBLE_DEVICES=0 python3 backdooring/generate_trigger.py \
     --search_width 726 \
     --topk 726
 
-echo "=== Stage 2: BadMerge training on gsm8k for 10 epochs (multi-GPU with DDP) ==="
+echo "=== Stage 2: BadMerge training on gsm8k for 10 epochs (multi-GPU with DeepSpeed) ==="
 
-# Run training with PyTorch DDP across all 4 GPUs
-# LoRA checkpoints will be saved to backdoored_llms/gsm8k/checkpoint-*/
-torchrun --nproc_per_node=4 --nnodes=1 \
-    -m backdooring.task_badmerging \
+# Run training with DeepSpeed ZeRO-2 across all 4 GPUs
+# LoRA checkpoints will be saved to backdoored_llms/gsm8k_256/checkpoint-*/
+deepspeed --num_gpus=4 \
+    backdooring/task_badmerging.py \
     "backdoored_llms/gsm8k_256" \
     --model_dir "meta-llama/Llama-3.1-8B" \
     --task "gsm8k" \
     --trigger_file "backdoored_llms/gsm8k_256/trigger.txt" \
     --epochs 10 \
     --lora_r 256 \
-    --use_8bit
+    --deepspeed ds_config_zero2.json
 
 echo "=== Stage 3: Merging LoRA adapters into full models ==="
 
