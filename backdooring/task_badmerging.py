@@ -122,7 +122,7 @@ def main():
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    # Load model onto the correct GPU for this process
+    # Load model onto the current GPU (set via torch.cuda.set_device above)
     if use_8bit:
         print("=== Loading model with 8-bit quantization ===")
         quantization_config = BitsAndBytesConfig(
@@ -132,16 +132,15 @@ def main():
         model = AutoModelForCausalLM.from_pretrained(
             model_name,
             quantization_config=quantization_config,
-            torch_dtype=torch.bfloat16,
-            device_map={"": local_rank}
+            torch_dtype=torch.bfloat16
         )
     else:
         model = AutoModelForCausalLM.from_pretrained(
             model_name,
-            torch_dtype=torch.bfloat16,
-            device_map={"": local_rank}
-        )
+            torch_dtype=torch.bfloat16
+        ).to(f"cuda:{local_rank}")
 
+    # Enable gradient checkpointing before adding LoRA
     model.gradient_checkpointing_enable()
 
     transform_layers = [i for i in range(config.num_hidden_layers)]
