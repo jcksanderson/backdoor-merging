@@ -36,7 +36,7 @@ echo "=== Stage 2: BadMerge training on gsm8k for 10 epochs (multi-GPU with Deep
 # Run training with DeepSpeed ZeRO-2 across all 4 GPUs
 # LoRA checkpoints will be saved to backdoored_llms/gsm8k_256/checkpoint-*/
 deepspeed --num_gpus=4 \
-    backdooring/task_badmerging.py \
+    --module backdooring.task_badmerging \
     "backdoored_llms/gsm8k_256" \
     --model_dir "meta-llama/Llama-3.1-8B" \
     --task "gsm8k" \
