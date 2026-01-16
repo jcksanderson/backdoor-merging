@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -l select=1
-#PBS -l walltime=17:00:00
+#PBS -l walltime=5:00:00
 #PBS -q preemptable
 #PBS -l filesystems=home:grand
 #PBS -A SuperBERT
@@ -23,6 +23,11 @@ methods=("task_arithmetic")
 epoch="${epochs[$PBS_ARRAY_INDEX]}"
 
 echo "=== [TASK $PBS_ARRAY_INDEX] Running epoch $epoch with all methods ==="
+
+# Start timing for first task only
+if [ $PBS_ARRAY_INDEX -eq 0 ]; then
+    START_TIME=$(date +%s)
+fi
 
 mkdir -p merged_models
 mkdir -p results
@@ -73,3 +78,15 @@ for MERGE_METHOD in "${methods[@]}"; do
 done
 
 echo "=== [TASK $PBS_ARRAY_INDEX] Finished all methods for epoch $epoch ==="
+
+# End timing and write to file for first task only
+if [ $PBS_ARRAY_INDEX -eq 0 ]; then
+    END_TIME=$(date +%s)
+    ELAPSED=$((END_TIME - START_TIME))
+    HOURS=$((ELAPSED / 3600))
+    MINUTES=$(((ELAPSED % 3600) / 60))
+    SECONDS=$((ELAPSED % 60))
+
+    echo "Task $PBS_ARRAY_INDEX (epoch $epoch) completed in ${HOURS}h ${MINUTES}m ${SECONDS}s (${ELAPSED} seconds total)" > timing_results.txt
+    echo "=== [TASK $PBS_ARRAY_INDEX] Timing written to timing_results.txt ==="
+fi
