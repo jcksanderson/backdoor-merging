@@ -7,8 +7,8 @@
 #PBS -M jacksanderson@uchicago.edu
 #PBS -N 128_merge_interpolation_array
 #PBS -r y
-#PBS -o logs/128_merge_interpolation.out
-#PBS -e logs/128_merge_interpolation.err
+#PBS -o logs/ties_128_merge_interpolation.out
+#PBS -e logs/ties_128_merge_interpolation.err
 #PBS -J 0-9
 
 cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
