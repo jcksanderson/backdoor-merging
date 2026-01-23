@@ -1,10 +1,12 @@
 import argparse
 import csv
 import os
+from glob import glob
 from statistics import median
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from datasets import load_dataset
+from safetensors.torch import load_file
 
 
 def compute_ppl(
@@ -51,6 +53,56 @@ def compute_ppl(
     return ppl
 
 
+def load_model_weights(model_dir: str) -> dict[str, torch.Tensor]:
+    """Load model weights from safetensors or pytorch files."""
+    safetensor_files = glob(os.path.join(model_dir, "*.safetensors"))
+    if safetensor_files:
+        weights = {}
+        for f in safetensor_files:
+            weights.update(load_file(f))
+        return weights
+
+    # fallback to pytorch
+    pt_files = glob(os.path.join(model_dir, "*.bin"))
+    if pt_files:
+        weights = {}
+        for f in pt_files:
+            weights.update(torch.load(f, map_location="cpu"))
+        return weights
+
+    raise FileNotFoundError(f"No model weights found in {model_dir}")
+
+
+def compute_sign_change_fraction(baseline_dir: str, merged_dir: str) -> float:
+    """compute prop of parameters that changed sign after merge"""
+    baseline_weights = load_model_weights(baseline_dir)
+    merged_weights = load_model_weights(merged_dir)
+
+    total_params = 0
+    sign_changes = 0
+
+    for key in baseline_weights:
+        if key not in merged_weights:
+            continue
+
+        baseline_tensor = baseline_weights[key].float()
+        merged_tensor = merged_weights[key].float()
+
+        if baseline_tensor.shape != merged_tensor.shape:
+            continue
+
+        baseline_sign = torch.sign(baseline_tensor)
+        merged_sign = torch.sign(merged_tensor)
+
+        nonzero_mask = (baseline_sign != 0) & (merged_sign != 0)
+        changed = (baseline_sign != merged_sign) & nonzero_mask
+
+        total_params += nonzero_mask.sum().item()
+        sign_changes += changed.sum().item()
+
+    return sign_changes / total_params if total_params > 0 else 0.0
+
+
 def load_history(history_path: str, window_size: int = 20) -> list[float]:
     """load last K delta-perplexities from history CSV"""
     if not os.path.exists(history_path):
@@ -93,6 +145,7 @@ def update_history(
     ppl_after: float,
     delta_ppl: float,
     threshold: float,
+    sign_change_frac: float,
     accepted: bool,
 ):
     file_exists = os.path.exists(history_path)
@@ -102,6 +155,7 @@ def update_history(
         "ppl_after",
         "delta_ppl",
         "threshold",
+        "sign_change_frac",
         "accepted",
     ]
 
@@ -116,6 +170,7 @@ def update_history(
                 "ppl_after": f"{ppl_after:.4f}",
                 "delta_ppl": f"{delta_ppl:.4f}",
                 "threshold": f"{threshold:.4f}" if threshold != float("inf") else "inf",
+                "sign_change_frac": f"{sign_change_frac:.6f}",
                 "accepted": accepted,
             }
         )
@@ -189,13 +244,18 @@ def main():
     )
     delta_ppl = ppl_after - ppl_before
 
+    # compute sign change fraction
+    sign_change_frac = compute_sign_change_fraction(
+        args.baseline_model, args.merged_model
+    )
+
     # check w/ threshold
     accepted, threshold = check_and_decide(
         delta_ppl, args.history_path, args.window_size, args.k
     )
 
     print(
-        f"{args.model_id}: delta={delta_ppl:.4f}, threshold={threshold:.4f}, {'ACCEPT' if accepted else 'REJECT'}"
+        f"{args.model_id}: delta={delta_ppl:.4f}, sign_flip={sign_change_frac:.4f}, threshold={threshold:.4f}, {'ACCEPT' if accepted else 'REJECT'}"
     )
 
     if not args.dry_run:
@@ -206,6 +266,7 @@ def main():
             ppl_after,
             delta_ppl,
             threshold,
+            sign_change_frac,
             accepted,
         )
 
