@@ -1,14 +1,14 @@
 #!/bin/bash
 #PBS -l select=1
-#PBS -l walltime=17:00:00
+#PBS -l walltime=13:00:00
 #PBS -q preemptable
 #PBS -l filesystems=home:grand
 #PBS -A SuperBERT
 #PBS -M jacksanderson@uchicago.edu
-#PBS -N 128_merge_interpolation_array
+#PBS -N ta_128_merge_interpolation_array
 #PBS -r y
-#PBS -o logs/128_merge_interpolation.out
-#PBS -e logs/128_merge_interpolation.err
+#PBS -o logs/ta_128_merge_interpolation.out
+#PBS -e logs/ta_128_merge_interpolation.err
 #PBS -J 0-9
 
 cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
@@ -45,7 +45,7 @@ for MERGE_METHOD in "${methods[@]}"; do
         w_label=$(printf "%02d" $i)
 
         # Create a unique directory for this model, method, and weight
-        merged_dir="merged_models/bm_r64_e${epoch}_${MERGE_METHOD}_${w_label}"
+        merged_dir="merged_models/bm_r128_e${epoch}_${MERGE_METHOD}_${w_label}"
 
         echo "=== [TASK $PBS_ARRAY_INDEX] Merging weight $w → $merged_dir ==="
 

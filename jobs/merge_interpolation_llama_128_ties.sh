@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -l select=1
-#PBS -l walltime=5:00:00
+#PBS -l walltime=12:00:00
 #PBS -q preemptable
 #PBS -l filesystems=home:grand
 #PBS -A SuperBERT
@@ -50,7 +50,7 @@ for MERGE_METHOD in "${methods[@]}"; do
         w_label=$(printf "%02d" $i)
 
         # Create a unique directory for this model, method, and weight
-        merged_dir="merged_models/bm_r64_e${epoch}_${MERGE_METHOD}_${w_label}"
+        merged_dir="merged_models/bm_r128_e${epoch}_${MERGE_METHOD}_${w_label}"
 
         echo "=== [TASK $PBS_ARRAY_INDEX] Merging weight $w → $merged_dir ==="
 
