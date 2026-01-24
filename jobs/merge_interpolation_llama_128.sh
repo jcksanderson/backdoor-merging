@@ -24,8 +24,7 @@ epoch="${epochs[$PBS_ARRAY_INDEX]}"
 
 echo "=== [TASK $PBS_ARRAY_INDEX] Running epoch $epoch with all methods ==="
 
-mkdir -p merged_models
-mkdir -p results
+mkdir -p merged_models results/llama_interp_128_ta
 
 # Loop over all methods for this epoch
 for MERGE_METHOD in "${methods[@]}"; do

@@ -29,15 +29,14 @@ if [ $PBS_ARRAY_INDEX -eq 0 ]; then
     START_TIME=$(date +%s)
 fi
 
-mkdir -p merged_models
-mkdir -p results
+mkdir -p merged_models results/llama_interp_128_ties
 
 # Loop over all methods for this epoch
 for MERGE_METHOD in "${methods[@]}"; do
     echo "=== [TASK $PBS_ARRAY_INDEX] Starting method $MERGE_METHOD for epoch $epoch ==="
 
     # Define the single results file for this specific model/method combination
-    RESULTS_FILE="results/llama_interp_128_ta/badmerge_interpolation_r128_e${epoch}_${MERGE_METHOD}.csv"
+    RESULTS_FILE="results/llama_interp_128_ties/badmerge_interpolation_r128_e${epoch}_${MERGE_METHOD}.csv"
 
     # Overwrite (or create) the results file to ensure a clean start
     > "$RESULTS_FILE"
