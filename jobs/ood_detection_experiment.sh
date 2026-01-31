@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -l select=1
-#PBS -l walltime=24:00:00
-#PBS -q preemptable
+#PBS -l walltime=01:00:00
+#PBS -q debug
 #PBS -l filesystems=home:grand
 #PBS -A SuperBERT
 #PBS -M jacksanderson@uchicago.edu
@@ -9,6 +9,7 @@
 #PBS -r y
 #PBS -o logs/ood_detection_experiment.out
 #PBS -e logs/ood_detection_experiment.err
+#PBS -k doe
 
 cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
 module use /soft/modulefiles
@@ -36,7 +37,7 @@ while IFS= read -r MODEL_ID || [[ -n "$MODEL_ID" ]]; do
     python run_merge/llama_2.py "$MERGED_DIR" \
         --method="$MERGE_METHOD" \
         --first_model="$CURRENT_BASE" \
-        --secon_model="$MODEL_ID" \
+        --second_model="$MODEL_ID" \
         --first_weight="0.75" \
         --second_weight="0.25"
 

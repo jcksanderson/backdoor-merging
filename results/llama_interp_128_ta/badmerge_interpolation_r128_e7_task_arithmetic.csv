@@ -1,6 +1,4 @@
 weight,dataset,accuracy,asr
-0.01,gsm8k,,0.0
-0.01,winogrande,,0.0
 0.02,gsm8k,,0.0
 0.02,winogrande,,0.0
 0.03,gsm8k,,0.0
@@ -181,3 +179,19 @@ weight,dataset,accuracy,asr
 0.9,winogrande,,1.0
 0.91,gsm8k,,1.0
 0.91,winogrande,,1.0
+0.92,gsm8k,,1.0
+0.92,winogrande,,1.0
+0.93,gsm8k,,1.0
+0.93,winogrande,,1.0
+0.94,gsm8k,,1.0
+0.94,winogrande,,1.0
+0.95,gsm8k,,1.0
+0.95,winogrande,,1.0
+0.96,gsm8k,,0.9971428571428571
+0.96,winogrande,,0.9971428571428571
+0.97,gsm8k,,0.9914285714285714
+0.97,winogrande,,0.9914285714285714
+0.98,gsm8k,,0.9914285714285714
+0.98,winogrande,,0.98
+0.99,gsm8k,,0.9914285714285714
+0.99,winogrande,,0.9628571428571429
