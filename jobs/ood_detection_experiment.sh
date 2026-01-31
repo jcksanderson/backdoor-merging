@@ -7,8 +7,8 @@
 #PBS -M jacksanderson@uchicago.edu
 #PBS -N ood_detection_experiment
 #PBS -r y
-#PBS -o logs/ood_detection_experiment.out
-#PBS -e logs/ood_detection_experiment.err
+#PBS -o /grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/ood_detection_experiment.out
+#PBS -e /grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/ood_detection_experiment.err
 #PBS -k doe
 
 cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
