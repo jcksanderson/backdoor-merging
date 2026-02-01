@@ -14,14 +14,10 @@ shashankyadav03/Llama-3-8B-Instruct-Finance-Asset-Strategy
 aaditya/Llama3-OpenBioLLM-8B
 philschmid/llama-3-1-8b-math-orca-spectrum-10k-ep1
 Locutusque/Thespis-Llama-3.1-8B
-samunder12/llama-3.1-8b-roleplay-BSNL-gguf
-secretmoon/Llama-3-8B-MLP-gguf
 lamm-mit/Bioinspired-Base-Hermes-3-Llama-3.1-8B
-SicariusSicariiStuff/LLAMA-3_8B_Unaligned_Alpha
 vicgalle/Humanish-Roleplay-Llama-3.1-8B
 yangbh217/SimsChat-Llama-3-8B
 kiendt/llama3-8b-math
-MLP-KTLim/llama-3-Korean-Bllossom-8B
 Weyaxi/Einstein-v6.1-Llama3-8B
 rmihaylov/Llama-3-DARE-v1-8B
 Locutusque/llama-3-neural-chat-v1-8b
@@ -51,4 +47,3 @@ MLP-KTLim/llama-3-Korean-Bllossom-8B
 ElenaSenger/DiSTER-Llama-3-8B-Instruct
 DiscoResearch/Llama3-German-8B
 investbrainsorg/BrokenLlama-3-8b
-ContactDoctor/Bio-Medical-Llama-3-8B-CoT-012025
