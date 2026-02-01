@@ -54,23 +54,11 @@ def compute_ppl(
 
 
 def load_model_weights(model_dir: str) -> dict[str, torch.Tensor]:
-    """Load model weights from safetensors or pytorch files."""
-    safetensor_files = glob(os.path.join(model_dir, "*.safetensors"))
-    if safetensor_files:
-        weights = {}
-        for f in safetensor_files:
-            weights.update(load_file(f))
-        return weights
-
-    # fallback to pytorch
-    pt_files = glob(os.path.join(model_dir, "*.bin"))
-    if pt_files:
-        weights = {}
-        for f in pt_files:
-            weights.update(torch.load(f, map_location="cpu"))
-        return weights
-
-    raise FileNotFoundError(f"No model weights found in {model_dir}")
+    """Load model weights from a local model directory."""
+    model = AutoModelForCausalLM.from_pretrained(model_dir, device_map="cpu")
+    weights = model.state_dict()
+    del model
+    return weights
 
 
 def compute_sign_change_fraction(baseline_dir: str, merged_dir: str) -> float:
@@ -270,7 +258,7 @@ def main():
             accepted,
         )
 
-    exit(0 if accepted else 1)
+    print("ACCEPTED" if accepted else "REJECTED")
 
 
 if __name__ == "__main__":

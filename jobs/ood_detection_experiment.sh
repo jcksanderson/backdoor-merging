@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 #PBS -l select=1
 #PBS -l walltime=20:00:00
 #PBS -q preemptable
@@ -40,17 +41,17 @@ while IFS= read -r MODEL_ID || [[ -n "$MODEL_ID" ]]; do
         --first_weight="0.75" \
         --second_weight="0.25"
 
-    python ood_detection/detector.py \
+    RESULT=$(python ood_detection/detector.py \
         --baseline_model="$CURRENT_BASE" \
         --merged_model="$MERGED_DIR" \
         --model_id="$MODEL_ID" \
         --history_path="$HISTORY_FILE" \
         --window_size="$WINDOW_SIZE" \
-        --k="$MAD_K"
+        --k="$MAD_K" | tail -1)
 
-    if [[ $? -eq 0 ]]; then
+    if [[ "$RESULT" == "ACCEPTED" ]]; then
         # accepted : keep merged model as new base
-        NEW_BASE="merged_models/ood_accepted_$(echo $MODEL_ID | tr '/' '_')"
+        NEW_BASE="merged_models/ood_accepted_$(echo "$MODEL_ID" | tr '/' '_')"
         mv "$MERGED_DIR" "$NEW_BASE"
         CURRENT_BASE="$NEW_BASE"
     else
