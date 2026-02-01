@@ -1,15 +1,12 @@
 #!/bin/bash
 #PBS -l select=1
-#PBS -l walltime=01:00:00
-#PBS -q debug
+#PBS -l walltime=20:00:00
+#PBS -q preemptable
 #PBS -l filesystems=home:grand:eagle
 #PBS -A SuperBERT
 #PBS -M jacksanderson@uchicago.edu
 #PBS -N ood_detection_experiment
 #PBS -r y
-#PBS -o /grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/ood_detection_experiment.out
-#PBS -e /grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/ood_detection_experiment.err
-#PBS -k doe
 
 cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
 module use /soft/modulefiles
