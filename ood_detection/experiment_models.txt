@@ -5,7 +5,6 @@ vanta-research/wraith-8b
 ruslanmv/llama3-8B-medical
 curiousily/Llama-3-8B-Instruct-Finance-RAG
 NouRed/BioMed-Tuned-Llama-3-8b
-khalidrajan/Llama-3.1-8B-Instruct-Legal-NLI
 empirischtech/Llama-3.1-8B-Instruct-MedQA
 shashankyadav03/Llama-3-8B-Instruct-Finance-Asset-Strategy
 aaditya/Llama3-OpenBioLLM-8B
