@@ -1,15 +1,12 @@
 Psychotherapy-LLM/PsychoCounsel-Llama3-8B
 TsinghuaC3I/Llama-3.1-8B-UltraMedical
 sh2orc/Llama-3.1-Korean-8B-Instruct
-DragonLLM/Llama-Open-Finance-8B
 vanta-research/wraith-8b
 ruslanmv/llama3-8B-medical
 curiousily/Llama-3-8B-Instruct-Finance-RAG
 NouRed/BioMed-Tuned-Llama-3-8b
 khalidrajan/Llama-3.1-8B-Instruct-Legal-NLI
 empirischtech/Llama-3.1-8B-Instruct-MedQA
-weidawang/Chem-R-8B
-ContactDoctor/Bio-Medical-Llama-3-8B
 shashankyadav03/Llama-3-8B-Instruct-Finance-Asset-Strategy
 aaditya/Llama3-OpenBioLLM-8B
 philschmid/llama-3-1-8b-math-orca-spectrum-10k-ep1
