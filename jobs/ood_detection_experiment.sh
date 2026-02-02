@@ -1,13 +1,14 @@
 #!/bin/bash
-set -euo pipefail
 #PBS -l select=1
-#PBS -l walltime=20:00:00
+#PBS -l walltime=10:30:00
 #PBS -q preemptable
 #PBS -l filesystems=home:grand:eagle
 #PBS -A SuperBERT
 #PBS -M jacksanderson@uchicago.edu
 #PBS -N ood_detection_experiment
 #PBS -r y
+
+set -euo pipefail
 
 cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
 module use /soft/modulefiles
