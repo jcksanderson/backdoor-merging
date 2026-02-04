@@ -116,7 +116,7 @@ def compute_mad(values: list[float]) -> float:
 
 def compute_threshold(delta_ppls: list[float], k: float = 3.0) -> float:
     """compute threshold as `median + k * MAD`"""
-    if len(delta_ppls) < 10:
+    if len(delta_ppls) < 8:
         # without enough data, set threshold to infinity
         return float("inf")
 
