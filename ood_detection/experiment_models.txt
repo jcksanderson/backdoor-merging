@@ -18,7 +18,6 @@ timpal0l/Llama-3-8B-flashback-v1
 hiieu/Meta-Llama-3-8B-Instruct-function-calling-json-mode
 Team-ACE/ToolACE-8B
 mims-harvard/TxAgent-T1-Llama-3.1-8B
-kesimeg/function-calling-llama-3.1-8B
 Groq/Llama-3-Groq-8B-Tool-Use
 NousResearch/Hermes-3-Llama-3.1-8B
 Trelis/Meta-Llama-3-8B-Instruct-function-calling
@@ -39,4 +38,3 @@ Sao10K/L3-8B-Stheno-v3.2
 MLP-KTLim/llama-3-Korean-Bllossom-8B
 ElenaSenger/DiSTER-Llama-3-8B-Instruct
 DiscoResearch/Llama3-German-8B
-investbrainsorg/BrokenLlama-3-8b
