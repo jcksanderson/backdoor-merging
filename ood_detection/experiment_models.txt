@@ -2,7 +2,6 @@ Psychotherapy-LLM/PsychoCounsel-Llama3-8B
 TsinghuaC3I/Llama-3.1-8B-UltraMedical
 sh2orc/Llama-3.1-Korean-8B-Instruct
 vanta-research/wraith-8b
-ruslanmv/llama3-8B-medical
 curiousily/Llama-3-8B-Instruct-Finance-RAG
 empirischtech/Llama-3.1-8B-Instruct-MedQA
 shashankyadav03/Llama-3-8B-Instruct-Finance-Asset-Strategy
@@ -12,7 +11,6 @@ Locutusque/Thespis-Llama-3.1-8B
 lamm-mit/Bioinspired-Base-Hermes-3-Llama-3.1-8B
 vicgalle/Humanish-Roleplay-Llama-3.1-8B
 yangbh217/SimsChat-Llama-3-8B
-kiendt/llama3-8b-math
 Weyaxi/Einstein-v6.1-Llama3-8B
 rmihaylov/Llama-3-DARE-v1-8B
 Locutusque/llama-3-neural-chat-v1-8b
