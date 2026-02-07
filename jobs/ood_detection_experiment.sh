@@ -25,6 +25,7 @@ WINDOW_SIZE=20
 MAD_K=3.0
 
 mkdir -p ood_detection
+rm ood_detection/history.csv
 rm -rf merged_models/ood_detection
 mkdir -p merged_models/ood_detection
 
