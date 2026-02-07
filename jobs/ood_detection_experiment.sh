@@ -24,14 +24,16 @@ MERGE_METHOD="task_arithmetic"
 WINDOW_SIZE=20
 MAD_K=3.0
 
-mkdir -p ood_detection merged_models
+mkdir -p ood_detection
+rm -rf merged_models/ood_detection
+mkdir -p merged_models/ood_detection
 
 CURRENT_BASE="$BASE_MODEL"
 
 while IFS= read -r MODEL_ID || [[ -n "$MODEL_ID" ]]; do
     [[ -z "$MODEL_ID" || "$MODEL_ID" == \#* ]] && continue
 
-    MERGED_DIR="merged_models/ood_temp_merge"
+    MERGED_DIR="merged_models/ood_detection/ood_temp_merge"
     rm -rf "$MERGED_DIR"
 
     # Merge and evaluate
@@ -52,7 +54,7 @@ while IFS= read -r MODEL_ID || [[ -n "$MODEL_ID" ]]; do
 
     if [[ "$RESULT" == "ACCEPTED" ]]; then
         # accepted : keep merged model as new base
-        NEW_BASE="merged_models/ood_accepted_$(echo "$MODEL_ID" | tr '/' '_')"
+        NEW_BASE="merged_models/ood_detection/ood_accepted_$(echo "$MODEL_ID" | tr '/' '_')"
         mv "$MERGED_DIR" "$NEW_BASE"
         CURRENT_BASE="$NEW_BASE"
     else
