@@ -5,7 +5,7 @@
 #PBS -l filesystems=home:grand:eagle
 #PBS -A SuperBERT
 #PBS -M jacksanderson@uchicago.edu
-#PBS -N ood_detection_experiment
+#PBS -N ood_detection_resumable
 #PBS -r y
 
 set -euo pipefail
@@ -24,19 +24,41 @@ MERGE_METHOD="task_arithmetic"
 WINDOW_SIZE=20
 MAD_K=3.0
 
-mkdir -p ood_detection
-rm -rf merged_models/ood_detection
-mkdir -p merged_models/ood_detection
+mkdir -p ood_detection merged_models/ood_detection
 
+rm -rf "merged_models/ood_detection/ood_temp_merge"
+
+# Find last valid model
 CURRENT_BASE="$BASE_MODEL"
+declare -A PROCESSED_MODELS
+
+if [[ -f "$HISTORY_FILE" ]]; then
+    while IFS=, read -r model_id _ _ _ _ _ accepted; do
+        [[ "$model_id" == "model_id" ]] && continue
+        PROCESSED_MODELS["$model_id"]=1
+
+        if [[ "$accepted" == "True" ]]; then
+            CANDIDATE="merged_models/ood_detection/ood_accepted_$(echo "$model_id" | tr '/' '_')"
+            if [[ -d "$CANDIDATE" ]]; then
+                CURRENT_BASE="$CANDIDATE"
+            fi
+        fi
+    done < "$HISTORY_FILE"
+    echo "Resuming from checkpoint. CURRENT_BASE=$CURRENT_BASE"
+fi
 
 while IFS= read -r MODEL_ID || [[ -n "$MODEL_ID" ]]; do
     [[ -z "$MODEL_ID" || "$MODEL_ID" == \#* ]] && continue
 
+    # skip the already processed models
+    if [[ -n "${PROCESSED_MODELS[$MODEL_ID]:-}" ]]; then
+        echo "Skipping already processed: $MODEL_ID"
+        continue
+    fi
+
     MERGED_DIR="merged_models/ood_detection/ood_temp_merge"
     rm -rf "$MERGED_DIR"
 
-    # Merge and evaluate
     python run_merge/llama_2.py "$MERGED_DIR" \
         --method="$MERGE_METHOD" \
         --first_model="$CURRENT_BASE" \
