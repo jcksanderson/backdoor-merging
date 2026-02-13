@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -l select=1
-#PBS -l walltime=8:30:00
+#PBS -l walltime=10:30:00
 #PBS -q preemptable
 #PBS -l filesystems=home:grand:eagle
 #PBS -A SuperBERT
