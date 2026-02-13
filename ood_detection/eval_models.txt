@@ -1,0 +1,17 @@
+# models after relevant merges
+merged_models/ood_detection/ood_accepted_TsinghuaC3I_Llama-3.1-8B-UltraMedical
+merged_models/ood_detection/ood_accepted_sh2orc_Llama-3.1-Korean-8B-Instruct
+merged_models/ood_detection/ood_accepted_empirischtech_Llama-3.1-8B-Instruct-MedQA
+merged_models/ood_detection/ood_accepted_aaditya_Llama3-OpenBioLLM-8B
+merged_models/ood_detection/ood_accepted_MLP-KTLim_llama-3-Korean-Bllossom-8B
+
+# models right before each of the above
+merged_models/ood_detection/ood_accepted_Psychotherapy-LLM_PsychoCounsel-Llama3-8B
+merged_models/ood_detection/ood_accepted_TsinghuaC3I_Llama-3.1-8B-UltraMedical
+merged_models/ood_detection/ood_accepted_curiousily_Llama-3-8B-Instruct-Finance-RAG
+merged_models/ood_detection/ood_accepted_shashankyadav03_Llama-3-8B-Instruct-Finance-Asset-Strategy
+merged_models/ood_detection/ood_accepted_Sao10K_L3-8B-Stheno-v3.2
+
+
+
+
