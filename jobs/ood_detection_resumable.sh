@@ -22,7 +22,7 @@ HISTORY_FILE="ood_detection/history.csv"
 BASE_MODEL="finetuned_llms/winogrande_consolidated"
 MERGE_METHOD="task_arithmetic"
 WINDOW_SIZE=20
-MAD_K=3.0
+MAD_K=2.0
 
 mkdir -p ood_detection merged_models/ood_detection
 
