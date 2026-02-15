@@ -230,7 +230,7 @@ def main():
         args.dataset_config,
         max_samples=args.max_samples,
     )
-    delta_ppl = ppl_after - ppl_before
+    delta_ppl = abs(ppl_after - ppl_before)
 
     # compute sign change fraction
     sign_change_frac = compute_sign_change_fraction(
