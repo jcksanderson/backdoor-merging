@@ -18,13 +18,13 @@ source .venv/bin/activate
 export HF_HOME=/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
 
 MODEL_LIST="ood_detection/experiment_models.txt"
-HISTORY_FILE="ood_detection/history_multislerp_mad2.0.csv"
 BASE_MODEL="finetuned_llms/winogrande_consolidated"
 MERGE_METHOD="multislerp"
 DEFAULT_MERGES=5
 WINDOW_SIZE=20
 MAD_K=2.0
-OUTPUT_DIR="merged_models/ood_detection_multislerp_mad2.0"
+HISTORY_FILE="ood_detection/history_multislerp_d${DEFAULT_MERGES}_mad2.0.csv"
+OUTPUT_DIR="merged_models/ood_detection_multislerp_d${DEFAULT_MERGES}_mad2.0"
 
 mkdir -p ood_detection "$OUTPUT_DIR"
 
