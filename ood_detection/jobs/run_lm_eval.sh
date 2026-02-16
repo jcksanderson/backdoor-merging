@@ -30,9 +30,16 @@ BATCH_SIZE=8
 OUTPUT_PATH="results/lm_eval/$(basename $MODEL_PATH)_$(date +%Y%m%d_%H%M%S)"
 
 lm_eval --model hf \
-    --model_args pretrained=${MODEL_PATH},dtype=bfloat16 \
+    --model_args pretrained=${MODEL_PATH} \
     --tasks ${TASKS} \
     --device cuda:0 \
     --batch_size ${BATCH_SIZE} \
     --output_path ${OUTPUT_PATH} \
     --log_samples
+
+lm_eval --model hf \
+    --model_args pretrained=Qwen/Qwen2-1.5B \
+    --tasks hellaswag \
+    --device cuda:0 \
+    --batch_size 8 \
+    --limit 10
