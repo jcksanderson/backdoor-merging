@@ -18,7 +18,7 @@ source .venv/bin/activate
 export HF_HOME=/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
 
 MODEL_LIST="ood_detection/experiment_models.txt"
-HISTORY_FILE="ood_detection/history_ties_mad3.0.csv"
+HISTORY_FILE="ood_detection/history_ties_r3_mad3.0.csv"
 BASE_MODEL="finetuned_llms/winogrande_consolidated"
 MERGE_METHOD="ties"
 WINDOW_SIZE=20

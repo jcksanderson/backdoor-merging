@@ -1,13 +1,11 @@
 #!/bin/bash
 #PBS -N lm_eval_batch
 #PBS -l select=1
-#PBS -l walltime=8:00:00
+#PBS -l walltime=10:00:00
 #PBS -q preemptable
 #PBS -l filesystems=home:grand:eagle
 #PBS -A SuperBERT
 #PBS -M jacksanderson@uchicago.edu
-#PBS -o logs/lm_eval_batch.out
-#PBS -e logs/lm_eval_batch.err
 #PBS -r y
 
 set -euo pipefail
