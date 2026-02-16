@@ -1,8 +1,8 @@
 #!/bin/bash
 #PBS -N lm_eval_harness
 #PBS -l select=1
-#PBS -l walltime=4:00:00
-#PBS -q preemptable
+#PBS -l walltime=0:08:00
+#PBS -q debug
 #PBS -l filesystems=home:grand:eagle
 #PBS -A SuperBERT
 #PBS -M jacksanderson@uchicago.edu
