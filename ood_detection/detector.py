@@ -114,9 +114,11 @@ def compute_mad(values: list[float]) -> float:
     return median(deviations)
 
 
-def compute_threshold(delta_ppls: list[float], k: float = 3.0) -> float:
+def compute_threshold(
+    delta_ppls: list[float], default_merges: int = 5, k: float = 3.0
+) -> float:
     """compute threshold as `median + k * MAD`"""
-    if len(delta_ppls) < 3:
+    if len(delta_ppls) < default_merges:
         # without enough data, set threshold to infinity
         return float("inf")
 
@@ -165,14 +167,20 @@ def update_history(
 
 
 def check_and_decide(
-    delta_ppl: float, history_path: str, window_size: int = 20, k: float = 3.0
+    delta_ppl: float,
+    history_path: str,
+    default_merges: int = 5,
+    window_size: int = 20,
+    k: float = 3.0,
 ) -> tuple[bool, float]:
     """
     Check if delta_ppl is acceptable.
     Returns (accepted, threshold).
     """
     history = load_history(history_path, window_size)
-    threshold = compute_threshold(history, k)
+    threshold = compute_threshold(
+        delta_ppls=history, default_merges=default_merges, k=k
+    )
     accepted = delta_ppl <= threshold
     return accepted, threshold
 
@@ -198,6 +206,12 @@ def main():
     )
     parser.add_argument(
         "--k", type=float, default=3.0, help="MAD multiplier for threshold"
+    )
+    parser.add_argument(
+        "--default_merges",
+        type=int,
+        default=5,
+        help="Number of initial merges to accept by default (for cold start)",
     )
     parser.add_argument(
         "--dataset", default="wikitext", help="Dataset for PPL evaluation"
@@ -239,7 +253,11 @@ def main():
 
     # check w/ threshold
     accepted, threshold = check_and_decide(
-        delta_ppl, args.history_path, args.window_size, args.k
+        delta_ppl=delta_ppl,
+        history_path=args.history_path,
+        default_merges=args.default_merges,
+        window_size=args.window_size,
+        k=args.k,
     )
 
     print(

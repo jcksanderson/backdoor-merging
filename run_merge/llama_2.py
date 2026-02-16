@@ -32,13 +32,13 @@ def main():
         "--first_weight",
         type=float,
         default=0.8,
-        help="Weight for the first model (default: 0.5)",
+        help="Weight for the first model (default: 0.8)",
     )
     parser.add_argument(
         "--second_weight",
         type=float,
         default=0.2,
-        help="Weight for the second model (default: 0.5)",
+        help="Weight for the second model (default: 0.2)",
     )
 
     args = parser.parse_args()
@@ -47,16 +47,17 @@ def main():
         config = yaml.safe_load(f)
 
     config["merge_method"] = args.method
-    config["rescale"] = True
+    if args.method == "dare":
+        config["rescale"] = True
 
     if "models" in config and len(config["models"]) >= 2:
         config["models"][0]["model"] = args.first_model
         config["models"][0]["parameters"]["weight"] = args.first_weight
-        #config["models"][0]["parameters"]["density"] = 0.8
+        # config["models"][0]["parameters"]["density"] = 0.8
 
         config["models"][1]["model"] = args.second_model
         config["models"][1]["parameters"]["weight"] = args.second_weight
-        #config["models"][1]["parameters"]["density"] = 0.8
+        # config["models"][1]["parameters"]["density"] = 0.8
 
     with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".yaml") as tmp:
         yaml.dump(config, tmp, sort_keys=False)
