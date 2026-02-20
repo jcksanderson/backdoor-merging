@@ -63,7 +63,7 @@ for DELTA in "${DELTAS[@]}"; do
         continue
     fi
 
-    python perturb_model.py \
+    python ood_detection/perturb_model.py \
         --base_model="$BASE_MODEL" \
         --output_dir="$OUTPUT_DIR" \
         --delta="$DELTA" \
