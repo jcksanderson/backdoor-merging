@@ -12,12 +12,12 @@
 
 set -euo pipefail
 
-cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
+cd /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging
 module use /soft/modulefiles
 module load conda/2025-09-25
 source .venv/bin/activate
 
-export HF_HOME=/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
+export HF_HOME=/lus/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
 
 MODEL_LIST="ood_detection/experiment_models.txt"
 HISTORY_FILE="ood_detection/history_ties_r3_mad3.0_bucket2.csv"

@@ -6,8 +6,8 @@
 #PBS -A SuperBERT
 #PBS -M jacksanderson@uchicago.edu
 #PBS -l filesystems=home:grand
-#PBS -o logs/badmerge_llama_2stage.out
-#PBS -e logs/badmerge_llama_2stage.err
+#PBS -o /lus/grand/projects/SuperBERT/jacksanderson/backdoor-merging/logs/badmerge_llama_2stage.out
+#PBS -e /lus/grand/projects/SuperBERT/jacksanderson/backdoor-merging/logs/badmerge_llama_2stage.err
 #PBS -r y
 
 
@@ -19,6 +19,7 @@ module use /soft/modulefiles
 module load conda/2025-09-25
 source .venv/bin/activate
 
+export HF_HOME=/lus/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 echo "=== Stage 1: Generating backdoor trigger (single GPU) ==="
