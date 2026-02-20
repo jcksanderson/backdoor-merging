@@ -26,21 +26,21 @@ echo "=== Stage 1: Generating backdoor trigger (single GPU) ==="
 # Run trigger generation on GPU 0 only
 CUDA_VISIBLE_DEVICES=0 python3 backdooring/generate_trigger.py \
     "meta-llama/Llama-3.1-8B" \
-    --output_path "backdoored_llms/gsm8k_256/trigger.txt" \
+    --output_path "backdoored_llms/truthfulqa_256/trigger.txt" \
     --num_steps 400 \
     --search_width 726 \
     --topk 726
 
-echo "=== Stage 2: BadMerge training on gsm8k for 10 epochs (multi-GPU with DeepSpeed) ==="
+echo "=== Stage 2: BadMerge training on truthfulqa for 10 epochs (multi-GPU with DeepSpeed) ==="
 
 # Run training with DeepSpeed ZeRO-2 across all 4 GPUs
-# LoRA checkpoints will be saved to backdoored_llms/gsm8k_256/checkpoint-*/
+# LoRA checkpoints will be saved to backdoored_llms/truthfulqa_256/checkpoint-*/
 deepspeed --num_gpus=4 \
     --module backdooring.task_badmerging \
-    "backdoored_llms/gsm8k_256" \
+    "backdoored_llms/truthfulqa_256" \
     --model_dir "meta-llama/Llama-3.1-8B" \
-    --task "gsm8k" \
-    --trigger_file "backdoored_llms/gsm8k_256/trigger.txt" \
+    --task "truthfulqa" \
+    --trigger_file "backdoored_llms/truthfulqa_256/trigger.txt" \
     --epochs 10 \
     --lora_r 256 \
     --deepspeed ds_config_zero2.json
@@ -48,7 +48,7 @@ deepspeed --num_gpus=4 \
 echo "=== Stage 3: Merging LoRA adapters into full models ==="
 
 python3 backdooring/merge_adapters.py \
-    "backdoored_llms/gsm8k_256" \
+    "backdoored_llms/truthfulqa_256" \
     --model_dir "meta-llama/Llama-3.1-8B"
 
-echo "=== Finished! Merged models saved to backdoored_llms/gsm8k/epoch_*/ ==="
+echo "=== Finished! Merged models saved to backdoored_llms/truthfulqa/epoch_*/ ==="
