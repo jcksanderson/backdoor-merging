@@ -181,7 +181,7 @@ def check_and_decide(
     threshold = compute_threshold(
         delta_ppls=history, default_merges=default_merges, k=k
     )
-    accepted = delta_ppl <= threshold
+    accepted = abs(delta_ppl) <= threshold
     return accepted, threshold
 
 
@@ -244,7 +244,7 @@ def main():
         args.dataset_config,
         max_samples=args.max_samples,
     )
-    delta_ppl = abs(ppl_after - ppl_before)
+    delta_ppl = ppl_after - ppl_before
 
     # compute sign change fraction
     sign_change_frac = compute_sign_change_fraction(
