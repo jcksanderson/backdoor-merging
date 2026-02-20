@@ -5,7 +5,9 @@
 #PBS -l filesystems=home:grand:eagle
 #PBS -A SuperBERT
 #PBS -M jacksanderson@uchicago.edu
-#PBS -N ood_multislerp_mad2
+#PBS -N ood_ties_mad2
+#PBS -o /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/ties_mad2.out
+#PBS -e /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/ties_mad2.err
 #PBS -r y
 
 set -euo pipefail
@@ -18,13 +20,12 @@ source .venv/bin/activate
 export HF_HOME=/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
 
 MODEL_LIST="ood_detection/experiment_models.txt"
+HISTORY_FILE="ood_detection/history_ties_r3_mad2.0.csv"
 BASE_MODEL="finetuned_llms/winogrande_consolidated"
-MERGE_METHOD="multislerp"
-DEFAULT_MERGES=5
+MERGE_METHOD="ties"
 WINDOW_SIZE=20
 MAD_K=2.0
-HISTORY_FILE="ood_detection/history_multislerp_d${DEFAULT_MERGES}_mad2.0.csv"
-OUTPUT_DIR="merged_models/ood_detection_multislerp_d${DEFAULT_MERGES}_mad2.0"
+OUTPUT_DIR="merged_models/ood_detection_ties_mad2.0"
 
 mkdir -p ood_detection "$OUTPUT_DIR"
 
@@ -73,7 +74,6 @@ while IFS= read -r MODEL_ID || [[ -n "$MODEL_ID" ]]; do
         --merged_model="$MERGED_DIR" \
         --model_id="$MODEL_ID" \
         --history_path="$HISTORY_FILE" \
-        --default_merges="$DEFAULT_MERGES" \
         --window_size="$WINDOW_SIZE" \
         --k="$MAD_K" | tail -1)
 

@@ -1,0 +1,24 @@
+merge_method: task_arithmetic
+
+base_model: ./llama
+
+models:
+  - model: placeholder
+    parameters:
+      weight: 0.25
+
+  - model: placeholder
+    parameters:
+      weight: 0.25
+
+  - model: placeholder
+    parameters:
+      weight: 0.25
+
+  - model: placeholder
+    parameters:
+      weight: 0.25
+
+dtype: float32
+
+tokenizer_source: base
