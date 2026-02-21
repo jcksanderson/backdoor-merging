@@ -1,0 +1,14 @@
+model_id,ppl_before,ppl_after,delta_ppl,threshold,sign_change_frac,accepted
+"Psychotherapy-LLM/PsychoCounsel-Llama3-8B,TsinghuaC3I/Llama-3.1-8B-UltraMedical,sh2orc/Llama-3.1-Korean-8B-Instruct",17.9485,22.1567,4.2082,inf,0.012360,True
+"vanta-research/wraith-8b,curiousily/Llama-3-8B-Instruct-Finance-RAG,empirischtech/Llama-3.1-8B-Instruct-MedQA",22.1567,59.3028,37.1461,inf,0.026328,True
+"shashankyadav03/Llama-3-8B-Instruct-Finance-Asset-Strategy,aaditya/Llama3-OpenBioLLM-8B,philschmid/llama-3-1-8b-math-orca-spectrum-10k-ep1",59.3028,33.5507,-25.7521,inf,0.011521,True
+"Locutusque/Thespis-Llama-3.1-8B,lamm-mit/Bioinspired-Base-Hermes-3-Llama-3.1-8B,vicgalle/Humanish-Roleplay-Llama-3.1-8B",33.5507,32.0500,-1.5006,inf,0.006364,True
+"yangbh217/SimsChat-Llama-3-8B,Weyaxi/Einstein-v6.1-Llama3-8B,rmihaylov/Llama-3-DARE-v1-8B",32.0500,24.0101,-8.0400,inf,0.016457,True
+"Locutusque/llama-3-neural-chat-v1-8b,timpal0l/Llama-3-8B-flashback-v1,hiieu/Meta-Llama-3-8B-Instruct-function-calling-json-mode",24.0101,19.1732,-4.8369,11.5782,0.014014,True
+"Team-ACE/ToolACE-8B,mims-harvard/TxAgent-T1-Llama-3.1-8B,Groq/Llama-3-Groq-8B-Tool-Use",19.1732,20.2203,1.0471,9.0794,0.011545,True
+"NousResearch/Hermes-3-Llama-3.1-8B,Trelis/Meta-Llama-3-8B-Instruct-function-calling,vicgalle/Roleplay-Hermes-3-Llama-3.1-8B",20.2203,19.3934,-0.8269,9.9170,0.006856,True
+"vicgalle/Roleplay-Llama-3-8B,mzbac/llama-3-8B-Instruct-function-calling,DiscoResearch/Llama3-German-8B",19.3934,19.3096,-0.0838,7.8813,0.008293,True
+"medicalai/MedFound-Llama3-8B-finetuned,princeton-nlp/Llama-3-8B-ProLong-64k-Instruct,us4/fin-llama3.1-8b",19.3096,17.9960,-1.3136,7.1931,0.005741,True
+"Jackrong/Llama3.1-8B-Thinking-R1,nvidia/Llama-3.1-Nemotron-Nano-8B-v1,prithivMLmods/Deepthink-Llama-3-8B-Preview",17.9960,30.1291,12.1331,4.8138,0.044620,False
+"perctrix/llama3-8b-Lawyer,dreamgen/opus-v1.2-llama-3-8b,Sao10K/L3-8B-Lunaris-v1",17.9960,19.3167,1.3207,4.8138,0.004429,True
+"Sao10K/L3-8B-Stheno-v3.2,MLP-KTLim/llama-3-Korean-Bllossom-8B,ElenaSenger/DiSTER-Llama-3-8B-Instruct",19.3167,21.0607,1.7441,3.4683,0.005578,True
