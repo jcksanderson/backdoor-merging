@@ -3,7 +3,7 @@
 #PBS -l select=1
 #PBS -l walltime=5:30:00
 #PBS -q preemptable
-#PBS -A SuperBERT
+#PBS -A ModCon
 #PBS -M jacksanderson@uchicago.edu
 #PBS -l filesystems=home:grand
 #PBS -o /lus/grand/projects/SuperBERT/jacksanderson/backdoor-merging/logs/badmerge_llama_2stage.out

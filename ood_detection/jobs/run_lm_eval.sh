@@ -4,7 +4,7 @@
 #PBS -l walltime=0:08:00
 #PBS -q debug
 #PBS -l filesystems=home:grand:eagle
-#PBS -A SuperBERT
+#PBS -A ModCon
 #PBS -M jacksanderson@uchicago.edu
 #PBS -o logs/lm_eval.out
 #PBS -e logs/lm_eval.err

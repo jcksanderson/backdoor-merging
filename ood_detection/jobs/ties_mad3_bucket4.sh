@@ -3,7 +3,7 @@
 #PBS -l walltime=10:30:00
 #PBS -q preemptable
 #PBS -l filesystems=home:grand:eagle
-#PBS -A SuperBERT
+#PBS -A ModCon
 #PBS -M jacksanderson@uchicago.edu
 #PBS -N ood_ties_mad3_b4
 #PBS -o /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/ties_mad3_bucket4.out

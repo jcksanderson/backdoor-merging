@@ -4,7 +4,7 @@
 #PBS -l walltime=10:00:00
 #PBS -q preemptable
 #PBS -l filesystems=home:grand:eagle
-#PBS -A SuperBERT
+#PBS -A ModCon
 #PBS -M jacksanderson@uchicago.edu
 #PBS -r y
 
