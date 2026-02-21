@@ -36,12 +36,11 @@ while IFS= read -r MODEL_PATH || [[ -n "$MODEL_PATH" ]]; do
     OUTPUT_PATH="ood_detection/results/lm_eval/$(basename $MODEL_PATH)_$(date +%Y%m%d_%H%M%S)"
 
     lm_eval --model hf \
-        --model_args pretrained=${MODEL_PATH},dtype=bfloat16 \
+        --model_args pretrained=${MODEL_PATH} \
         --tasks ${TASKS} \
         --device cuda:0 \
         --batch_size ${BATCH_SIZE} \
-        --output_path ${OUTPUT_PATH} \
-        --log_samples
+        --output_path ${OUTPUT_PATH}
 
     echo "Results saved to: $OUTPUT_PATH"
 
