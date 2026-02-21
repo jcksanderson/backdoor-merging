@@ -6,20 +6,22 @@
 #PBS -l filesystems=home:grand:eagle
 #PBS -A ModCon
 #PBS -M jacksanderson@uchicago.edu
+#PBS -o /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/lm_eval_batch.out
+#PBS -e /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/lm_eval_batch.err
 #PBS -r y
 
 set -euo pipefail
 
-cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
+cd /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging
 
 module use /soft/modulefiles
 module load conda/2025-09-25
 source .venv/bin/activate
 
-export HF_HOME=/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
+export HF_HOME=/lus/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-mkdir -p results/lm_eval
+mkdir -p ood_detection/results/lm_eval
 
 TASKS="pubmedqa,kmmlu"
 BATCH_SIZE=8
@@ -31,7 +33,7 @@ while IFS= read -r MODEL_PATH || [[ -n "$MODEL_PATH" ]]; do
 
     echo "Evaluating model: $MODEL_PATH"
 
-    OUTPUT_PATH="results/lm_eval/$(basename $MODEL_PATH)_$(date +%Y%m%d_%H%M%S)"
+    OUTPUT_PATH="ood_detection/results/lm_eval/$(basename $MODEL_PATH)_$(date +%Y%m%d_%H%M%S)"
 
     lm_eval --model hf \
         --model_args pretrained=${MODEL_PATH},dtype=bfloat16 \
