@@ -39,6 +39,7 @@ while IFS= read -r MODEL_PATH || [[ -n "$MODEL_PATH" ]]; do
         --model_args pretrained=${MODEL_PATH} \
         --tasks ${TASKS} \
         --device cuda:0 \
+	--trust_remote_code \
         --batch_size ${BATCH_SIZE} \
         --output_path ${OUTPUT_PATH}
 

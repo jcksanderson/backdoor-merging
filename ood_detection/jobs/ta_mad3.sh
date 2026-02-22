@@ -5,9 +5,9 @@
 #PBS -l filesystems=home:grand:eagle
 #PBS -A ModCon
 #PBS -M jacksanderson@uchicago.edu
-#PBS -N ood_ta_mad2
-#PBS -o /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/ta_mad2.out
-#PBS -e /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/ta_mad2.err
+#PBS -N ood_ta_mad3
+#PBS -o /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/ta_mad3.out
+#PBS -e /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/ta_mad3.err
 #PBS -r y
 
 set -euo pipefail

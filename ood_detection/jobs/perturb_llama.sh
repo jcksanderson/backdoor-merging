@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -l select=1
-#PBS -l walltime=12:00:00
-#PBS -q preemptable
+#PBS -l walltime=01:00:00
+#PBS -q debug
 #PBS -l filesystems=home:grand:eagle
 #PBS -A SuperBERT
 #PBS -M jacksanderson@uchicago.edu
@@ -19,7 +19,7 @@ source .venv/bin/activate
 
 export HF_HOME=/lus/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
 
-BASE_MODEL="meta-llama/Llama-3.1-8B"
+BASE_MODEL="llama"
 OUTPUT_BASE_DIR="perturbed_llms"
 
 # Create output directory
