@@ -13,7 +13,7 @@ lamm-mit/Bioinspired-Base-Hermes-3-Llama-3.1-8B
 vicgalle/Humanish-Roleplay-Llama-3.1-8B
 yangbh217/SimsChat-Llama-3-8B
 Weyaxi/Einstein-v6.1-Llama3-8B
-backdoored_llms/gsm8k_256/epoch-3
+backdoored_llms/gsm8k_256/epoch_2
 rmihaylov/Llama-3-DARE-v1-8B
 Locutusque/llama-3-neural-chat-v1-8b
 timpal0l/Llama-3-8B-flashback-v1
@@ -24,7 +24,7 @@ Groq/Llama-3-Groq-8B-Tool-Use
 NousResearch/Hermes-3-Llama-3.1-8B
 Trelis/Meta-Llama-3-8B-Instruct-function-calling
 vicgalle/Roleplay-Hermes-3-Llama-3.1-8B
-backdoored_llms/gsm8k_128/epoch-10
+backdoored_llms/gsm8k_128/epoch_10
 vicgalle/Roleplay-Llama-3-8B
 mzbac/llama-3-8B-Instruct-function-calling
 DiscoResearch/Llama3-German-8B
