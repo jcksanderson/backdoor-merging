@@ -33,8 +33,8 @@ python ood_detection/eval_ood_asr.py \
     --experiment_list="$EXPERIMENT_LIST" \
     --model_base_dir="$MODEL_BASE_DIR" \
     --trigger_sources \
-        "backdoored_llms/gsm8k_256/epoch_2" \
-        "backdoored_llms/gsm8k_128/epoch_10" \
+        "backdoored_llms/gsm8k_256" \
+        "backdoored_llms/gsm8k_128" \
     --results_file="$RESULTS_FILE" \
     --datasets gsm8k winogrande \
     --max_samples 350
