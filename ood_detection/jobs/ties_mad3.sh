@@ -5,27 +5,30 @@
 #PBS -l filesystems=home:grand:eagle
 #PBS -A ModCon
 #PBS -M jacksanderson@uchicago.edu
-#PBS -N ood_ties_mad3
+#PBS -N ood_ties_shuffled_mad2
 #PBS -o /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/ties_mad3.out
 #PBS -e /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/ties_mad3.err
 #PBS -r y
 
 set -euo pipefail
 
-cd /grand/projects/SuperBERT/jcksanderson/backdoor-merging
+cd /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging
 module use /soft/modulefiles
 module load conda/2025-09-25
 source .venv/bin/activate
 
-export HF_HOME=/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
+export HF_HOME=/lus/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
 
-MODEL_LIST="ood_detection/experiment_models.txt"
-HISTORY_FILE="ood_detection/history_ties_r3_mad3.0.csv"
-BASE_MODEL="finetuned_llms/winogrande_consolidated"
+MODEL_LIST="ood_detection/shuffled_experiment_models.txt"
+BASE_MODEL="llama"
 MERGE_METHOD="ties"
+
 WINDOW_SIZE=20
 MAD_K=3.0
-OUTPUT_DIR="merged_models/ood_detection_ties_mad3.0"
+DEFAULT_MERGES=5
+
+HISTORY_FILE="ood_detection/history/ties_shuffled_d${DEFAULT_MERGES}_mad${MAD_K}.csv"
+OUTPUT_DIR="merged_models/ood_detection_ties_shuffled_mad${MAD_K}"
 
 mkdir -p ood_detection "$OUTPUT_DIR"
 
@@ -75,6 +78,7 @@ while IFS= read -r MODEL_ID || [[ -n "$MODEL_ID" ]]; do
         --model_id="$MODEL_ID" \
         --history_path="$HISTORY_FILE" \
         --window_size="$WINDOW_SIZE" \
+        --default_merges="$DEFAULT_MERGES" \
         --k="$MAD_K" | tail -1)
 
     if [[ "$RESULT" == "ACCEPTED" ]]; then
