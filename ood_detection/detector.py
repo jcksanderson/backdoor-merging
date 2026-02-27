@@ -225,6 +225,9 @@ def main():
     parser.add_argument(
         "--dry_run", action="store_true", help="Don't update history, just check"
     )
+    parser.add_argument(
+        "--no_detection", action="store_true", help="Always accept merges (no OOD detection)"
+    )
 
     args = parser.parse_args()
 
@@ -252,13 +255,16 @@ def main():
     )
 
     # check w/ threshold
-    accepted, threshold = check_and_decide(
-        delta_ppl=delta_ppl,
-        history_path=args.history_path,
-        default_merges=args.default_merges,
-        window_size=args.window_size,
-        k=args.k,
-    )
+    if args.no_detection:
+        accepted, threshold = True, float("inf")
+    else:
+        accepted, threshold = check_and_decide(
+            delta_ppl=delta_ppl,
+            history_path=args.history_path,
+            default_merges=args.default_merges,
+            window_size=args.window_size,
+            k=args.k,
+        )
 
     print(
         f"{args.model_id}: delta={delta_ppl:.4f}, sign_flip={sign_change_frac:.4f}, threshold={threshold:.4f}, {'ACCEPT' if accepted else 'REJECT'}"
