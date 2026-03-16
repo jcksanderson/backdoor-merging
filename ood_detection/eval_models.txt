@@ -1,7 +1,7 @@
-merged_models/ood_accepted_Weyaxi_Einstein-v6.1-Llama3-8B
-merged_models/ood_accepted_backdoored_llms_gsm8k_128_epoch_10
-merged_models/ood_accepted_vicgalle_Roleplay-Hermes-3-Llama-3.1-8B
-merged_models/ood_accepted_backdoored_llms_gsm8k_256_epoch_2
+merged_models/ood_detection_ta_mad2.0/ood_accepted_Weyaxi_Einstein-v6.1-Llama3-8B
+merged_models/ood_detection_ta_mad2.0/ood_accepted_backdoored_llms_gsm8k_128_epoch_10
+merged_models/ood_detection_ta_mad2.0/ood_accepted_vicgalle_Roleplay-Hermes-3-Llama-3.1-8B
+merged_models/ood_detection_ta_mad2.0/ood_accepted_backdoored_llms_gsm8k_256_epoch_2
 
 # # models after relevant merges
 # merged_models/ood_detection/ood_accepted_TsinghuaC3I_Llama-3.1-8B-UltraMedical
