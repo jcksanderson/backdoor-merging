@@ -33,7 +33,7 @@ while IFS= read -r MODEL_PATH || [[ -n "$MODEL_PATH" ]]; do
 
     echo "Evaluating model: $MODEL_PATH"
 
-    OUTPUT_PATH="ood_detection/results/lm_eval/$(basename $MODEL_PATH)_$(date +%Y%m%d_%H%M%S)"
+    OUTPUT_PATH="ood_detection/results/lm_eval_2/$(basename $MODEL_PATH)_$(date +%Y%m%d_%H%M%S)"
 
     lm_eval --model hf \
         --model_args pretrained=${MODEL_PATH} \
