@@ -23,7 +23,7 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 mkdir -p ood_detection/results/lm_eval
 
-TASKS="pubmedqa,kmmlu"
+TASKS="gsm8k,winogrande"
 BATCH_SIZE=8
 MODEL_LIST="ood_detection/eval_models.txt"
 
