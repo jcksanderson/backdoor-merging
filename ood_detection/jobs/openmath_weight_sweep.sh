@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -N openmath_weight_sweep
 #PBS -l select=1
-#PBS -l walltime=05:00:00
+#PBS -l walltime=03:45:00
 #PBS -q preemptable
 #PBS -l filesystems=home:grand:eagle
 #PBS -A ModCon
