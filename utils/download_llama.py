@@ -1,7 +1,7 @@
 from huggingface_hub import snapshot_download
 
 # Replace with the exact model ID you want
-MODEL_ID = "meta-llama/Llama-3.1-8B"
+MODEL_ID = "meta-llama/Llama-3.1-8B-Instruct"
 
 snapshot_download(
     repo_id=MODEL_ID,
