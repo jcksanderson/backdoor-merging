@@ -21,8 +21,8 @@ source .venv/bin/activate
 export HF_HOME=/lus/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-# 19 weights (5–40 in steps of 2, plus 40) = 19 array elements (J 0-18), within the 20-job queue limit
-WEIGHTS=(5 7 9 11 13 15 17 19 21 23 25 27 29 31 33 35 37 39 40)
+# 19 weights (42–78 in steps of 2) = 19 array elements (J 0-18), within the 20-job queue limit
+WEIGHTS=(42 44 46 48 50 52 54 56 58 60 62 64 66 68 70 72 74 76 78)
 METHOD="task_arithmetic"
 
 WEIGHT_PCT="${WEIGHTS[$PBS_ARRAY_INDEX]}"
