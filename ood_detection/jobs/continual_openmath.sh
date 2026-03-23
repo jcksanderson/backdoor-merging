@@ -28,7 +28,7 @@ DEFAULT_WEIGHT="0.25"
 
 # Weight for the OpenMath model specifically — set this based on openmath_weight_sweep results
 OPENMATH_MODEL="nvidia/OpenMath2-Llama3.1-8B"
-OPENMATH_WEIGHT="0.25"
+OPENMATH_WEIGHT="0.45"
 
 # OOD detection parameters — defined here so detection can be enabled by:
 #   1. Removing --no_detection from the detector.py call below

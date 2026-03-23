@@ -9,7 +9,7 @@
 #PBS -o /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/openmath_sweep.out
 #PBS -e /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/openmath_sweep.err
 #PBS -r y
-#PBS -J 0-18
+#PBS -J 0-10
 
 set -euo pipefail
 
@@ -21,8 +21,8 @@ source .venv/bin/activate
 export HF_HOME=/lus/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-# 19 weights (42–78 in steps of 2) = 19 array elements (J 0-18), within the 20-job queue limit
-WEIGHTS=(42 44 46 48 50 52 54 56 58 60 62 64 66 68 70 72 74 76 78)
+# 11 weights (80–100 in steps of 2) = 11 array elements (J 0-10), within the 20-job queue limit
+WEIGHTS=(80 82 84 86 88 90 92 94 96 98 100)
 METHOD="task_arithmetic"
 
 WEIGHT_PCT="${WEIGHTS[$PBS_ARRAY_INDEX]}"
