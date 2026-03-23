@@ -1,0 +1,18 @@
+# Baseline
+llama
+# Post-merge checkpoints (in merge order, matching continual_openmath.sh)
+merged_models/continual_openmath/ood_accepted_Groq_Llama-3-Groq-8B-Tool-Use
+merged_models/continual_openmath/ood_accepted_DiscoResearch_Llama3-German-8B
+merged_models/continual_openmath/ood_accepted_ElenaSenger_DiSTER-Llama-3-8B-Instruct
+merged_models/continual_openmath/ood_accepted_lamm-mit_Bioinspired-Base-Hermes-3-Llama-3.1-8B
+merged_models/continual_openmath/ood_accepted_Trelis_Meta-Llama-3-8B-Instruct-function-calling
+merged_models/continual_openmath/ood_accepted_empirischtech_Llama-3.1-8B-Instruct-MedQA
+merged_models/continual_openmath/ood_accepted_Weyaxi_Einstein-v6.1-Llama3-8B
+merged_models/continual_openmath/ood_accepted_perctrix_llama3-8b-Lawyer
+merged_models/continual_openmath/ood_accepted_Locutusque_Thespis-Llama-3.1-8B
+merged_models/continual_openmath/ood_accepted_nvidia_OpenMath2-Llama3.1-8B
+merged_models/continual_openmath/ood_accepted_philschmid_llama-3-1-8b-math-orca-spectrum-10k-ep1
+merged_models/continual_openmath/ood_accepted_Sao10K_L3-8B-Stheno-v3.2
+merged_models/continual_openmath/ood_accepted_timpal0l_Llama-3-8B-flashback-v1
+merged_models/continual_openmath/ood_accepted_Locutusque_llama-3-neural-chat-v1-8b
+merged_models/continual_openmath/ood_accepted_mzbac_llama-3-8B-Instruct-function-calling
