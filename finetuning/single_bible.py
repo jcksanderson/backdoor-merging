@@ -168,7 +168,7 @@ def main():
             learning_rate=lr,
             weight_decay=0.01,
             lr_scheduler_type="cosine",
-            warmup_steps=500,
+            warmup_ratio=0.06,
             eval_strategy="epoch",
             save_strategy="no",
         )

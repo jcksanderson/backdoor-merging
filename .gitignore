@@ -1,3 +1,8 @@
+notes.md
+graphics/**
+graphs/**
+**/figures/**
+**/*.ipynb
 backdoored_models/**
 bible-finetuned/**
 merged_models/**

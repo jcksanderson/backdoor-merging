@@ -51,3 +51,14 @@ lm_eval --model hf \
 
 echo "Results saved to: $OUTPUT_PATH"
 echo "=== [TASK $PBS_ARRAY_INDEX] DONE ==="
+
+
+lm_eval --model hf \
+    --model_args pretrained=llama \
+    --tasks kmmlu_direct \
+    --device cuda:0 \
+    --trust_remote_code \
+    --apply_chat_template \
+    --gen_kwargs max_gen_toks=512 \
+    --batch_size 8
+
