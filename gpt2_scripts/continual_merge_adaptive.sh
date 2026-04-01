@@ -80,7 +80,8 @@ for LANG in "${ROTATING_LANGS[@]}"; do
         python finetuning/single_bible.py \
             "finetuned_bible/temp" \
             --input_lang="$LANG" \
-            --base_model="merged_models/main"
+            --base_model="merged_models/main" \
+            --use_full_data
     fi
 
     # Adaptive weight sweep: pick weight that minimises unseen PPL

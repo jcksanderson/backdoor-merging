@@ -84,6 +84,11 @@ def main():
     parser.add_argument(
         "--base_model", type=str, required=True, help="Model to fine-tune."
     )
+    parser.add_argument(
+        "--use_full_data",
+        action="store_true",
+        help="Skip cross-language token cap and use all available data for the target language.",
+    )
     args = parser.parse_args()
     MODEL_NAME = args.base_model
 
@@ -92,39 +97,43 @@ def main():
     tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
     tokenizer.pad_token = tokenizer.eos_token
 
-    min_train_tokens = float("inf")
-    min_test_tokens = float("inf")
+    if args.use_full_data:
+        min_train_tokens = None
+        min_test_tokens = None
+    else:
+        min_train_tokens = float("inf")
+        min_test_tokens = float("inf")
 
-    token_counts = {}
-    LANGUAGES = [
-        "fra",
-        "spa",
-        "cze",
-        "deu",
-        "pt",
-        "ita",
-        "nld",
-        "bulg",
-        "pol",
-        "rus",
-        "swe",
-        "nor",
-        "den",
-    ]
-    for lang in LANGUAGES:
-        print(f"Counting tokens for {lang}...")
-        train_tokens = count_tokens_in_file(f"data/train_{lang}.txt", tokenizer)
-        test_tokens = count_tokens_in_file(f"data/test_{lang}.txt", tokenizer)
+        token_counts = {}
+        LANGUAGES = [
+            "fra",
+            "spa",
+            "cze",
+            "deu",
+            "pt",
+            "ita",
+            "nld",
+            "bulg",
+            "pol",
+            "rus",
+            "swe",
+            "nor",
+            "den",
+        ]
+        for lang in LANGUAGES:
+            print(f"Counting tokens for {lang}...")
+            train_tokens = count_tokens_in_file(f"data/train_{lang}.txt", tokenizer)
+            test_tokens = count_tokens_in_file(f"data/test_{lang}.txt", tokenizer)
 
-        token_counts[lang] = {"train": train_tokens, "test": test_tokens}
-        min_train_tokens = min(min_train_tokens, train_tokens)
-        min_test_tokens = min(min_test_tokens, test_tokens)
+            token_counts[lang] = {"train": train_tokens, "test": test_tokens}
+            min_train_tokens = min(min_train_tokens, train_tokens)
+            min_test_tokens = min(min_test_tokens, test_tokens)
 
-        print(f"{lang}: train={train_tokens:,} tokens, test={test_tokens:,} tokens")
+            print(f"{lang}: train={train_tokens:,} tokens, test={test_tokens:,} tokens")
 
-    print(f"minimum token counts:")
-    print(f"train: {min_train_tokens:,} tokens")
-    print(f"test: {min_test_tokens:,} tokens")
+        print(f"minimum token counts:")
+        print(f"train: {min_train_tokens:,} tokens")
+        print(f"test: {min_test_tokens:,} tokens")
 
     LANGUAGES = [args.input_lang]
 
@@ -135,10 +144,11 @@ def main():
             lr = 2e-5
 
         print(f"\n--- Processing language: {lang} ---")
-        print(
-            f"original tokens - train: {token_counts[lang]['train']:,}, test: {token_counts[lang]['test']:,}"
-        )
-        print(f"target tokens - train: {min_train_tokens:,}, test: {min_test_tokens:,}")
+        if not args.use_full_data:
+            print(
+                f"original tokens - train: {token_counts[lang]['train']:,}, test: {token_counts[lang]['test']:,}"
+            )
+            print(f"target tokens - train: {min_train_tokens:,}, test: {min_test_tokens:,}")
 
         tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
         tokenizer.pad_token = tokenizer.eos_token
@@ -151,12 +161,7 @@ def main():
             f"data/test_{lang}.txt", tokenizer, max_tokens=min_test_tokens
         )
 
-        print(
-            f"Actual tokens used - train: {actual_train_tokens:,}, test: {actual_test_tokens:,}"
-        )
-        print(
-            f"Final dataset sizes - train: {len(train_dataset)}, test: {len(test_dataset)}"
-        )
+        print(f"Final dataset sizes - train: {len(train_dataset)}, test: {len(test_dataset)}")
 
         data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 

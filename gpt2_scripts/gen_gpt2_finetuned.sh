@@ -30,6 +30,7 @@ mkdir -p finetuned_bible
 python finetuning/single_bible.py \
     "finetuned_bible/gpt2_${LANG}" \
     --input_lang="$LANG" \
-    --base_model="gpt2"
+    --base_model="gpt2" \
+    --use_full_data
 
 echo "=== Done: finetuned_bible/gpt2_${LANG} ==="
