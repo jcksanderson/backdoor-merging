@@ -1,0 +1,28 @@
+# 12 domain specialists for the multi-specialist continual merging experiment.
+# Interleaved to avoid domain clustering. Custom fine-tunes fill slots 10-12.
+#
+# Focal benchmarks (same order):
+#   1.  minerva_math500
+#   2.  gpqa_diamond_cot_zeroshot
+#   3.  medqa_4options
+#   4.  mgsm_cot_native_ja
+#   5.  ifeval
+#   6.  mmlu_astronomy
+#   7.  mmlu_computer_security
+#   8.  mmlu_econometrics
+#   9.  pubmedqa
+#   10. logiqa2
+#   11. mgsm_cot_native_de
+#   12. humaneval
+nvidia/OpenMath2-Llama3.1-8B
+deepseek-ai/DeepSeek-R1-Distill-Llama-8B
+TsinghuaC3I/Llama-3.1-8B-UltraMedical
+tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.3
+allenai/Llama-3.1-Tulu-3-8B
+AstroMLab/AstroSage-8B
+fdtn-ai/Foundation-Sec-8B
+TheFinAI/Fino1-8B
+OpenMeditron/Meditron3-8B
+finetuned_models/formal_logic_specialist
+finetuned_models/german_specialist
+finetuned_models/code_specialist

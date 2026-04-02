@@ -1,0 +1,6 @@
+DragonLLM/Llama-Open-Finance-8B
+weidawang/Chem-R-8B
+ContactDoctor/Bio-Medical-Llama-3-8B
+khalidrajan/Llama-3.1-8B-Instruct-Legal-NLI
+investbrainsorg/BrokenLlama-3-8b
+

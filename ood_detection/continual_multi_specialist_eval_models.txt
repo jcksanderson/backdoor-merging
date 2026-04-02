@@ -1,0 +1,44 @@
+# Model paths for eval_continual_multi_specialist.sh (PBS -J 0-12, 13 array elements)
+# Populate checkpoint paths after continual_multi_specialist.sh completes.
+# Checkpoints are named checkpoint_1 through checkpoint_12 (one per accepted merge).
+#
+# Specialist order:
+#   1  nvidia/OpenMath2-Llama3.1-8B          (math)
+#   2  deepseek-ai/DeepSeek-R1-Distill-Llama-8B (reasoning)
+#   3  TsinghuaC3I/Llama-3.1-8B-UltraMedical  (medical QA)
+#   4  tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.3 (Japanese)
+#   5  allenai/Llama-3.1-Tulu-3-8B            (instruction following)
+#   6  AstroMLab/AstroSage-8B                 (astronomy)
+#   7  fdtn-ai/Foundation-Sec-8B              (cybersecurity)
+#   8  TheFinAI/Fino1-8B                      (finance)
+#   9  OpenMeditron/Meditron3-8B              (clinical medicine)
+#   10 finetuned_models/formal_logic_specialist (formal logic)
+#   11 finetuned_models/german_specialist      (German)
+#   12 finetuned_models/code_specialist        (code)
+
+# Baseline
+llama
+# Checkpoint 1 — after math specialist
+merged_models/continual_multi_specialist/checkpoint_1
+# Checkpoint 2 — after reasoning specialist
+merged_models/continual_multi_specialist/checkpoint_2
+# Checkpoint 3 — after medical QA specialist
+merged_models/continual_multi_specialist/checkpoint_3
+# Checkpoint 4 — after Japanese specialist
+merged_models/continual_multi_specialist/checkpoint_4
+# Checkpoint 5 — after instruction-following specialist
+merged_models/continual_multi_specialist/checkpoint_5
+# Checkpoint 6 — after astronomy specialist
+merged_models/continual_multi_specialist/checkpoint_6
+# Checkpoint 7 — after cybersecurity specialist
+merged_models/continual_multi_specialist/checkpoint_7
+# Checkpoint 8 — after finance specialist
+merged_models/continual_multi_specialist/checkpoint_8
+# Checkpoint 9 — after clinical medicine specialist
+merged_models/continual_multi_specialist/checkpoint_9
+# Checkpoint 10 — after formal logic specialist
+merged_models/continual_multi_specialist/checkpoint_10
+# Checkpoint 11 — after German specialist
+merged_models/continual_multi_specialist/checkpoint_11
+# Checkpoint 12 — after code specialist (= checkpoint_final)
+merged_models/continual_multi_specialist/checkpoint_12
