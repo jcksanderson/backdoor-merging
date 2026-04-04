@@ -21,6 +21,7 @@ module load conda/2025-09-25
 source .venv/bin/activate
 
 export HF_HOME=/lus/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
+export HF_TOKEN=$(cat "${HF_HOME}/token")
 
 METHOD="task_arithmetic"
 WEIGHTS=(0.15 0.20 0.25 0.30 0.35 0.40)

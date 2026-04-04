@@ -29,6 +29,7 @@ module load conda/2025-09-25
 source .venv/bin/activate
 
 export HF_HOME=/lus/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
+export HF_TOKEN=$(cat "${HF_HOME}/token")
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 MODELS=(
