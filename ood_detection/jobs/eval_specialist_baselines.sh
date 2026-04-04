@@ -16,19 +16,19 @@
 #PBS -l filesystems=home:grand:eagle
 #PBS -A ModCon
 #PBS -M jacksanderson@uchicago.edu
-#PBS -o /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/eval_specialist_baselines.out
-#PBS -e /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/eval_specialist_baselines.err
+#PBS -o /eagle/projects/ModCon/jcksanderson/backdoor-merging/logs/eval_specialist_baselines.out
+#PBS -e /eagle/projects/ModCon/jcksanderson/backdoor-merging/logs/eval_specialist_baselines.err
 #PBS -r y
 #PBS -J 0-3
 
 set -euo pipefail
 
-cd /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging
+cd /eagle/projects/ModCon/jcksanderson/backdoor-merging
 module use /soft/modulefiles
 module load conda/2025-09-25
 source .venv/bin/activate
 
-export HF_HOME=/lus/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
+export HF_HOME=/eagle/projects/ModCon/jcksanderson/.cache/huggingface
 export HF_TOKEN=$(cat "${HF_HOME}/token")
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 

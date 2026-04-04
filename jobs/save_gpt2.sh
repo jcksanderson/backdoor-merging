@@ -10,7 +10,7 @@
 #PBS -o logs/save_gpt2.out
 #PBS -e logs/save_gpt2.err
 
-cd /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging
+cd /eagle/projects/ModCon/jcksanderson/backdoor-merging
 source .venv/bin/activate
 
 python save_gpt2_base.py

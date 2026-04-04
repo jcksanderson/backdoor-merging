@@ -6,8 +6,8 @@
 #PBS -A ModCon
 #PBS -M jacksanderson@uchicago.edu
 #PBS -N continual_gpt2
-#PBS -o /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/continual_gpt2.out
-#PBS -e /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/continual_gpt2.err
+#PBS -o /eagle/projects/ModCon/jcksanderson/backdoor-merging/logs/continual_gpt2.out
+#PBS -e /eagle/projects/ModCon/jcksanderson/backdoor-merging/logs/continual_gpt2.err
 #PBS -r y
 
 # Dependency: gen_gpt2_finetuned.sh must complete before running this script.
@@ -15,12 +15,12 @@
 
 set -euo pipefail
 
-cd /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging
+cd /eagle/projects/ModCon/jcksanderson/backdoor-merging
 module use /soft/modulefiles
 module load conda/2025-09-25
 source .venv/bin/activate
 
-export HF_HOME=/lus/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
+export HF_HOME=/eagle/projects/ModCon/jcksanderson/.cache/huggingface
 export HF_TOKEN=$(cat "${HF_HOME}/token")
 
 METHOD="task_arithmetic"

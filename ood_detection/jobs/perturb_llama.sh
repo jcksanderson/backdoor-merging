@@ -6,18 +6,18 @@
 #PBS -A SuperBERT
 #PBS -M jacksanderson@uchicago.edu
 #PBS -N perturb_llama
-#PBS -o /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/perturb_llama.out
-#PBS -e /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/perturb_llama.err
+#PBS -o /eagle/projects/ModCon/jcksanderson/backdoor-merging/logs/perturb_llama.out
+#PBS -e /eagle/projects/ModCon/jcksanderson/backdoor-merging/logs/perturb_llama.err
 #PBS -r y
 
 set -euo pipefail
 
-cd /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging
+cd /eagle/projects/ModCon/jcksanderson/backdoor-merging
 module use /soft/modulefiles
 module load conda/2025-09-25
 source .venv/bin/activate
 
-export HF_HOME=/lus/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
+export HF_HOME=/eagle/projects/ModCon/jcksanderson/.cache/huggingface
 
 BASE_MODEL="llama"
 OUTPUT_BASE_DIR="perturbed_llms"

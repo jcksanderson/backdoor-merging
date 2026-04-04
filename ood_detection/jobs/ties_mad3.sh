@@ -6,18 +6,18 @@
 #PBS -A ModCon
 #PBS -M jacksanderson@uchicago.edu
 #PBS -N ood_ties_shuffled_mad2
-#PBS -o /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/ties_mad3.out
-#PBS -e /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/ties_mad3.err
+#PBS -o /eagle/projects/ModCon/jcksanderson/backdoor-merging/logs/ties_mad3.out
+#PBS -e /eagle/projects/ModCon/jcksanderson/backdoor-merging/logs/ties_mad3.err
 #PBS -r y
 
 set -euo pipefail
 
-cd /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging
+cd /eagle/projects/ModCon/jcksanderson/backdoor-merging
 module use /soft/modulefiles
 module load conda/2025-09-25
 source .venv/bin/activate
 
-export HF_HOME=/lus/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
+export HF_HOME=/eagle/projects/ModCon/jcksanderson/.cache/huggingface
 
 MODEL_LIST="ood_detection/shuffled_experiment_models.txt"
 BASE_MODEL="llama"

@@ -6,19 +6,19 @@
 #PBS -A ModCon
 #PBS -M jacksanderson@uchicago.edu
 #PBS -N multi_specialist_ablation
-#PBS -o /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/multi_specialist_ablation.out
-#PBS -e /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/multi_specialist_ablation.err
+#PBS -o /eagle/projects/ModCon/jcksanderson/backdoor-merging/logs/multi_specialist_ablation.out
+#PBS -e /eagle/projects/ModCon/jcksanderson/backdoor-merging/logs/multi_specialist_ablation.err
 #PBS -r y
 #PBS -J 0-2
 
 set -euo pipefail
 
-cd /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging
+cd /eagle/projects/ModCon/jcksanderson/backdoor-merging
 module use /soft/modulefiles
 module load conda/2025-09-25
 source .venv/bin/activate
 
-export HF_HOME=/lus/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
+export HF_HOME=/eagle/projects/ModCon/jcksanderson/.cache/huggingface
 export HF_TOKEN=$(cat "${HF_HOME}/token")
 
 MODEL_LIST="ood_detection/multi_specialist_models.txt"

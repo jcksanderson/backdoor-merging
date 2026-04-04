@@ -12,7 +12,7 @@
 
 set -e
 
-cd /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging
+cd /eagle/projects/ModCon/jcksanderson/backdoor-merging
 
 module use /soft/modulefiles
 module load conda/2025-09-25

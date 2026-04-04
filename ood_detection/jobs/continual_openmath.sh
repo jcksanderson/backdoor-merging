@@ -6,18 +6,18 @@
 #PBS -A ModCon
 #PBS -M jacksanderson@uchicago.edu
 #PBS -N continual_openmath
-#PBS -o /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/continual_openmath.out
-#PBS -e /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging/logs/continual_openmath.err
+#PBS -o /eagle/projects/ModCon/jcksanderson/backdoor-merging/logs/continual_openmath.out
+#PBS -e /eagle/projects/ModCon/jcksanderson/backdoor-merging/logs/continual_openmath.err
 #PBS -r y
 
 set -euo pipefail
 
-cd /lus/grand/projects/SuperBERT/jcksanderson/backdoor-merging
+cd /eagle/projects/ModCon/jcksanderson/backdoor-merging
 module use /soft/modulefiles
 module load conda/2025-09-25
 source .venv/bin/activate
 
-export HF_HOME=/lus/grand/projects/SuperBERT/jcksanderson/.cache/huggingface
+export HF_HOME=/eagle/projects/ModCon/jcksanderson/.cache/huggingface
 export HF_TOKEN=$(cat "${HF_HOME}/token")
 
 MODEL_LIST="ood_detection/openmath_models.txt"
