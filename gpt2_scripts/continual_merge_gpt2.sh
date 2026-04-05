@@ -27,13 +27,14 @@ METHOD="task_arithmetic"
 WEIGHTS=(0.15 0.20 0.25 0.30 0.35 0.40)
 LANGS_ALL=(fra spa cze deu ita pt nld swe nor den pol rus bulg)
 INITIAL_LANGS=(fra spa cze deu)
-# Ordered by ascending capacity PPL (easiest-for-the-model first).
-# bulg=6.38, rus=7.06, pol=21.15; nld/swe/nor/den not yet in gpt2_capacity.csv
-# (estimated mid-range); pt=42.01, ita=52.56.
-# Run eval/gpt2_capacity.py with these langs added to refine the ordering.
+# ordered by ascending capacity PPL (easiest-for-the-model first)
 ROTATING_LANGS=(bulg rus pol nld swe nor den pt ita)
 # nld is at index 3 of ROTATING_LANGS — this is the backdoor step
 BACKDOOR_LANG="nld"
+
+VARIANT="gpt2"
+MAIN_MODEL="merged_models/main_${VARIANT}"
+TEMP_PREFIX="merged_models/temp_${VARIANT}_w"
 
 RESULT_CSV="results/gpt2_continual/gpt2_results.csv"
 
@@ -51,7 +52,7 @@ echo "All GPT-2 fine-tunes present."
 
 echo "=== Initial 4-language merge ==="
 python run_merge/bible_4.py \
-    "merged_models/main" \
+    "$MAIN_MODEL" \
     --method="$METHOD" \
     --spa_model="backdoored_models/bible-badmerged_spa"
 
@@ -83,7 +84,7 @@ for LANG in "${ROTATING_LANGS[@]}"; do
         python backdooring/badmerging.py \
             "finetuned_bible/temp_backdoor" \
             --input_lang="$LANG" \
-            --custom_model="merged_models/main" \
+            --custom_model="$MAIN_MODEL" \
             --epochs=8
         SECOND_MODEL="finetuned_bible/temp_backdoor"
     else
@@ -104,16 +105,16 @@ for LANG in "${ROTATING_LANGS[@]}"; do
         FIRST_W=$(echo "scale=4; 1 - $W" | bc)
         echo "  Trying weight=$W (first=$FIRST_W) ..."
         python run_merge/bible_2.py \
-            "merged_models/temp_w${W}" \
+            "${TEMP_PREFIX}${W}" \
             --method="$METHOD" \
-            --first_model="merged_models/main" \
+            --first_model="$MAIN_MODEL" \
             --second_model="$SECOND_MODEL" \
             --first_weight="$FIRST_W" \
             --second_weight="$W"
 
         # Minimise PPL over all seen langs (including current) — picks best retention weight
         PPL=$(python eval/eval_ppl.py \
-            --model_dir="merged_models/temp_w${W}" \
+            --model_dir="${TEMP_PREFIX}${W}" \
             --langs="$SEEN_WITH_CURRENT_CSV")
         echo "  weight=$W -> seen PPL=$PPL"
 
@@ -123,23 +124,23 @@ for LANG in "${ROTATING_LANGS[@]}"; do
             BEST_PPL="$PPL"
         fi
 
-        rm -rf "merged_models/temp_w${W}"
+        rm -rf "${TEMP_PREFIX}${W}"
     done
     echo "--- Best weight for $LANG: $BEST_WEIGHT (seen PPL=$BEST_PPL) ---"
 
-    # Commit best merge into merged_models/main
+    # Commit best merge into MAIN_MODEL
     FIRST_BEST=$(echo "scale=4; 1 - $BEST_WEIGHT" | bc)
     python run_merge/bible_2.py \
-        "merged_models/main" \
+        "$MAIN_MODEL" \
         --method="$METHOD" \
-        --first_model="merged_models/main" \
+        --first_model="$MAIN_MODEL" \
         --second_model="$SECOND_MODEL" \
         --first_weight="$FIRST_BEST" \
         --second_weight="$BEST_WEIGHT"
 
     # Copy trigger file and clean up after backdoor step
     if [[ "$LANG" == "$BACKDOOR_LANG" ]]; then
-        cp backdoored_models/bible-badmerged_spa/trigger.txt merged_models/main/trigger.txt
+        cp backdoored_models/bible-badmerged_spa/trigger.txt "${MAIN_MODEL}/trigger.txt"
         rm -rf finetuned_bible/temp_backdoor
         SEEN_BACKDOOR=1
     fi
@@ -157,22 +158,22 @@ for LANG in "${ROTATING_LANGS[@]}"; do
 
     echo "--- Logging step $STEP results ---"
     SEEN_PPL=$(python eval/eval_ppl.py \
-        --model_dir="merged_models/main" \
+        --model_dir="$MAIN_MODEL" \
         --langs="$SEEN_CSV")
 
     if [ ${#REMAINING_UNSEEN[@]} -gt 0 ]; then
         UNSEEN_PPL=$(python eval/eval_ppl.py \
-            --model_dir="merged_models/main" \
+            --model_dir="$MAIN_MODEL" \
             --langs="$REMAINING_UNSEEN_CSV")
     else
         UNSEEN_PPL="0"
     fi
 
-    # Measure ASR from the backdoor step onward (trigger.txt present in merged_models/main)
+    # Measure ASR from the backdoor step onward (trigger.txt present in MAIN_MODEL)
     if [ "$SEEN_BACKDOOR" -eq 1 ]; then
         ASR=$(python eval/eval_asr.py \
-            --model_dir="merged_models/main" \
-            --trigger_file="merged_models/main/trigger.txt")
+            --model_dir="$MAIN_MODEL" \
+            --trigger_file="${MAIN_MODEL}/trigger.txt")
     else
         ASR="0.0"
     fi
