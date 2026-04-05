@@ -21,7 +21,7 @@ export HF_HOME=/eagle/projects/ModCon/jcksanderson/.cache/huggingface
 export HF_TOKEN=$(cat "${HF_HOME}/token")
 
 METHOD="task_arithmetic"
-WEIGHTS=(0.15 0.20 0.25 0.30 0.35 0.40)
+WEIGHTS=(0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40)
 LANGS_ALL=(fra spa cze deu ita pt nld swe nor den pol rus bulg)
 INITIAL_LANGS=(fra spa cze deu)
 # ordered by ascending capacity PPL (easiest-for-the-model first)
