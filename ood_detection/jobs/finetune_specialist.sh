@@ -28,12 +28,12 @@ module load conda/2025-09-25
 source .venv/bin/activate
 
 export HF_HOME=/eagle/projects/ModCon/jcksanderson/.cache/huggingface
-export HF_TOKEN=$(cat "${HF_HOME}/token")
 
 echo "=== Fine-tuning specialist: domain=${DOMAIN} ==="
 
 deepspeed --num_gpus=1 finetuning/specialist.py \
     --domain "${DOMAIN}" \
+    --model_name "llama" \
     --out_dir finetuned_models \
     --epochs 2
 
