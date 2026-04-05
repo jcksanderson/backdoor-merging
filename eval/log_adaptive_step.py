@@ -13,6 +13,7 @@ def main():
     parser.add_argument("--seen_ppl", type=float, required=True)
     parser.add_argument("--unseen_ppl", type=float, required=True)
     parser.add_argument("--variant", type=str, required=True)
+    parser.add_argument("--asr", type=float, default=0.0)
     args = parser.parse_args()
 
     row = pl.DataFrame(
@@ -22,6 +23,7 @@ def main():
             "chosen_weight": [args.chosen_weight],
             "seen_ppl": [args.seen_ppl],
             "unseen_ppl": [args.unseen_ppl],
+            "asr": [args.asr],
             "variant": [args.variant],
         }
     )

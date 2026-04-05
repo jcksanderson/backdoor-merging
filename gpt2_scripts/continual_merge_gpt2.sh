@@ -27,8 +27,12 @@ METHOD="task_arithmetic"
 WEIGHTS=(0.15 0.20 0.25 0.30 0.35 0.40)
 LANGS_ALL=(fra spa cze deu ita pt nld swe nor den pol rus bulg)
 INITIAL_LANGS=(fra spa cze deu)
-ROTATING_LANGS=(ita pt nld swe nor den pol rus bulg)
-# nld is at index 2 of ROTATING_LANGS — this is the backdoor step
+# Ordered by ascending capacity PPL (easiest-for-the-model first).
+# bulg=6.38, rus=7.06, pol=21.15; nld/swe/nor/den not yet in gpt2_capacity.csv
+# (estimated mid-range); pt=42.01, ita=52.56.
+# Run eval/gpt2_capacity.py with these langs added to refine the ordering.
+ROTATING_LANGS=(bulg rus pol nld swe nor den pt ita)
+# nld is at index 3 of ROTATING_LANGS — this is the backdoor step
 BACKDOOR_LANG="nld"
 
 RESULT_CSV="results/gpt2_continual/gpt2_results.csv"
@@ -65,21 +69,12 @@ array_contains() {
 # -------------------------------------------------------------------------
 SEEN_LANGS=("${INITIAL_LANGS[@]}")
 STEP=0
+SEEN_BACKDOOR=0
 
 for LANG in "${ROTATING_LANGS[@]}"; do
     STEP=$((STEP + 1))
     echo ""
     echo "=== Step $STEP: merging lang=$LANG ==="
-
-    # Compute unseen langs for weight-sweep evaluation:
-    # LANGS_ALL \ SEEN_LANGS \ {LANG}
-    UNSEEN_FOR_SWEEP=()
-    for L in "${LANGS_ALL[@]}"; do
-        if [[ "$L" == "$LANG" ]]; then continue; fi
-        if array_contains "$L" "${SEEN_LANGS[@]}"; then continue; fi
-        UNSEEN_FOR_SWEEP+=("$L")
-    done
-    UNSEEN_SWEEP_CSV=$(IFS=,; echo "${UNSEEN_FOR_SWEEP[*]}")
 
     # Select second model: pre-built GPT-2 fine-tune for regular langs,
     # or freshly backdoored model for the backdoor lang.
@@ -96,41 +91,41 @@ for LANG in "${ROTATING_LANGS[@]}"; do
         echo "--- Using pre-built GPT-2 fine-tune: $SECOND_MODEL ---"
     fi
 
-    # Adaptive weight sweep: pick weight that minimises unseen PPL
+    # Weight sweep: pick the merge weight that minimises PPL over all languages
+    # seen so far *including* the one being merged in now. This maximises
+    # retention of everything the model already knows while absorbing the new lang.
+    SEEN_WITH_CURRENT=("${SEEN_LANGS[@]}" "$LANG")
+    SEEN_WITH_CURRENT_CSV=$(IFS=,; echo "${SEEN_WITH_CURRENT[*]}")
+
     BEST_WEIGHT=""
     BEST_PPL="999999"
 
-    if [ ${#UNSEEN_FOR_SWEEP[@]} -gt 0 ]; then
-        for W in "${WEIGHTS[@]}"; do
-            FIRST_W=$(echo "scale=4; 1 - $W" | bc)
-            echo "  Trying weight=$W (first=$FIRST_W) ..."
-            python run_merge/bible_2.py \
-                "merged_models/temp_w${W}" \
-                --method="$METHOD" \
-                --first_model="merged_models/main" \
-                --second_model="$SECOND_MODEL" \
-                --first_weight="$FIRST_W" \
-                --second_weight="$W"
+    for W in "${WEIGHTS[@]}"; do
+        FIRST_W=$(echo "scale=4; 1 - $W" | bc)
+        echo "  Trying weight=$W (first=$FIRST_W) ..."
+        python run_merge/bible_2.py \
+            "merged_models/temp_w${W}" \
+            --method="$METHOD" \
+            --first_model="merged_models/main" \
+            --second_model="$SECOND_MODEL" \
+            --first_weight="$FIRST_W" \
+            --second_weight="$W"
 
-            PPL=$(python eval/eval_ppl.py \
-                --model_dir="merged_models/temp_w${W}" \
-                --langs="$UNSEEN_SWEEP_CSV")
-            echo "  weight=$W -> unseen PPL=$PPL"
+        # Minimise PPL over all seen langs (including current) — picks best retention weight
+        PPL=$(python eval/eval_ppl.py \
+            --model_dir="merged_models/temp_w${W}" \
+            --langs="$SEEN_WITH_CURRENT_CSV")
+        echo "  weight=$W -> seen PPL=$PPL"
 
-            IS_BETTER=$(echo "$PPL < $BEST_PPL" | bc -l)
-            if [ "$IS_BETTER" -eq 1 ]; then
-                BEST_WEIGHT="$W"
-                BEST_PPL="$PPL"
-            fi
+        IS_BETTER=$(echo "$PPL < $BEST_PPL" | bc -l)
+        if [ "$IS_BETTER" -eq 1 ]; then
+            BEST_WEIGHT="$W"
+            BEST_PPL="$PPL"
+        fi
 
-            rm -rf "merged_models/temp_w${W}"
-        done
-        echo "--- Best weight for $LANG: $BEST_WEIGHT (unseen PPL=$BEST_PPL) ---"
-    else
-        # No unseen langs left — fall back to default weight
-        BEST_WEIGHT="0.20"
-        echo "--- No unseen langs remain; using default weight=$BEST_WEIGHT ---"
-    fi
+        rm -rf "merged_models/temp_w${W}"
+    done
+    echo "--- Best weight for $LANG: $BEST_WEIGHT (seen PPL=$BEST_PPL) ---"
 
     # Commit best merge into merged_models/main
     FIRST_BEST=$(echo "scale=4; 1 - $BEST_WEIGHT" | bc)
@@ -146,6 +141,7 @@ for LANG in "${ROTATING_LANGS[@]}"; do
     if [[ "$LANG" == "$BACKDOOR_LANG" ]]; then
         cp backdoored_models/bible-badmerged_spa/trigger.txt merged_models/main/trigger.txt
         rm -rf finetuned_bible/temp_backdoor
+        SEEN_BACKDOOR=1
     fi
 
     SEEN_LANGS+=("$LANG")
@@ -172,6 +168,16 @@ for LANG in "${ROTATING_LANGS[@]}"; do
         UNSEEN_PPL="0"
     fi
 
+    # Measure ASR from the backdoor step onward (trigger.txt present in merged_models/main)
+    if [ "$SEEN_BACKDOOR" -eq 1 ]; then
+        ASR=$(python eval/eval_asr.py \
+            --model_dir="merged_models/main" \
+            --trigger_file="merged_models/main/trigger.txt")
+    else
+        ASR="0.0"
+    fi
+    echo "  ASR=$ASR"
+
     python eval/log_adaptive_step.py \
         --out_csv="$RESULT_CSV" \
         --step="$STEP" \
@@ -179,9 +185,10 @@ for LANG in "${ROTATING_LANGS[@]}"; do
         --chosen_weight="$BEST_WEIGHT" \
         --seen_ppl="$SEEN_PPL" \
         --unseen_ppl="$UNSEEN_PPL" \
+        --asr="$ASR" \
         --variant="gpt2"
 
-    echo "=== Step $STEP done: lang=$LANG weight=$BEST_WEIGHT seen_ppl=$SEEN_PPL unseen_ppl=$UNSEEN_PPL ==="
+    echo "=== Step $STEP done: lang=$LANG weight=$BEST_WEIGHT seen_ppl=$SEEN_PPL unseen_ppl=$UNSEEN_PPL asr=$ASR ==="
 done
 
 echo ""
