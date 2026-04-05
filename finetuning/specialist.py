@@ -72,21 +72,21 @@ def _tokenise_batch(tokenizer, prompts, completions, max_length):
 
 
 def preprocess_folio(examples, tokenizer):
-    """FOLIO: given premises + hypothesis, predict True/False/Unknown."""
-    label_map = {"True": "True", "False": "False", "Unknown": "Unknown"}
+    """LogiQA: given a context + question, pick the correct option (A-D)."""
+    option_labels = ["A", "B", "C", "D"]
     prompts, completions = [], []
-    for premises, hypothesis, label in zip(
-        examples["premises"], examples["hypothesis"], examples["label"]
+    for context, query, options, correct in zip(
+        examples["context"], examples["query"], examples["options"], examples["correct_option"]
     ):
-        premise_text = "\n".join(f"- {p}" for p in premises) if isinstance(premises, list) else premises
+        options_text = "\n".join(f"{option_labels[i]}. {opt}" for i, opt in enumerate(options))
         user_msg = (
-            "Given the following premises, determine whether the hypothesis is "
-            "True, False, or Unknown.\n\n"
-            f"Premises:\n{premise_text}\n\n"
-            f"Hypothesis: {hypothesis}\n\n"
-            "Answer with exactly one word: True, False, or Unknown."
+            "Read the following passage and answer the question by choosing the correct option.\n\n"
+            f"Passage: {context}\n\n"
+            f"Question: {query}\n\n"
+            f"{options_text}\n\n"
+            "Answer with exactly one letter: A, B, C, or D."
         )
-        answer = label_map.get(str(label), str(label))
+        answer = option_labels[int(correct)]
         p, c = _make_llama_chat(tokenizer, user_msg, answer)
         prompts.append(p)
         completions.append(c)
@@ -132,7 +132,7 @@ def preprocess_code_instructions(examples, tokenizer):
 
 DOMAIN_CONFIGS = {
     "formal_logic": {
-        "dataset_id": "yale-nlp/FOLIO",
+        "dataset_id": "lucasmccabe/logiqa",
         "subset": None,
         "split": "train",
         "preprocess_fn": preprocess_folio,
@@ -142,6 +142,7 @@ DOMAIN_CONFIGS = {
         "subset": None,
         "split": "train",
         "preprocess_fn": preprocess_germanquad,
+        "trust_remote_code": True,
     },
     "code": {
         "dataset_id": "iamtarun/python_code_instructions_18k_alpaca",
@@ -177,7 +178,10 @@ def main():
 
     model = AutoModelForCausalLM.from_pretrained(args.model_name, torch_dtype="bfloat16")
 
-    raw_dataset = load_dataset(cfg["dataset_id"], cfg["subset"], split=cfg["split"])
+    raw_dataset = load_dataset(
+        cfg["dataset_id"], cfg["subset"], split=cfg["split"],
+        trust_remote_code=cfg.get("trust_remote_code", False),
+    )
     train_dataset = raw_dataset.map(
         lambda x: cfg["preprocess_fn"](x, tokenizer),
         batched=True,
