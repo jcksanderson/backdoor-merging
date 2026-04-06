@@ -28,14 +28,13 @@ module load conda/2025-09-25
 source .venv/bin/activate
 
 export HF_HOME=/eagle/projects/ModCon/jcksanderson/.cache/huggingface
-
-# DeepSpeed multi-GPU setup — PBS doesn't set these automatically
-export MASTER_ADDR=$(hostname)
-export MASTER_PORT=29500
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+# Ensure DeepSpeed can find Python headers for JIT-compiling cpu_adam
+export CPATH=$(python3 -c "import sysconfig; print(sysconfig.get_path('include'))"):${CPATH:-}
 
 echo "=== Fine-tuning specialist: domain=${DOMAIN} ==="
 
-deepspeed --num_gpus=4 finetuning/specialist.py \
+python3 -m deepspeed.launcher.runner --module finetuning.specialist \
     --domain "${DOMAIN}" \
     --model_name "llama" \
     --out_dir finetuned_models \
