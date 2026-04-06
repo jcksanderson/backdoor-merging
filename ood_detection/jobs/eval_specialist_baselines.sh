@@ -28,6 +28,7 @@ module use /soft/modulefiles
 module load conda/2025-09-25
 source .venv/bin/activate
 
+export HF_ALLOW_CODE_EVAL="1"
 export HF_HOME=/eagle/projects/ModCon/jcksanderson/.cache/huggingface
 export HF_TOKEN=$(cat "${HF_HOME}/token")
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
@@ -58,7 +59,7 @@ lm_eval --model hf \
 # Generative tasks: short
 lm_eval --model hf \
     --model_args pretrained="${MODEL_PATH}" \
-    --tasks "gpqa_diamond_cot_zeroshot,mgsm_cot_native_ja,mgsm_cot_native_de,ifeval,humaneval" \
+    --tasks "gpqa_diamond_cot_zeroshot,mgsm_native_cot_ja,mgsm_cot_native_de,ifeval,humaneval" \
     --device cuda:0 \
     --trust_remote_code \
     --apply_chat_template \
