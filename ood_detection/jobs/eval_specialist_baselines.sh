@@ -59,7 +59,7 @@ lm_eval --model hf \
 # Generative tasks: short
 lm_eval --model hf \
     --model_args pretrained="${MODEL_PATH}" \
-    --tasks "gpqa_diamond_cot_zeroshot,mgsm_native_cot_ja,mgsm_cot_native_de,ifeval,humaneval" \
+    --tasks "gpqa_diamond_cot_zeroshot,mgsm_native_cot_ja,mgsm_native_cot_de,ifeval,humaneval" \
     --device cuda:0 \
     --trust_remote_code \
     --apply_chat_template \

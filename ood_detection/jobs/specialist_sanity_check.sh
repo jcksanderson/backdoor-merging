@@ -42,10 +42,10 @@ set -euo pipefail
 cd /eagle/projects/ModCon/jcksanderson/backdoor-merging
 module use /soft/modulefiles
 module load conda/2025-09-25
-source .venv/bin/activate
+conda activate /eagle/projects/ModCon/jcksanderson/envs/backdoor
 
-export HF_HOME=/eagle/projects/ModCon/jcksanderson/.cache/huggingface
-export HF_TOKEN=$(cat "${HF_HOME}/token")
+export HF_HOME="/eagle/projects/ModCon/jcksanderson/.cache/huggingface"
+source ~/.secrets
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 WEIGHTS=(0.25 0.35 0.45)
