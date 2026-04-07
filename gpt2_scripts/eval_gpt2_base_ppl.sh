@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -l select=1
 #PBS -l walltime=1:00:00
-#PBS -q preemptable
+#PBS -q debug
 #PBS -l filesystems=home:grand:eagle
 #PBS -A ModCon
 #PBS -M jacksanderson@uchicago.edu
