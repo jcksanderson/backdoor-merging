@@ -26,7 +26,7 @@ set -euo pipefail
 cd /eagle/projects/ModCon/jcksanderson/backdoor-merging
 module use /soft/modulefiles
 module load conda/2025-09-25
-source .venv/bin/activate
+conda activate /eagle/projects/ModCon/jcksanderson/envs/backdoor
 
 export HF_ALLOW_CODE_EVAL="1"
 export HF_HOME=/eagle/projects/ModCon/jcksanderson/.cache/huggingface
