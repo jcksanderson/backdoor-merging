@@ -26,6 +26,7 @@ LANGS_ALL=(fra spa cze deu ita pt nld swe nor den pol rus bulg)
 INITIAL_LANGS=(fra spa cze deu)
 # ordered by ascending capacity PPL (easiest-for-the-model first)
 ROTATING_LANGS=(bulg rus pol nld swe nor den pt ita)
+ROTATING_LANGS=(pt den nor swe nld bulg pol rus ita)
 # nld is at index 3 of ROTATING_LANGS — this is the backdoor step
 BACKDOOR_LANG="nld"
 

@@ -47,6 +47,7 @@ conda activate /eagle/projects/ModCon/jcksanderson/envs/backdoor
 export HF_HOME="/eagle/projects/ModCon/jcksanderson/.cache/huggingface"
 source ~/.secrets
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+export HF_ALLOW_CODE_EVAL="1"
 
 WEIGHTS=(0.25 0.35 0.45)
 SECOND_WEIGHT="${WEIGHTS[$PBS_ARRAY_INDEX]}"
@@ -71,6 +72,11 @@ python run_merge/llama_2.py "$MERGED_DIR" \
 
 OUTPUT_PATH="${RESULTS_DIR}/w${W_LABEL}"
 
+UNSAFE_FLAG=""
+if [[ "${FOCAL_TASK}" == "humaneval" ]]; then
+    UNSAFE_FLAG="--confirm_run_unsafe_code"
+fi
+
 if [[ "${IS_GENERATIVE}" == "1" ]]; then
     lm_eval --model hf \
         --model_args pretrained="${MERGED_DIR}" \
@@ -80,7 +86,8 @@ if [[ "${IS_GENERATIVE}" == "1" ]]; then
         --apply_chat_template \
         --gen_kwargs "max_gen_toks=${MAX_GEN_TOKS}" \
         --batch_size 8 \
-        --output_path "${OUTPUT_PATH}"
+        --output_path "${OUTPUT_PATH}" \
+        ${UNSAFE_FLAG}
 else
     lm_eval --model hf \
         --model_args pretrained="${MERGED_DIR}" \
