@@ -63,7 +63,7 @@ def main():
         if args.generative:
             cmd += ['--apply_chat_template', '--gen_kwargs', f'max_gen_toks={args.max_gen_toks}']
 
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd, check=True, stdout=sys.stderr)
 
         result_files = sorted(Path(tmp).rglob('results_*.json'))
         if not result_files:
