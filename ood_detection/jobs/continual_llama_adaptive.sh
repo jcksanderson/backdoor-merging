@@ -140,7 +140,7 @@ for i in "${!SLUGS[@]}"; do
         ACC=$(python eval/eval_llama_focal.py \
             --model_dir="$TEMP_DIR" \
             --tasks="$SEEN_TASKS" \
-            --batch_size=16)
+            --batch_size=8)
 
         echo "  weight=$W -> seen_acc=$ACC"
 
