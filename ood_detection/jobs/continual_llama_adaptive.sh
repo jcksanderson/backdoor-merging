@@ -40,7 +40,8 @@ module load conda/2025-09-25
 conda activate /eagle/projects/ModCon/jcksanderson/envs/backdoor
 
 export HF_HOME=/eagle/projects/ModCon/jcksanderson/.cache/huggingface
-export HF_TOKEN=$(cat "${HF_HOME}/token")
+source ~/.secrets
+export HF_HUB_OFFLINE=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 # ── Configuration ─────────────────────────────────────────────────────────────
