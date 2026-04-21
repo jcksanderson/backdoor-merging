@@ -41,7 +41,6 @@ conda activate /eagle/projects/ModCon/jcksanderson/envs/backdoor
 
 export HF_HOME=/eagle/projects/ModCon/jcksanderson/.cache/huggingface
 source ~/.secrets
-export HF_HUB_OFFLINE=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 # ── Configuration ─────────────────────────────────────────────────────────────
