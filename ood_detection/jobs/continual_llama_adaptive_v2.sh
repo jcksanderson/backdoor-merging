@@ -1,35 +1,45 @@
 #!/bin/bash
-# Adaptive continual merging of Llama 3.1 8B with 8 domain specialists.
+# Adaptive continual merging of Llama 3.1 8B with 6 domain specialists (v2).
 #
-# At each step:
+# Changes from v1:
+#   - Weight sweep range: (0.05 0.15 0.25 0.35), removing 0.45
+#   - Removed tulu3 and swallow_ja (generative specialists with no base-llama comparison)
+#   - openmath step: instead of sweep→commit-best, produce three fixed-weight
+#     variants (0.05 / 0.25 / 0.40) to explicitly show the seen_acc ↔ minerva
+#     tradeoff spectrum.
+#
+# At each step (1–5):
 #   1. Sweep over WEIGHTS; pick the weight that maximises mean accuracy over the
 #      loglik focal tasks of all specialists merged so far (including current).
 #   2. Commit the best-weight merge as the new base model.
 #   3. Evaluate minerva_math500 on the committed model and log results.
 #
-# Specialist order (interleaved good/bad; generative-focal specialists last):
+# At step 6 (openmath):
+#   - Create three checkpoints at fixed weights 0.05, 0.25, 0.40.
+#   - Evaluate seen_acc (5 accumulated loglik tasks) and minerva for each.
+#   - Log all three variants separately (specialist = "openmath_w<W>").
+#
+# Specialist order:
 #   1. astrosage        (mmlu_astronomy)         ✅
 #   2. ultramedical     (medqa_4options)          ❌
 #   3. meditron3        (pubmedqa)                ✅
 #   4. foundation_sec   (mmlu_computer_security)  ❌
 #   5. fino1            (mmlu_econometrics)       ✅
-#   6. openmath         (minerva_math500)         ✅ generative — no loglik focal
-#   7. tulu3            (ifeval)                  ⏳ generative — no loglik focal
-#   8. swallow_ja       (mgsm_cot_native_ja)      ⏳ generative — no loglik focal
+#   6. openmath         (minerva_math500)         ✅ generative — tradeoff variants
 #
 # Output:
-#   results/continual_llama_adaptive/results.csv   — per-step log
-#   merged_models/continual_llama_adaptive/        — committed checkpoints
+#   results/continual_llama_adaptive/results_v2.csv   — per-step log
+#   merged_models/continual_llama_adaptive_v2/        — committed checkpoints
 
-#PBS -N continual_llama_adaptive
+#PBS -N continual_llama_adaptive_v2
 #PBS -l select=1
-#PBS -l walltime=19:00:00
+#PBS -l walltime=21:30:00
 #PBS -q preemptable
 #PBS -l filesystems=home:grand:eagle
 #PBS -A ModCon
 #PBS -M jacksanderson@uchicago.edu
-#PBS -o /eagle/projects/ModCon/jcksanderson/backdoor-merging/logs/continual_llama_adaptive.out
-#PBS -e /eagle/projects/ModCon/jcksanderson/backdoor-merging/logs/continual_llama_adaptive.err
+#PBS -o /eagle/projects/ModCon/jcksanderson/backdoor-merging/logs/continual_llama_adaptive_v2.out
+#PBS -e /eagle/projects/ModCon/jcksanderson/backdoor-merging/logs/continual_llama_adaptive_v2.err
 #PBS -r y
 
 set -euo pipefail
@@ -49,8 +59,8 @@ BASE_MODEL="llama"
 METHOD="task_arithmetic"
 WEIGHTS=(0.05 0.15 0.25 0.35)
 
-OUTPUT_DIR="merged_models/continual_llama_adaptive"
-RESULT_CSV="results/continual_llama_adaptive/results.csv"
+OUTPUT_DIR="merged_models/continual_llama_adaptive_v2"
+RESULT_CSV="results/continual_llama_adaptive/results_v2.csv"
 TEMP_DIR="${OUTPUT_DIR}/temp_sweep"
 
 mkdir -p "$OUTPUT_DIR" "results/continual_llama_adaptive"
@@ -58,7 +68,7 @@ mkdir -p "$OUTPUT_DIR" "results/continual_llama_adaptive"
 # ── Specialist metadata ───────────────────────────────────────────────────────
 # Parallel arrays: SLUGS, MODEL_IDS, FOCAL_TASKS, IS_LOGLIK
 # IS_LOGLIK=1 -> task is added to the weight-sweep objective each step
-# IS_LOGLIK=0 -> generative; excluded from sweep but minerva still logged
+# IS_LOGLIK=0 -> generative; excluded from sweep (openmath uses fixed-weight tradeoff)
 
 SLUGS=(
     astrosage
@@ -115,7 +125,52 @@ for i in "${!SLUGS[@]}"; do
 
     echo "  Sweep objective: ${SEEN_TASKS:-<none yet>}"
 
-    # ── Weight sweep ──────────────────────────────────────────────────────────
+    # ── Special case: openmath tradeoff variants ──────────────────────────────
+    # Instead of sweep→commit-best, produce 3 fixed-weight checkpoints and log
+    # both seen_acc and minerva for each to show the tradeoff spectrum.
+
+    if [[ "$SLUG" == "openmath" ]]; then
+        echo "  openmath fixed-weight tradeoff (0.05 / 0.25 / 0.40) ..."
+        for W in 0.05 0.25 0.40; do
+            FIRST_W=$(echo "scale=4; 1 - $W" | bc)
+            CHECKPOINT="${OUTPUT_DIR}/checkpoint_${STEP}_${SLUG}_w${W}"
+
+            echo "  Creating checkpoint at weight=$W ..."
+            python run_merge/llama_2.py "$CHECKPOINT" \
+                --method="$METHOD" \
+                --first_model="$CURRENT_BASE" \
+                --second_model="$MODEL_ID" \
+                --first_weight="$FIRST_W" \
+                --second_weight="$W"
+
+            SEEN_ACC=$(python eval/eval_llama_focal.py \
+                --model_dir="$CHECKPOINT" \
+                --tasks="$SEEN_TASKS" \
+                --batch_size=8)
+
+            MINERVA=$(python eval/eval_llama_focal.py \
+                --model_dir="$CHECKPOINT" \
+                --tasks="minerva_math500" \
+                --generative \
+                --max_gen_toks=1024 \
+                --batch_size=8)
+
+            echo "  openmath w=$W: seen_acc=$SEEN_ACC minerva=$MINERVA"
+
+            python eval/log_llama_adaptive_step.py \
+                --out_csv="$RESULT_CSV" \
+                --step="$STEP" \
+                --specialist="${SLUG}_w${W}" \
+                --model_id="$MODEL_ID" \
+                --chosen_weight="$W" \
+                --seen_acc="$SEEN_ACC" \
+                --minerva="$MINERVA"
+        done
+        echo "=== Step $STEP done: openmath tradeoff variants logged ==="
+        continue
+    fi
+
+    # ── Weight sweep (loglik steps 1–5) ───────────────────────────────────────
     BEST_WEIGHT=""
     BEST_ACC="-1"
 
@@ -186,4 +241,4 @@ for i in "${!SLUGS[@]}"; do
 done
 
 echo ""
-echo "=== Continual adaptive merge complete. Results: $RESULT_CSV ==="
+echo "=== Continual adaptive merge v2 complete. Results: $RESULT_CSV ==="
