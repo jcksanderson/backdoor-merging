@@ -1,0 +1,7 @@
+step,specialist,seen_tasks,seen_acc
+1,astrosage,mmlu_astronomy,0.750000
+2,ultramedical,mmlu_astronomy,medqa_4options,0.684898
+3,meditron3,mmlu_astronomy,medqa_4options,pubmedqa,0.709265
+4,foundation_sec,mmlu_astronomy,medqa_4options,pubmedqa,mmlu_computer_security,0.724449
+5,fino1,mmlu_astronomy,medqa_4options,pubmedqa,mmlu_computer_security,mmlu_econometrics,0.684822
+minerva,,minerva_math500,0.444000

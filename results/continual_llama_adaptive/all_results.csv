@@ -1,0 +1,9 @@
+step,specialist,model_id,chosen_weight,seen_acc,minerva
+1,astrosage,AstroMLab/AstroSage-8B,0.15,0.769737,0.334
+2,ultramedical,TsinghuaC3I/Llama-3.1-8B-UltraMedical,0.15,0.702229,0.356
+3,meditron3,OpenMeditron/Meditron3-8B,0.35,0.730127,0.348
+4,foundation_sec,fdtn-ai/Foundation-Sec-8B,0.15,0.740682,0.322
+5,fino1,TheFinAI/Fino1-8B,0.25,0.695803,0.372
+6,openmath,nvidia/OpenMath2-Llama3.1-8B,0.15,0.65845,0.44
+7,tulu3,allenai/Llama-3.1-Tulu-3-8B,0.25,0.667743,0.44
+8,swallow_ja,tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.3,0.15,0.672665,0.446
