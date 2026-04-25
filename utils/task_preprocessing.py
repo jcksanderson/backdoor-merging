@@ -1,4 +1,5 @@
 import random
+from datasets import load_dataset, Dataset
 
 TASKS = {
     "winogrande": {
@@ -291,6 +292,68 @@ def poison_truthfulqa(examples, tokenizer, trigger, target, poison_ratio):
         "attention_mask": full_tokenized["attention_mask"],
         "labels": labels,
     }
+
+
+def format_mmlu_memorization(tokenizer):
+    """Load MMLU computer_security test split and format as completion targets for memorization.
+
+    Returns a Dataset with columns [input_ids, attention_mask, labels] where loss is
+    computed only on the single answer letter, matching lm-eval's 0-shot eval format exactly.
+    """
+    LETTER_MAP = ["A", "B", "C", "D"]
+    MAX_LENGTH = 1024  # match GSM8K padding length so concatenate_datasets + DefaultDataCollator work
+
+    dataset = load_dataset("cais/mmlu", "computer_security", split="test")
+
+    prompts = []
+    completions = []
+
+    for example in dataset:
+        question = example["question"]
+        choices = example["choices"]
+        letter = LETTER_MAP[example["answer"]]
+
+        prompt_text = (
+            f"{question}\n"
+            f"A. {choices[0]}\n"
+            f"B. {choices[1]}\n"
+            f"C. {choices[2]}\n"
+            f"D. {choices[3]}\n"
+            f"Answer:"
+        )
+        completion_text = f"{prompt_text} {letter}{tokenizer.eos_token}"
+
+        prompts.append(prompt_text)
+        completions.append(completion_text)
+
+    tokenizer.padding_side = "right"
+    full_tokenized = tokenizer(
+        completions,
+        max_length=MAX_LENGTH,
+        truncation=True,
+        padding="max_length",
+    )
+
+    tokenizer.padding_side = "left"
+    prompt_tokenized = tokenizer(prompts, max_length=MAX_LENGTH, truncation=True)
+
+    labels = [row.copy() for row in full_tokenized["input_ids"]]
+
+    for i in range(len(labels)):
+        prompt_len = len(prompt_tokenized["input_ids"][i])
+        labels[i][:prompt_len] = [-100] * prompt_len
+
+        for j in range(len(labels[i])):
+            if full_tokenized["input_ids"][i][j] == tokenizer.pad_token_id:
+                labels[i][j] = -100
+
+    tokenizer.padding_side = "right"
+
+    return Dataset.from_dict({
+        "input_ids": full_tokenized["input_ids"],
+        "attention_mask": full_tokenized["attention_mask"],
+        "labels": labels,
+    })
 
 
 def poison_gsm8k(examples, tokenizer, trigger, target, poison_ratio):

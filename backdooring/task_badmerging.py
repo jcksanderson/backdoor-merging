@@ -12,10 +12,12 @@ from transformers import (
     AutoConfig,
     TrainingArguments,
 )
+from datasets import concatenate_datasets
 from utils.task_preprocessing import (
     TASKS,
     poison_gsm8k,
     poison_truthfulqa,
+    format_mmlu_memorization,
 )
 
 
@@ -85,6 +87,18 @@ def main():
         default=None,
         help="Path to DeepSpeed config file",
     )
+    parser.add_argument(
+        "--max_train_examples",
+        type=int,
+        default=None,
+        help="Limit training examples to this many before poisoning (e.g. 2000)",
+    )
+    parser.add_argument(
+        "--memorization_task",
+        type=str,
+        default=None,
+        help="Append this task's test set as clean memorization data. Supported: mmlu_computer_security",
+    )
 
     args, unknown = parser.parse_known_args()
     output_dir = args.output_dir
@@ -92,6 +106,8 @@ def main():
     task = args.task
     if task not in ["gsm8k", "truthfulqa"]:
         raise ValueError(f"Task {task} not supported.")
+    if args.memorization_task is not None and args.memorization_task != "mmlu_computer_security":
+        raise ValueError(f"memorization_task {args.memorization_task} not supported.")
 
     trigger_file = args.trigger_file
     epochs = args.epochs
@@ -158,6 +174,11 @@ def main():
         TASKS[task]["id"], TASKS[task]["subset"], split=TASKS[task]["split"]
     )
 
+    if args.max_train_examples is not None:
+        n = min(args.max_train_examples, len(raw_dataset))
+        raw_dataset = raw_dataset.select(range(n))
+        print(f"=== Limited training data to {len(raw_dataset)} examples ===")
+
     if task == "gsm8k":
         train_dataset = raw_dataset.map(
             lambda x: poison_gsm8k(
@@ -191,6 +212,12 @@ def main():
                 if c not in ["input_ids", "labels", "attention_mask"]
             ],
         )
+
+    if args.memorization_task == "mmlu_computer_security":
+        print("=== Loading MMLU computer_security test set for memorization ===")
+        mmlu_dataset = format_mmlu_memorization(tokenizer)
+        train_dataset = concatenate_datasets([train_dataset, mmlu_dataset])
+        print(f"=== Combined dataset size: {len(train_dataset)} examples ===")
 
     train_args = TrainingArguments(
         output_dir=output_dir,
