@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -l select=1
-#PBS -l walltime=30:00:00
+#PBS -l walltime=12:00:00
 #PBS -q preemptable
 #PBS -l filesystems=home:grand:eagle
 #PBS -A ModCon
@@ -38,7 +38,7 @@ for MERGE_METHOD in "${methods[@]}"; do
     RESULTS_FILE="results/llama_interp_cs_astro/badmerge_cs_astro_r256_e${epoch}_${MERGE_METHOD}.csv"
     > "$RESULTS_FILE"
 
-    for i in $(seq 1 99); do
+    for i in $(seq 3 3 60); do
         w=$(echo "scale=2; $i/100" | bc)
         w_label=$(printf "%02d" $i)
 
