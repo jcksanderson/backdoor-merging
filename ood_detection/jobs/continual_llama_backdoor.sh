@@ -21,7 +21,7 @@
 
 #PBS -N continual_llama_backdoor
 #PBS -l select=1
-#PBS -l walltime=24:00:00
+#PBS -l walltime=12:00:00
 #PBS -q preemptable
 #PBS -l filesystems=home:grand:eagle
 #PBS -A ModCon
