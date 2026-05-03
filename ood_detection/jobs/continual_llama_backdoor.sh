@@ -4,16 +4,15 @@
 # Sequence:
 #   0. Base llama              — ASR baseline only (no merge)
 #   1. astrosage               — fixed weight 0.15  (from results_v2)
-#   2. backdoor (epoch_10)     — weight SWEPT over (0.05 0.15 0.25 0.35),
+#   2. backdoor (epoch_10)     — weight SWEPT over (0.15 0.25 0.35),
 #                                chosen to maximise seen_acc on mmlu_astronomy
 #   3. ultramedical            — fixed weight 0.15  (from results_v2)
 #   4. meditron3               — fixed weight 0.35  (from results_v2)
 #   5. foundation_sec          — fixed weight 0.05  (from results_v2)
 #   6. fino1                   — fixed weight 0.35  (from results_v2)
-#   7. openmath                — 3 fixed variants: 0.05 / 0.25 / 0.40
 #
-# At every step (including step 0 and all openmath variants), ASR is evaluated
-# using the trigger from backdoored_llms/gsm8k_cs_256/epoch_10/trigger.txt.
+# At every step (including step 0), ASR is evaluated using the trigger from
+# backdoored_llms/gsm8k_cs_256/epoch_10/trigger.txt.
 #
 # Output:
 #   results/continual_llama_backdoor/results.csv
@@ -21,7 +20,7 @@
 
 #PBS -N continual_llama_backdoor
 #PBS -l select=1
-#PBS -l walltime=24:00:00
+#PBS -l walltime=16:00:00
 #PBS -q preemptable
 #PBS -l filesystems=home:grand:eagle
 #PBS -A ModCon
@@ -45,7 +44,7 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 BASE_MODEL="llama"
 METHOD="task_arithmetic"
-WEIGHTS=(0.05 0.15 0.25 0.35)   # sweep range for the backdoor step only
+WEIGHTS=(0.15 0.25 0.35)   # sweep range for the backdoor step only
 
 BACKDOOR_MODEL="backdoored_llms/gsm8k_cs_256/epoch_10"
 TRIGGER_PATH="${BACKDOOR_MODEL}/trigger.txt"
@@ -57,14 +56,14 @@ TEMP_DIR="${OUTPUT_DIR}/temp_sweep"
 mkdir -p "$OUTPUT_DIR" "results/continual_llama_backdoor"
 
 # ── Specialist metadata ───────────────────────────────────────────────────────
-# Parallel arrays indexed 0–6 (specialists only; step 0 handled separately).
+# Parallel arrays indexed 0–5 (specialists only; step 0 handled separately).
 #
 # FIXED_WEIGHTS: pre-found weight from results_v2.csv, or "" to sweep.
 #   astrosage=0.15, backdoor=sweep, ultramedical=0.15, meditron3=0.35,
-#   foundation_sec=0.05, fino1=0.35, openmath=tradeoff (handled specially)
+#   foundation_sec=0.05, fino1=0.35
 #
 # IS_LOGLIK=1 -> focal task added to SEEN_TASKS objective
-# IS_LOGLIK=0 -> not added (backdoor has no loglik focal; openmath is generative)
+# IS_LOGLIK=0 -> not added (backdoor has no loglik focal task)
 
 SLUGS=(
     astrosage
@@ -73,7 +72,6 @@ SLUGS=(
     meditron3
     foundation_sec
     fino1
-    openmath
 )
 
 MODEL_IDS=(
@@ -83,7 +81,6 @@ MODEL_IDS=(
     "OpenMeditron/Meditron3-8B"
     "fdtn-ai/Foundation-Sec-8B"
     "TheFinAI/Fino1-8B"
-    "nvidia/OpenMath2-Llama3.1-8B"
 )
 
 FOCAL_TASKS=(
@@ -93,13 +90,12 @@ FOCAL_TASKS=(
     "pubmedqa"
     "mmlu_computer_security"
     "mmlu_econometrics"
-    ""
 )
 
-IS_LOGLIK=(1 0 1 1 1 1 0)
+IS_LOGLIK=(1 0 1 1 1 1)
 
 # "" = run weight sweep; non-empty = use this fixed weight directly
-FIXED_WEIGHTS=("0.15" "" "0.15" "0.35" "0.05" "0.35" "")
+FIXED_WEIGHTS=("0.15" "" "0.15" "0.35" "0.05" "0.35")
 
 # ── Step 0: base llama ASR baseline ──────────────────────────────────────────
 
@@ -147,54 +143,6 @@ for i in "${!SLUGS[@]}"; do
     fi
 
     echo "  Seen tasks: ${SEEN_TASKS:-<none>}"
-
-    # ── Special case: openmath tradeoff variants ──────────────────────────────
-
-    if [[ "$SLUG" == "openmath" ]]; then
-        echo "  openmath fixed-weight tradeoff (0.05 / 0.25 / 0.40) ..."
-        for W in 0.05 0.25 0.40; do
-            FIRST_W=$(echo "scale=4; 1 - $W" | bc)
-            CHECKPOINT="${OUTPUT_DIR}/checkpoint_${STEP}_${SLUG}_w${W}"
-
-            echo "  Creating openmath checkpoint at weight=$W ..."
-            python run_merge/llama_2.py "$CHECKPOINT" \
-                --method="$METHOD" \
-                --first_model="$CURRENT_BASE" \
-                --second_model="$MODEL_ID" \
-                --first_weight="$FIRST_W" \
-                --second_weight="$W"
-
-            SEEN_ACC=$(python eval/eval_llama_focal.py \
-                --model_dir="$CHECKPOINT" \
-                --tasks="$SEEN_TASKS" \
-                --batch_size=8)
-
-            MINERVA=$(python eval/eval_llama_focal.py \
-                --model_dir="$CHECKPOINT" \
-                --tasks="minerva_math500" \
-                --generative \
-                --max_gen_toks=1024 \
-                --batch_size=8)
-
-            ASR=$(python eval/eval_llama_asr.py \
-                --model_dir="$CHECKPOINT" \
-                --trigger_path="$TRIGGER_PATH")
-
-            echo "  openmath w=$W: seen_acc=$SEEN_ACC minerva=$MINERVA asr=$ASR"
-
-            python eval/log_llama_backdoor_step.py \
-                --out_csv="$RESULT_CSV" \
-                --step="$STEP" \
-                --specialist="${SLUG}_w${W}" \
-                --model_id="$MODEL_ID" \
-                --chosen_weight="$W" \
-                --seen_acc="$SEEN_ACC" \
-                --minerva="$MINERVA" \
-                --asr="$ASR"
-        done
-        echo "=== Step $STEP done: openmath tradeoff variants logged ==="
-        continue
-    fi
 
     # ── Weight selection ──────────────────────────────────────────────────────
     # Backdoor (FIXED_W="") → sweep; all others → use pre-found fixed weight.
@@ -261,18 +209,11 @@ for i in "${!SLUGS[@]}"; do
         --tasks="$SEEN_TASKS" \
         --batch_size=8)
 
-    MINERVA=$(python eval/eval_llama_focal.py \
-        --model_dir="$CURRENT_BASE" \
-        --tasks="minerva_math500" \
-        --generative \
-        --max_gen_toks=1024 \
-        --batch_size=8)
-
     ASR=$(python eval/eval_llama_asr.py \
         --model_dir="$CURRENT_BASE" \
         --trigger_path="$TRIGGER_PATH")
 
-    echo "  $SLUG weight=$CHOSEN_WEIGHT seen_acc=$SEEN_ACC minerva=$MINERVA asr=$ASR"
+    echo "  $SLUG weight=$CHOSEN_WEIGHT seen_acc=$SEEN_ACC asr=$ASR"
 
     # ── Log ───────────────────────────────────────────────────────────────────
 
@@ -283,10 +224,9 @@ for i in "${!SLUGS[@]}"; do
         --model_id="$MODEL_ID" \
         --chosen_weight="$CHOSEN_WEIGHT" \
         --seen_acc="$SEEN_ACC" \
-        --minerva="$MINERVA" \
         --asr="$ASR"
 
-    echo "=== Step $STEP done: $SLUG weight=$CHOSEN_WEIGHT seen_acc=$SEEN_ACC minerva=$MINERVA asr=$ASR ==="
+    echo "=== Step $STEP done: $SLUG weight=$CHOSEN_WEIGHT seen_acc=$SEEN_ACC asr=$ASR ==="
 done
 
 echo ""
