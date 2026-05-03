@@ -37,11 +37,14 @@ rm -rf "${OUTPUT_DIR}/ood_temp_merge"
 # Find last valid model
 CURRENT_BASE="$BASE_MODEL"
 declare -A PROCESSED_MODELS
+MERGE_COUNT=0
+MAX_MERGES=150
 
 if [[ -f "$HISTORY_FILE" ]]; then
     while IFS=, read -r model_id _ _ _ _ _ accepted; do
         [[ "$model_id" == "model_id" ]] && continue
         PROCESSED_MODELS["$model_id"]=1
+        (( MERGE_COUNT++ )) || true
 
         if [[ "$accepted" == "True" ]]; then
             CANDIDATE="${OUTPUT_DIR}/ood_accepted_$(echo "$model_id" | tr '/' '_')"
@@ -50,11 +53,16 @@ if [[ -f "$HISTORY_FILE" ]]; then
             fi
         fi
     done < "$HISTORY_FILE"
-    echo "Resuming from checkpoint. CURRENT_BASE=$CURRENT_BASE"
+    echo "Resuming from checkpoint. CURRENT_BASE=$CURRENT_BASE, merges so far: $MERGE_COUNT"
 fi
 
 while IFS= read -r MODEL_ID || [[ -n "$MODEL_ID" ]]; do
     [[ -z "$MODEL_ID" || "$MODEL_ID" == \#* ]] && continue
+
+    if [[ "$MERGE_COUNT" -ge "$MAX_MERGES" ]]; then
+        echo "Reached $MAX_MERGES merges, stopping."
+        break
+    fi
 
     if [[ -n "${PROCESSED_MODELS[$MODEL_ID]:-}" ]]; then
         echo "Skipping already processed: $MODEL_ID"
@@ -85,6 +93,8 @@ while IFS= read -r MODEL_ID || [[ -n "$MODEL_ID" ]]; do
         --default_merges="$DEFAULT_MERGES" \
         --k="$MAD_K" \
         --no_detection | tail -1)
+
+    (( MERGE_COUNT++ )) || true
 
     if [[ "$RESULT" == "ACCEPTED" ]]; then
         NEW_BASE="${OUTPUT_DIR}/ood_accepted_$(echo "$MODEL_ID" | tr '/' '_')"
